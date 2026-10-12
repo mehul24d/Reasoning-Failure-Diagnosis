@@ -24,7 +24,7 @@ SEGMENTATION_CFG = {
     "community_detection": {"method": "louvain", "resolution": 1.0, "seed": 42},
     "changepoint": {
         "method": "ruptures",
-        "ruptures": {"model": "l2", "penalty": 1.0, "min_size": 2},
+        "ruptures": {"model": "l2", "penalty_scale": 1.5, "min_size": 2},
     },
 }
 

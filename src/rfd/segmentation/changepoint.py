@@ -10,8 +10,21 @@ import numpy as np
 def _ruptures_changepoints(series: np.ndarray, cfg: dict[str, Any]) -> list[int]:
     import ruptures as rpt
 
+    n, d = series.shape
     algo = rpt.Pelt(model=cfg.get("model", "l2"), min_size=cfg.get("min_size", 2)).fit(series)
-    breakpoints = algo.predict(pen=cfg.get("penalty", 3.0))
+
+    # Adaptive, BIC-style penalty (standard practice for Pelt's l2 cost
+    # when the data's own scale is not known ahead of time: pen ~=
+    # scale * sigma^2 * d * log(n)). A fixed absolute `penalty` was found
+    # during the pilot run to be badly miscalibrated for SAE-feature-scale
+    # signals (mean activation ~0.1) -- it collapsed nearly every trace
+    # into a single segment. `penalty_scale` is tuned once, uniformly
+    # across all traces (not per-trace), targeting a handful of
+    # boundaries per trace on the pilot data; see docs/PROGRESS.md.
+    variance_estimate = max(series.var(axis=0).mean(), 1e-6)
+    penalty = cfg.get("penalty_scale", 1.5) * variance_estimate * d * np.log(max(n, 2))
+
+    breakpoints = algo.predict(pen=penalty)
     return breakpoints[:-1]  # ruptures appends len(series) as the final boundary
 
 

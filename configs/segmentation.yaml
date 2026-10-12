@@ -19,7 +19,11 @@ changepoint:
   method: "ruptures"       # "ruptures" | "hmm"
   ruptures:
     model: "l2"
-    penalty: 3.0
+    # Adaptive BIC-style penalty: pen = penalty_scale * var(series) * n_dims * log(n_tokens).
+    # Tuned once against the pilot's 50 traces (see docs/PROGRESS.md) --
+    # a fixed absolute penalty does not transfer across signals of very
+    # different scale (e.g. different layers, models, or aggregation methods).
+    penalty_scale: 1.5
     min_size: 2
   hmm:
     n_states: 4             # matches number of phases
