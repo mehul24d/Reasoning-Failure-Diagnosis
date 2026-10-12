@@ -1,0 +1,29 @@
+# Phase segmentation pipeline config.
+phases:
+  - problem_understanding
+  - operation_planning
+  - arithmetic_execution
+  - self_verification
+
+coactivation:
+  method: "correlation"   # "correlation" | "pmi"
+  min_abs_corr: 0.1        # edges below this magnitude are dropped
+  binarize_for_pmi: true    # PMI needs binarized (active/inactive) features
+
+community_detection:
+  method: "louvain"        # "louvain" | "leiden" (leiden requires igraph/leidenalg)
+  resolution: 1.0
+  seed: 42
+
+changepoint:
+  method: "ruptures"       # "ruptures" | "hmm"
+  ruptures:
+    model: "l2"
+    penalty: 3.0
+    min_size: 2
+  hmm:
+    n_states: 4             # matches number of phases
+    n_iter: 100
+    seed: 42
+
+tolerance_window: 2   # tokens, used by boundary F1 / temporal IoU

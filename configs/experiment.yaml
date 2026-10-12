@@ -1,0 +1,23 @@
+# Top-level pilot experiment config: wires model/dataset/sae/segmentation
+# configs together and sets output paths. Maps to synopsis experiment E1
+# (pilot feasibility) -- see docs/PROGRESS.md for the E1/E2 mapping table.
+name: "pilot_qwen05b_gsm8k50"
+seed: 42
+
+model_config: "configs/model.yaml"
+dataset_config: "configs/dataset.yaml"
+sae_config: "configs/sae.yaml"
+segmentation_config: "configs/segmentation.yaml"
+
+output_dir: "results/pilot"
+traces_file: "results/pilot/traces.jsonl"
+activations_cache: "results/pilot/activations"
+sae_features_cache: "results/pilot/sae_features"
+segmentation_output: "results/pilot/segmentation.jsonl"
+taxonomy_output: "results/pilot/taxonomy.csv"
+metrics_output: "results/pilot/metrics.json"
+
+annotation:
+  n_traces_to_annotate: 20
+  annotation_file: "results/pilot/annotations.json"
+  taxonomy_manual_check_fraction: 0.2

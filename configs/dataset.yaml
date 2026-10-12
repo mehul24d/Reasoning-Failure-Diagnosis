@@ -1,0 +1,42 @@
+seed: 42
+
+datasets:
+  gsm8k:
+    status: primary
+    hf_path: "openai/gsm8k"
+    hf_config: "main"
+    splits:
+      # GSM8K ships with train/test only; we carve a fixed val slice out of train.
+      train: { source_split: "train", start: 0, end: 200 }
+      val:   { source_split: "train", start: 200, end: 250 }
+      test:  { source_split: "test",  start: 0,   end: 50 }
+    question_field: "question"
+    answer_field: "answer"          # contains "#### <number>" gold answer
+
+  math:
+    status: secondary   # TODO (Semester 7): wire into full pipeline
+    hf_path: "hendrycks/competition_math"
+    hf_config: "default"
+    splits:
+      train: { source_split: "train", start: 0, end: 200 }
+      val:   { source_split: "train", start: 200, end: 250 }
+      test:  { source_split: "test",  start: 0,   end: 50 }
+    question_field: "problem"
+    answer_field: "solution"
+
+  bbh_logic:
+    status: secondary   # TODO (Semester 7): wire into full pipeline
+    hf_path: "lukaemon/bbh"
+    hf_config: "logical_deduction_five_objects"
+    splits:
+      train: { source_split: "train", start: 0, end: 50 }
+      val:   { source_split: "train", start: 50, end: 60 }
+      test:  { source_split: "train", start: 60, end: 100 }
+    question_field: "input"
+    answer_field: "target"
+
+# Pilot run uses a small slice of GSM8K test split only.
+pilot:
+  dataset: gsm8k
+  split: test
+  n_problems: 50

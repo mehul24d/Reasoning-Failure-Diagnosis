@@ -1,0 +1,21 @@
+# Model used for trace generation and activation extraction.
+# Pilot model: small enough to run on CPU/MPS with <8GB RAM.
+model_name: "Qwen/Qwen2.5-0.5B-Instruct"
+device: "auto"          # "auto" picks mps -> cuda -> cpu
+dtype: "float32"        # float32 for CPU/MPS stability; bfloat16 if CUDA available
+trust_remote_code: false
+
+generation:
+  temperature: 0.0      # greedy decoding
+  do_sample: false
+  max_new_tokens: 512
+  batch_size: 1         # per task spec: batch size 1
+
+prompt_template: |
+  You are a careful math problem solver. Solve the problem step by step,
+  then give the final numeric answer on its own line as:
+  "Final Answer: <number>"
+
+  Problem: {question}
+
+  Solution:

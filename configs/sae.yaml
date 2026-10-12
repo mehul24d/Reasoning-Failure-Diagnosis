@@ -1,0 +1,35 @@
+# SAE activation extraction + (pilot-scale) training config.
+#
+# NOTE on pretrained SAEs: as of this session we could not confirm a
+# publicly released SAELens-compatible pretrained SAE for
+# Qwen/Qwen2.5-0.5B-Instruct (SAELens' public catalogue mainly covers
+# gpt2-small, pythia, and gemma-2 families). Verifying/locating one is a
+# TODO for Semester 7. For the pilot we therefore TRAIN A SMALL SAE
+# ourselves on cached pilot activations -- see `pilot_training` below.
+# This pilot SAE is a toy, pipeline-validation artifact, NOT a
+# publication-quality dictionary.
+
+hook_point_template: "blocks.{layer}.hook_resid_post"   # TransformerLens hook name
+layers: ["middle"]        # "middle" resolves to n_layers // 2 at runtime, or give explicit ints e.g. [6, 12]
+
+# Full-scale target config for Semester 7 (per synopsis). NOT run in this
+# pilot session -- training script supports it, but it is compute/time
+# gated. See docs/PROGRESS.md.
+full_scale_training:
+  status: TODO
+  architecture: jumprelu
+  d_sae: 65536
+  target_l0: 64
+  trained_on: train_split_only
+  dataset: gsm8k
+
+# Pilot-scale config that is ACTUALLY executed by scripts/run_pilot.sh.
+pilot_training:
+  architecture: jumprelu
+  d_sae: 512          # small on purpose: fits pilot compute budget
+  l1_coefficient: 5.0e-3
+  bandwidth: 0.001     # JumpReLU STE bandwidth
+  learning_rate: 1.0e-3
+  n_training_steps: 200
+  batch_size: 64
+  seed: 42

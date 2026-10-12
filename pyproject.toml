@@ -1,0 +1,44 @@
+[project]
+name = "rfd"
+version = "0.1.0"
+description = "Automated Phase Segmentation and Diagnostic Taxonomy of Mathematical Reasoning Failures using SAE feature coactivation"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Mehul Dahiya" }]
+
+dependencies = [
+    "torch>=2.2",
+    "transformers>=4.44",
+    "transformer_lens>=1.17",
+    "sae_lens>=3.0",
+    "datasets>=2.20",
+    "huggingface_hub>=0.24",
+    "networkx>=3.3",
+    "python-louvain>=0.16",
+    "ruptures>=1.1",
+    "hmmlearn>=0.3",
+    "scikit-learn>=1.4",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+vllm = ["vllm>=0.5"]
+dev = ["pytest>=8.0", "pre-commit>=3.7", "ruff>=0.5", "mypy>=1.10"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
