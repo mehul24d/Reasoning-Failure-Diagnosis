@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Reasoning trace phase annotation",
+  "type": "object",
+  "required": ["id", "annotator", "segments"],
+  "properties": {
+    "id": { "type": "string", "description": "Trace id, matches the `id` field in traces.jsonl" },
+    "annotator": { "type": "string" },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["start", "end", "phase"],
+        "properties": {
+          "start": { "type": "integer", "minimum": 0, "description": "Inclusive token start index" },
+          "end": { "type": "integer", "minimum": 0, "description": "Exclusive token end index" },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "problem_understanding",
+              "operation_planning",
+              "arithmetic_execution",
+              "self_verification"
+            ]
+          }
+        }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}
