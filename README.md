@@ -5,8 +5,8 @@ Reasoning Failures using SAE Feature Coactivation**
 
 B.Tech Minor Project, Semester 7.
 
-- **Team:** TODO — add team member names/roll numbers
-- **Supervisor:** TODO — add supervisor name
+- **Team:** Mehul Dahiya (23/CS/253), Neil Negi (23/CS/278), Harshit Yadav (23/CS/172)
+- **Supervisor:**
 
 > Scope note: this repo is the **minor project** only. It does not
 > implement anything from the related major project (no feature
