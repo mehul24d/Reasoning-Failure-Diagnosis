@@ -56,7 +56,10 @@ def main() -> None:
     probs, _ = load_gsm_symbolic(cfg["cache_dir"])
     rng = random.Random(cfg["seed"])
     sample = rng.sample(probs, 8)
-    seqs = [chat_ids(tok, cot_messages(p.question)) + tok(p.answer_text)["input_ids"] for p in sample[:3]]
+    seqs = [
+        chat_ids(tok, cot_messages(p.question)) + tok(p.answer_text)["input_ids"]
+        for p in sample[:3]
+    ]
     seqs += [chat_ids(tok, arith_messages(123, 456, "+", [(271, 318), (402, 197)]), "<<123+456=")]
     report: dict = {
         "model": cfg["model"]["model_name"],

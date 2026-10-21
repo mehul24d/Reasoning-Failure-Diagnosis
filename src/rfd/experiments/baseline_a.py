@@ -2,7 +2,9 @@
 
 Subcommands (each writes under results/baseline_a/):
   pilot    error rate per digit length (choose the task size; pre-registered rule)
-  collect  greedy answers + residual stream at the '=' token, every layer
+  collect  greedy answers + residual stream, every layer, at each "emission
+           position": the token right before the model emits each answer digit
+           (position 0 is Sun et al.'s '=' token, which precedes the leading digit)
   analyze  probes (CPU): correct-only protocol (brief) and mixed protocol (paper),
            shuffled-label / random-probe controls, layer curves, error recovery
   reprompt probe-guided selective re-prompting vs none / always / oracle
@@ -28,9 +30,11 @@ from rfd.utils.io import read_jsonl, write_jsonl
 _ANS_RE = re.compile(r"\s*(-?\d+)")
 
 
-def _cfg(path: str) -> dict[str, Any]:
+def _cfg(path: str, harness: str | None = None, out: str | None = None) -> dict[str, Any]:
     cfg = load_yaml(path)
-    cfg["harness"] = load_yaml(cfg["harness_config"])
+    cfg["harness"] = load_yaml(harness or cfg["harness_config"])
+    if out:
+        cfg["out_dir"] = out
     return cfg
 
 
@@ -126,7 +130,20 @@ def cmd_pilot(cfg: dict[str, Any]) -> None:
 # --------------------------------------------------------------------------- collect
 
 
+def _n_digit_tokens(tok: Any, gen_ids: list[int]) -> int:
+    """Number of leading single-digit tokens in the generated answer."""
+    n = 0
+    for t in gen_ids:
+        piece = tok.decode([t])
+        if len(piece) == 1 and piece.isdigit():
+            n += 1
+        else:
+            break
+    return n
+
+
 def cmd_collect(cfg: dict[str, Any], limit: int | None = None) -> None:
+    from rfd.harness.generate import forward
     from rfd.harness.model import library_versions, load
     from rfd.utils.seed import set_seed
 
@@ -141,18 +158,34 @@ def cmd_collect(cfg: dict[str, Any], limit: int | None = None) -> None:
         n, nd, cfg["op"], seed=cfg["seed"] + 3000, exclude={(d.a, d.b) for d in demos}
     )
     loaded = load(cfg["harness"]["model"])
+    tok = loaded.tokenizer
     n_layers = len(loaded.model.model.layers)
     d_model = loaded.model.config.hidden_size
+    n_slots = nd + 2  # answer digits (+ carry digit, + slack)
     acts = np.lib.format.open_memmap(
-        out / "acts_eq.npy", mode="w+", dtype=np.float16, shape=(n, n_layers, d_model)
+        out / "acts_emit.npy", mode="w+", dtype=np.float16, shape=(n, n_slots, n_layers, d_model)
     )
     records = []
     bs = cfg["gen_batch_size"]
     for i in range(0, n, bs):
         batch = probs[i : i + bs]
-        prefixes, outs, a = _answer_batch(loaded, batch, demos, cfg, capture=True)
-        acts[i : i + len(batch)] = a
-        for p, pre, o in zip(batch, prefixes, outs):
+        prefixes, outs, _ = _answer_batch(loaded, batch, demos, cfg, capture=False)
+        n_out = [min(_n_digit_tokens(tok, o.gen_ids), n_slots) for o in outs]
+        seqs = [pre + o.gen_ids for pre, o in zip(prefixes, outs)]
+        # emission position j: the token whose output predicts answer digit j
+        positions = [
+            [len(pre) - 1 + j for j in range(max(k, 1))] for pre, k in zip(prefixes, n_out)
+        ]
+        res = forward(
+            loaded.model,
+            tok,
+            seqs,
+            capture_layers=list(range(n_layers)),
+            capture_positions=positions,
+        )["resid"]  # [bs, L, k, d]
+        for b, k in enumerate(n_out):
+            acts[i + b, : max(k, 1)] = res[b, :, : max(k, 1)].permute(1, 0, 2).half().numpy()
+        for p, pre, o, k in zip(batch, prefixes, outs, n_out):
             pred = _parse_answer(o.text)
             records.append(
                 {
@@ -165,6 +198,7 @@ def cmd_collect(cfg: dict[str, Any], limit: int | None = None) -> None:
                     "correct": pred == p.answer,
                     "text": o.text,
                     "prompt_len": len(pre),
+                    "n_out_digits": k,
                     "gen_ids": o.gen_ids,
                 }
             )
@@ -179,6 +213,7 @@ def cmd_collect(cfg: dict[str, Any], limit: int | None = None) -> None:
         "demos": [(d.a, d.b) for d in demos],
         "n_layers": n_layers,
         "d_model": d_model,
+        "n_slots": n_slots,
         "n_errors": sum(not r["correct"] for r in records),
         "n_unparsed": sum(r["pred"] is None for r in records),
         "versions": library_versions(),
@@ -216,7 +251,7 @@ def cmd_analyze(cfg: dict[str, Any]) -> None:
     out = Path(cfg["out_dir"])
     meta = json.loads((out / "collect_meta.json").read_text())
     recs = list(read_jsonl(out / "collect.jsonl"))
-    acts = np.load(out / "acts_eq.npy", mmap_mode="r")
+    acts = np.load(out / "acts_emit.npy", mmap_mode="r")  # [n, slot, layer, d]
     n, n_layers = len(recs), meta["n_layers"]
     C, seed = cfg["probe"]["C"], cfg["seed"]
 
@@ -224,53 +259,80 @@ def cmd_analyze(cfg: dict[str, Any]) -> None:
     preds = np.array([r["pred"] if r["pred"] is not None else -1 for r in recs])
     parsed = preds >= 0
     correct = np.array([r["correct"] for r in recs])
-    n_places = len(str(int(answers.max())))
+    n_out = np.array([r["n_out_digits"] for r in recs])
+    gold_len = np.array([len(str(int(v))) for v in answers])
+    pred_len = np.array([len(str(int(v))) if v >= 0 else 0 for v in preds])
+    same_len = parsed & (pred_len == gold_len) & (n_out == pred_len)
+    n_places = int(gold_len.max())
     gold_d = np.array([digits_by_place(v, n_places) for v in answers])  # [n, P]
     model_d = np.array([digits_by_place(v, n_places) if v >= 0 else [-1] * n_places for v in preds])
     err = parsed & ~correct
-    # most significant wrong place per error item (Sun: the hundreds digit, i.e. the leading one)
+    # most significant wrong place = the first wrong digit the model emitted
+    # (Sun: the hundreds digit, i.e. the leading one, for 3-digit sums)
     err_place = np.full(n, -1)
-    for i in np.flatnonzero(err):
+    for i in np.flatnonzero(err & same_len):
         wrong = np.flatnonzero(gold_d[i] != model_d[i])
         if len(wrong):
             err_place[i] = wrong.max()
     tr, te = _split(n, cfg["split"]["train"], seed)
     tr_c, te_c = tr[correct[tr]], te[correct[te]]
-    # layer selection data: correct TRAIN items only, 80/20 fit/val
-    fit_idx, val_idx = (
-        tr_c[_split(len(tr_c), 0.8, seed + 1)[0]],
-        tr_c[_split(len(tr_c), 0.8, seed + 1)[1]],
-    )
-    err_idx = np.flatnonzero(err & (err_place >= 0))
+    fit_c, val_c = (tr_c[k] for k in _split(len(tr_c), 0.8, seed + 1))
+    err_idx = np.flatnonzero(err_place >= 0)
     places = list(range(n_places))
 
+    def slot(idx: np.ndarray, place: int) -> tuple[np.ndarray, np.ndarray]:
+        """Items in idx that emitted a digit at `place`, and its emission slot."""
+        j = n_out[idx] - 1 - place
+        keep = (j >= 0) & (j < acts.shape[1]) & (n_out[idx] > 0)
+        return idx[keep], j[keep]
+
+    def feats(idx: np.ndarray, j: np.ndarray, layer: int) -> np.ndarray:
+        if len(idx) == 0:
+            return np.zeros((0, acts.shape[-1]), np.float32)
+        return np.stack([acts[i, jj, layer] for i, jj in zip(idx, j)]).astype(np.float32)
+
     def job(layer: int, place: int) -> dict[str, Any]:
-        X = np.asarray(acts[:, layer, :], dtype=np.float32)
         y = gold_d[:, place]
-        # protocol P1 (brief): train on correct cases only
-        (val_pred,) = _fit_eval(X[fit_idx], y[fit_idx], [X[val_idx]], C, seed)
-        te_pred, err_pred = _fit_eval(X[tr_c], y[tr_c], [X[te_c], X[err_idx]], C, seed)
-        (err_pred_shuf,) = _fit_eval(
-            X[tr_c], y[tr_c], [X[err_idx]], C, seed + 7 + layer, shuffle=True
+        fi, fj = slot(fit_c, place)
+        vi, vj = slot(val_c, place)
+        ti, tj = slot(tr_c, place)
+        ei, ej = slot(te_c, place)
+        xi = err_idx[err_place[err_idx] == place]
+        xi, xj = slot(xi, place)
+        X_fit, X_val, X_tr, X_te, X_err = (
+            feats(fi, fj, layer),
+            feats(vi, vj, layer),
+            feats(ti, tj, layer),
+            feats(ei, ej, layer),
+            feats(xi, xj, layer),
         )
+        # protocol P1 (brief): train on correct cases only
+        (val_pred,) = _fit_eval(X_fit, y[fi], [X_val], C, seed)
+        te_pred, err_pred = _fit_eval(X_tr, y[ti], [X_te, X_err], C, seed)
+        (err_pred_shuf,) = _fit_eval(X_tr, y[ti], [X_err], C, seed + 7 + layer, shuffle=True)
         # random-weight linear readout (same standardization as the real probe)
         rng = np.random.default_rng(seed + 11 * layer + place)
-        mu, sd = X[tr_c].mean(0), X[tr_c].std(0) + 1e-6
-        W = rng.standard_normal((X.shape[1], 10))
-        err_pred_rand = ((X[err_idx] - mu) / sd @ W).argmax(1)
-        # protocol P2 (paper): mixed train split (errors included); output- and GT-digit probes
-        tr_p = tr[parsed[tr]]
-        te_p = te[parsed[te]]
-        (gt_pred_te,) = _fit_eval(X[tr_p], y[tr_p], [X[te_p]], C, seed)
-        (out_pred_te,) = _fit_eval(X[tr_p], model_d[tr_p, place], [X[te_p]], C, seed)
+        mu, sd = X_tr.mean(0), X_tr.std(0) + 1e-6
+        W = rng.standard_normal((X_tr.shape[1], 10))
+        err_pred_rand = ((X_err - mu) / sd @ W).argmax(1) if len(X_err) else np.zeros(0, int)
+        # protocol P2 (paper): mixed split incl. errors; output-digit and GT-digit probes
+        pi, pj = slot(tr[same_len[tr]], place)
+        qi, qj = slot(te[same_len[te]], place)
+        X_p, X_q = feats(pi, pj, layer), feats(qi, qj, layer)
+        (gt_pred_te,) = _fit_eval(X_p, y[pi], [X_q], C, seed)
+        (out_pred_te,) = _fit_eval(X_p, model_d[pi, place], [X_q], C, seed)
         return {
             "layer": layer,
             "place": place,
-            "val_bacc": safe_balanced_accuracy(y[val_idx], val_pred),
-            "te_correct_bacc": safe_balanced_accuracy(y[te_c], te_pred),
+            "val_bacc": safe_balanced_accuracy(y[vi], val_pred),
+            "te_correct_bacc": safe_balanced_accuracy(y[ei], te_pred),
+            "te_items": ei.tolist(),
+            "te_pred": te_pred.tolist(),
+            "err_items": xi.tolist(),
             "err_pred": err_pred.tolist(),
             "err_pred_shuf": err_pred_shuf.tolist(),
             "err_pred_rand": err_pred_rand.tolist(),
+            "p2_items": qi.tolist(),
             "p2_gt_pred_te": gt_pred_te.tolist(),
             "p2_out_pred_te": out_pred_te.tolist(),
         }
@@ -281,7 +343,7 @@ def cmd_analyze(cfg: dict[str, Any]) -> None:
     )
     by = {(r["layer"], r["place"]): r for r in results}
 
-    # error-place view: for each error item, its most significant wrong place
+    # error-place view: for each error item, its first (most significant) wrong place
     ep = err_place[err_idx]
     gold_at = gold_d[err_idx, ep]
     model_at = model_d[err_idx, ep]
@@ -289,8 +351,12 @@ def cmd_analyze(cfg: dict[str, Any]) -> None:
     def rec_rates(layer_of_place: dict[int, int], key: str) -> np.ndarray:
         """[n_err, 3] indicators: probe == gold digit, == model digit, other."""
         out_ = np.zeros((len(err_idx), 3))
-        for j, (p_, g, m) in enumerate(zip(ep, gold_at, model_at)):
-            pr = by[(layer_of_place[p_], p_)][key][j]
+        lookup = {}
+        for p_ in places:
+            r = by[(layer_of_place[p_], p_)]
+            lookup.update({i: v for i, v in zip(r["err_items"], r[key])})
+        for j, (i, g, m) in enumerate(zip(err_idx, gold_at, model_at)):
+            pr = lookup.get(int(i), -1)
             out_[j] = [pr == g, pr == m, pr not in (g, m)]
         return out_
 
@@ -336,53 +402,66 @@ def cmd_analyze(cfg: dict[str, Any]) -> None:
     dec = {}
     for p in places:
         L = sel_layer[p]
-        X = np.asarray(acts[:, L, :], dtype=np.float32)
         y = gold_d[:, p]
-        (real_pred,) = _fit_eval(X[tr_c], y[tr_c], [X[te_c]], C, seed)
-        (shuf_pred,) = _fit_eval(X[tr_c], y[tr_c], [X[te_c]], C, seed + 99, shuffle=True)
-        hit_r, hit_s = (real_pred == y[te_c]), (shuf_pred == y[te_c])
+        ti, tj = slot(tr_c, p)
+        ei, ej = slot(te_c, p)
+        X_tr, X_te = feats(ti, tj, L), feats(ei, ej, L)
+        (real_pred,) = _fit_eval(X_tr, y[ti], [X_te], C, seed)
+        (shuf_pred,) = _fit_eval(X_tr, y[ti], [X_te], C, seed + 99, shuffle=True)
+        hit_r, hit_s = (real_pred == y[ei]), (shuf_pred == y[ei])
         dec[p] = {
             "layer": L,
-            "test_bacc": safe_balanced_accuracy(y[te_c], real_pred),
-            "test_bacc_shuffled": safe_balanced_accuracy(y[te_c], shuf_pred),
+            "test_bacc": safe_balanced_accuracy(y[ei], real_pred),
+            "test_bacc_shuffled": safe_balanced_accuracy(y[ei], shuf_pred),
             "acc_minus_shuffled": cluster_bootstrap(
                 lambda i, a=hit_r, b=hit_s: a[i].mean() - b[i].mean(),
-                np.arange(len(te_c)),
+                np.arange(len(ei)),
                 nb,
                 seed,
             ),
-            "n_test_correct": int(len(te_c)),
+            "n_test_correct": int(len(ei)),
         }
     primary["decodability_selected_layer"] = dec
     # paper protocol P2 on the mixed held-out split, incl. the error-only subset
-    te_p = te[parsed[te]]
-    te_err_mask = ~correct[te_p]
+    te_err_mask_all = ~correct
     p2 = {}
     for p in places:
         rows = []
         for L in range(n_layers):
             r = by[(L, p)]
+            qi = np.array(r["p2_items"], int)
             gt, op_ = np.array(r["p2_gt_pred_te"]), np.array(r["p2_out_pred_te"])
+            em = te_err_mask_all[qi] if len(qi) else np.zeros(0, bool)
+            # an item is wrong at THIS place iff its digit here differs from gold
+            wrong_here = model_d[qi, p] != gold_d[qi, p] if len(qi) else np.zeros(0, bool)
             rows.append(
                 {
-                    "gt_acc": float(np.mean(gt == gold_d[te_p, p])),
-                    "out_acc": float(np.mean(op_ == model_d[te_p, p])),
-                    "gt_acc_on_errors": float(
-                        np.mean(gt[te_err_mask] == gold_d[te_p, p][te_err_mask])
-                    )
-                    if te_err_mask.any()
+                    "n_items": int(len(qi)),
+                    "gt_acc": float(np.mean(gt == gold_d[qi, p])) if len(qi) else float("nan"),
+                    "out_acc": float(np.mean(op_ == model_d[qi, p])) if len(qi) else float("nan"),
+                    "gt_acc_on_errors": float(np.mean(gt[em] == gold_d[qi, p][em]))
+                    if em.any()
                     else float("nan"),
-                    "detector_acc": float(np.mean((gt != op_) == te_err_mask)),
-                    "detector_bacc": safe_balanced_accuracy(te_err_mask, gt != op_),
+                    "gt_acc_where_digit_wrong": float(
+                        np.mean(gt[wrong_here] == gold_d[qi, p][wrong_here])
+                    )
+                    if wrong_here.any()
+                    else float("nan"),
+                    "detector_bacc_this_place": safe_balanced_accuracy(wrong_here, gt != op_)
+                    if len(qi)
+                    else float("nan"),
                 }
             )
         p2[p] = rows
+    te_err_mask = ~correct[te]
     summary = {
         "meta": {k: v for k, v in meta.items() if k != "versions"},
         "n": n,
         "n_parsed": int(parsed.sum()),
         "n_correct": int(correct.sum()),
         "n_errors_parsed": int(err.sum()),
+        "n_errors_same_length": int((err & same_len).sum()),
+        "n_errors_analyzed": int(len(err_idx)),
         "error_place_counts": {int(k): int(v) for k, v in zip(*np.unique(ep, return_counts=True))},
         "n_train": int(len(tr)),
         "n_test": int(len(te)),
@@ -416,7 +495,7 @@ def cmd_reprompt(cfg: dict[str, Any]) -> None:
     set_seed(cfg["seed"])
     out = Path(cfg["out_dir"])
     recs = list(read_jsonl(out / "collect.jsonl"))
-    acts = np.load(out / "acts_eq.npy", mmap_mode="r")
+    acts = np.load(out / "acts_emit.npy", mmap_mode="r")[:, 0]  # '=' token, as Sun et al.
     n = len(recs)
     seed = cfg["seed"]
     correct = np.array([r["correct"] for r in recs])
@@ -529,8 +608,15 @@ def main() -> None:
     ap.add_argument("cmd", choices=["pilot", "collect", "analyze", "reprompt"])
     ap.add_argument("--config", default="configs/baseline_a.yaml")
     ap.add_argument("--limit", type=int, default=None, help="debug: collect only N problems")
+    ap.add_argument(
+        "--harness", default=None, help="override harness config (e.g. configs/debug.yaml)"
+    )
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--n-per-length", type=int, default=None, help="debug: smaller error pilot")
     args = ap.parse_args()
-    cfg = _cfg(args.config)
+    cfg = _cfg(args.config, args.harness, args.out)
+    if args.n_per_length:
+        cfg["error_pilot"]["n_per_length"] = args.n_per_length
     if args.cmd == "pilot":
         cmd_pilot(cfg)
     elif args.cmd == "collect":
