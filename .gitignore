@@ -12,8 +12,11 @@ dist/
 venv/
 env/
 
-results/*
-!results/.gitkeep
+# results/: small measurement files (json/jsonl/csv/md/png) are committed so every
+# number in docs/BASELINE_REPORT.md can be traced; activation caches (*.npy,
+# *.npz) stay out, as do local debug runs and the archived legacy outputs.
+results/debug/
+results/legacy_pilot/
 
 .cache/
 *.ckpt
