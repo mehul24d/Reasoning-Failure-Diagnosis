@@ -76,8 +76,12 @@ def build_items(cfg: dict[str, Any], limit: int | None = None) -> tuple[list[dic
                         "question_numbers": p.question_numbers,
                     }
                 )
-    if limit:  # debug: dev templates only, both variants of the first instances
-        items = [i for i in items if i["split"] == "dev"][:limit]
+    if limit:  # debug: the first `limit` traces of each split (whole templates first)
+        items = [
+            i
+            for sp in ("train", "dev", "test")
+            for i in [x for x in items if x["split"] == sp][:limit]
+        ]
     return items, {"data_report": report, "splits": splits}
 
 
@@ -302,7 +306,7 @@ def main() -> None:
         "--harness", default=None, help="override harness config (e.g. configs/debug.yaml)"
     )
     ap.add_argument("--out", default=None)
-    ap.add_argument("--limit", type=int, default=None, help="debug: first N dev-template traces")
+    ap.add_argument("--limit", type=int, default=None, help="debug: first N traces of each split")
     args = ap.parse_args()
     cfg = load_cfg(args.config, args.harness, args.out)
     {

@@ -1,0 +1,20 @@
+# Baseline B: Yuan et al. (2605.09502), correctness probe is diagnostic, not causal.
+# Pre-registration: docs/prereg/baseline_b.md
+harness_config: "configs/harness.yaml"
+traces_dir: "results/traces"
+out_dir: "results/baseline_b"
+seed: 42
+probe:
+  C: 0.1                 # Yuan et al.: StandardScaler + L2 logistic, C = 0.1
+  cv_folds: 5            # template-grouped, train templates only
+  positions: ["last", "first_step", "question"]
+steer:
+  # strength grids (pre-registered)
+  project_alphas: [0.5, 1.0, 2.0, 5.0, 8.0]      # Yuan et al.: h - a (h.w) w
+  add_multiples: [0.5, 1.0, 2.0, 4.0, 8.0]       # x ||mu_correct - mu_wrong|| at the steering layer
+  n_eval_train_per_class: 64   # selection set (train templates), per original outcome
+  n_eval_test_per_class: 80    # evaluation set (test templates), per original outcome
+  n_random: 100                # matched-norm random directions at the selected strength
+  n_band: 10                   # random directions per strength for the descriptive sweep band
+  band_directions: ["add_diffmeans"]
+n_boot: 10000

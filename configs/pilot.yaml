@@ -1,0 +1,17 @@
+# Phase 3 PILOT: feasibility slice of self-sourced repair. Pre-registration: docs/prereg/pilot.md
+harness_config: "configs/harness.yaml"
+traces_dir: "results/traces"
+out_dir: "results/pilot"
+seed: 42
+probe:
+  C: 0.1
+  cv_folds: 5
+  step_buckets: 6          # step positions 0..4 and 5+ for the readability map
+  kinds: ["logistic", "diffmeans"]
+sample:
+  temperature: 0.7
+  k: 5
+repair:
+  strength_multiples: [1.0, 2.0, 4.0, 8.0]   # x per-trace oracle content-edit norm
+  n_random: 100
+n_boot: 10000
