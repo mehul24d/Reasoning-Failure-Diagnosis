@@ -169,8 +169,10 @@ def strength_sweep(sweep: dict[str, dict[str, Any]], path: Path, title: str) -> 
                 color=NULL,
                 alpha=0.25,
                 linewidth=0,
-                label="random dirs (2.5-97.5%)",
+                label="random dirs: net (min-max)",
             )
+            ax.plot(x, s["null_lo"], color=NULL, linewidth=0.8)
+            ax.plot(x, s["null_hi"], color=NULL, linewidth=0.8)
         ax.plot(
             x,
             np.array(s["repair"]) * 100,
@@ -201,8 +203,14 @@ def strength_sweep(sweep: dict[str, dict[str, Any]], path: Path, title: str) -> 
         ax.axhline(0, color="#c9c8c2", linewidth=0.8)
         if np.all(x > 0) and x.max() / max(x.min(), 1e-9) > 8:
             ax.set_xscale("log")
+            ax.minorticks_off()
+        ax.set_xticks(x)
+        ax.set_xticklabels([f"{v:g}" for v in x], fontsize=7.5)
         _style(ax, name, "strength", "percent / points")
-    axes[0][0].legend(fontsize=7, frameon=False, loc="upper left")
+        if s.get("null_lo") is not None:
+            ax.legend(fontsize=7, frameon=False, loc="upper left")
+    if sweep[dirs[0]].get("null_lo") is None:
+        axes[0][0].legend(fontsize=7, frameon=False, loc="upper left")
     fig.suptitle(title, fontsize=10, color=INK, x=0.01, ha="left")
     _save(fig, path)
 
