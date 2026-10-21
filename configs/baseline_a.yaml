@@ -1,0 +1,26 @@
+# Baseline A: Sun et al. (2507.12379) probing for arithmetic errors.
+# Pre-registration: docs/prereg/baseline_a.md
+harness_config: "configs/harness.yaml"
+out_dir: "results/baseline_a"
+seed: 42
+op: "+"
+error_pilot:
+  digit_lengths: [3, 4, 5, 6, 7, 8]
+  n_per_length: 128
+# chosen digit length = smallest length whose pilot error rate e satisfies
+# min(n_max, ceil(target_errors / e)) * e >= target_errors
+target_errors: 300
+n_min: 2000
+n_max: 6000
+n_demos: 2
+gen_batch_size: 32
+max_new_tokens: 14
+split: { train: 0.7, test: 0.3 }   # instance-level (no templates in this task)
+probe:
+  C: 0.1
+  cv_folds: 5
+  mlp_hidden: 512        # Sun et al. MLP probe, run at the train-selected layers only
+  n_shuffle: 1           # shuffled-label control probes per (layer, place)
+reprompt:
+  message: "That step looks suspicious. Let's re-do just this step:"   # Sun et al. "suspicious"
+n_boot: 10000
