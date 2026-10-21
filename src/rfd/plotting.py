@@ -210,16 +210,27 @@ def strength_sweep(sweep: dict[str, dict[str, Any]], path: Path, title: str) -> 
 # --------------------------------------------------------------------------- pilot
 
 
-def readability_maps(maps: dict[str, np.ndarray], path: Path, col_labels: list[str]) -> None:
-    """maps[variable] = [n_layers, n_steps] metric (AUROC or balanced acc)."""
+def readability_maps(
+    maps: dict[str, np.ndarray],
+    path: Path,
+    col_labels: list[str],
+    chance: dict[str, float] | None = None,
+) -> None:
+    """maps[variable] = [n_layers, n_steps] held-out metric (AUROC or balanced acc).
+    Colour floor = the variable's chance level; grey = fewer than 10 test steps."""
     names = list(maps)
+    chance = chance or {}
     fig, axes = plt.subplots(2, 2, figsize=(9, 6.6), squeeze=False)
     for ax, name in zip(axes.ravel(), names):
-        m = np.asarray(maps[name], float)
-        im = ax.imshow(m, aspect="auto", origin="lower", cmap="Blues", vmin=0.4, vmax=1.0)
+        m = np.ma.masked_invalid(np.asarray(maps[name], float))
+        cmap = matplotlib.colormaps["Blues"].copy()
+        cmap.set_bad("#e6e5e1")
+        lo = chance.get(name, 0.5)
+        im = ax.imshow(m, aspect="auto", origin="lower", cmap=cmap, vmin=lo, vmax=1.0)
         ax.set_xticks(range(m.shape[1]))
         ax.set_xticklabels(col_labels[: m.shape[1]], fontsize=7)
-        _style(ax, name, "step position", "layer")
+        _style(ax, f"{name}  (floor = chance {lo:.2f}; grey = n<10)", "step position", "layer")
+        ax.title.set_fontsize(8.5)
         ax.grid(False)
         fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02).ax.tick_params(labelsize=7, colors=INK2)
     for ax in axes.ravel()[len(names) :]:

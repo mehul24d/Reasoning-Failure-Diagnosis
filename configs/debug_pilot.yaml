@@ -1,0 +1,17 @@
+# DEBUG ONLY copy of pilot.yaml (results/debug, never reported)
+harness_config: "configs/harness.yaml"
+traces_dir: "results/traces"
+out_dir: "results/pilot"
+seed: 42
+probe:
+  C: 0.1
+  cv_folds: 5
+  step_buckets: 6          # step positions 0..4 and 5+ for the readability map
+  kinds: ["logistic", "diffmeans"]
+sample:
+  temperature: 0.7
+  k: 5
+repair:
+  strength_multiples: [1.0, 8.0]   # x per-trace oracle content-edit norm
+  n_random: 2
+n_boot: 500

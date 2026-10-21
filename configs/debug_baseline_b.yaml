@@ -1,0 +1,20 @@
+# DEBUG ONLY copy of baseline_b.yaml with tiny grids (results/debug, never reported)
+# Pre-registration: docs/prereg/baseline_b.md
+harness_config: "configs/harness.yaml"
+traces_dir: "results/traces"
+out_dir: "results/baseline_b"
+seed: 42
+probe:
+  C: 0.1                 # Yuan et al.: StandardScaler + L2 logistic, C = 0.1
+  cv_folds: 5            # template-grouped, train templates only
+  positions: ["last", "first_step", "question"]
+steer:
+  # strength grids (pre-registered)
+  project_alphas: [1.0, 8.0]      # Yuan et al.: h - a (h.w) w
+  add_multiples: [1.0, 8.0]       # x ||mu_correct - mu_wrong|| at the steering layer
+  n_eval_train_per_class: 4   # selection set (train templates), per original outcome
+  n_eval_test_per_class: 4    # evaluation set (test templates), per original outcome
+  n_random: 2                # matched-norm random directions at the selected strength
+  n_band: 1                   # random directions per strength for the descriptive sweep band
+  band_directions: ["add_diffmeans"]
+n_boot: 500

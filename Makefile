@@ -56,9 +56,9 @@ debug:
 	$(PY) -m rfd.experiments.collect_traces label --harness configs/debug.yaml --out results/debug/traces
 	$(PY) -m rfd.experiments.collect_traces extract --harness configs/debug.yaml --out results/debug/traces
 	$(PY) -m rfd.experiments.baseline_b probe --harness configs/debug.yaml --out results/debug/baseline_b --traces results/debug/traces
-	$(PY) -m rfd.experiments.baseline_b steer --harness configs/debug.yaml --out results/debug/baseline_b --traces results/debug/traces --n-random 3 --per-class 8
-	$(PY) -m rfd.experiments.pilot readability --harness configs/debug.yaml --out results/debug/pilot --traces results/debug/traces
-	$(PY) -m rfd.experiments.pilot repair --harness configs/debug.yaml --out results/debug/pilot --traces results/debug/traces --n-random 3
+	$(PY) -m rfd.experiments.baseline_b steer --config configs/debug_baseline_b.yaml --harness configs/debug.yaml --out results/debug/baseline_b --traces results/debug/traces
+	$(PY) -m rfd.experiments.pilot readability --config configs/debug_pilot.yaml --harness configs/debug.yaml --out results/debug/pilot --traces results/debug/traces
+	$(PY) -m rfd.experiments.pilot repair --config configs/debug_pilot.yaml --harness configs/debug.yaml --out results/debug/pilot --traces results/debug/traces
 
 # Archived SAE phase-segmentation pilot (see src/rfd/legacy/README.md).
 legacy-pilot:

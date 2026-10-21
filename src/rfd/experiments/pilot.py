@@ -294,7 +294,12 @@ def cmd_readability(cfg: dict[str, Any]) -> None:
     cols = [str(b + 1) for b in range(cfg["probe"]["step_buckets"] - 1)] + [
         f"{cfg['probe']['step_buckets']}+"
     ]
-    readability_maps(maps, out / "fig_pilot_readability_maps.png", cols)
+    readability_maps(
+        maps,
+        out / "fig_pilot_readability_maps.png",
+        cols,
+        chance={v: 0.5 if VARIABLES[v][1] == 2 else 0.25 for v in VARIABLES},
+    )
     for v, r in summary["variables"].items():
         lg = r["logistic"]
         print(
@@ -378,7 +383,15 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
         rows, y = labels[v]
         m = split[rows] == "train"
         X = np.asarray(acts[rows[m], L], np.float32)
-        return L, np.stack([X[y[m] == c].mean(0) for c in range(VARIABLES[v][1])])
+        # a class absent from train rows has no mean: edits involving it are skipped
+        return L, np.stack(
+            [
+                X[y[m] == c].mean(0)
+                if (y[m] == c).any()
+                else np.full(X.shape[1], np.nan, np.float32)
+                for c in range(VARIABLES[v][1])
+            ]
+        )
 
     means = {v: class_means(v) for v in VARIABLES}
     probes = {}
@@ -465,6 +478,22 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
         self_src = mu[decoded] - mu[bound]
         Le, mue = means["evaluation/binary: step correct"]
         evald = mue[1] - mue[0]
+        # NaN = a class without train examples -> that edit is skipped (zero vector)
+        oracle, self_src, evald = (
+            np.nan_to_num(v_, nan=0.0) if np.isnan(v_).any() else v_
+            for v_ in (oracle, self_src, evald)
+        )
+        if np.isnan(ref_norm):
+            ref_norm = float(
+                np.nanmean(
+                    [
+                        np.linalg.norm(mu[a] - mu[b])
+                        for a in range(len(mu))
+                        for b in range(len(mu))
+                        if a != b
+                    ]
+                )
+            )
         return {
             "trace": traces[tix[s["uid"]]],
             "at": s["gen_token_index"],
