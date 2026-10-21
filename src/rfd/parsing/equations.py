@@ -98,6 +98,15 @@ def _clean_lhs(tokens: list[tuple[str, str, int, int]]) -> list[tuple[str, str, 
     """Drop words; an op between a word and a number (`inches/remora * 7`)
     collapses to the LAST op before the next number/paren."""
     toks = [t for t in tokens if t[0] != "word"]
+    # "70 (building blocks) + 46" leaves an empty "( )" once words are dropped
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(toks) - 1):
+            if toks[i][0] == "lp" and toks[i + 1][0] == "rp":
+                del toks[i : i + 2]
+                changed = True
+                break
     # 'x' used as a word (e.g. "x-ray") is rare; treat x as multiply only between numbers
     out: list[tuple[str, str, int, int]] = []
     for t in toks:

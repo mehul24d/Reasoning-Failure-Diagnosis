@@ -51,3 +51,9 @@ def test_decompose_evaluation_order():
 def test_program_from_text_skips_restatements():
     prog = program_from_text("She has 48=48 emails. 150-48=102 left. 102*6= 612")
     assert [(s.op, s.result) for s in prog] == [("-", 102.0), ("*", 612.0)]
+
+
+def test_parenthesised_unit_words_are_dropped():
+    assert _exprs("70 (building blocks) + 46 (stuffed animals) + 29 (rings) = 145 toys") == [
+        ("70.0+46.0+29.0", 145.0)
+    ]

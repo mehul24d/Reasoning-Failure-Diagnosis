@@ -1,0 +1,10 @@
+# GSM-Symbolic CoT traces shared by Baseline B and the Phase 3 pilot.
+# Pre-registration: docs/prereg/phase0.md (data), baseline_b.md, pilot.md
+harness_config: "configs/harness.yaml"
+out_dir: "results/traces"
+seed: 42
+split_fractions: { train: 0.5, dev: 0.2, test: 0.3 }   # template-grouped
+instances_per_template: 8
+variants: ["main", "noop"]
+chunk_size: 64          # traces per resumable chunk
+parse_sample_size: 30   # steps dumped for manual inspection (phase 0.3)
