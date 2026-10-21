@@ -512,6 +512,7 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
         }
 
     built = [build(it) for it in items]
+    changed = np.zeros(len(built), bool)  # filled by run(); prefix of length len(sub) is valid
 
     def run(
         sub: list[dict],
@@ -520,8 +521,10 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
         layer_key: str = "L",
         rand: np.ndarray | None = None,
     ) -> np.ndarray:
-        """Final correctness after the edit at each item's first deviating step."""
+        """Final correctness after the edit at each item's first deviating step;
+        `changed` records which items' continuations the edit altered at all."""
         new = np.zeros(len(sub), bool)
+        changed[:] = False
         by_layer: dict[int, list[int]] = {}
         for i, b in enumerate(sub):
             by_layer.setdefault(b[layer_key], []).append(i)
@@ -552,6 +555,7 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
             res = run_condition(model, tok, [sub[i]["trace"] for i in idx], spec, max_new, bs, eos)
             for i, r in zip(idx, res):
                 new[i] = r.correct
+                changed[i] = r.diverged
         return new
 
     def rates(sub: list[dict], new: np.ndarray) -> dict[str, Any]:
@@ -564,6 +568,7 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
         return {
             "n_failures": int((~solved).sum()),
             "n_solved": int(solved.sum()),
+            "frac_items_changed": float(changed[: len(sub)].mean()) if len(sub) else float("nan"),
             "repair": cluster_bootstrap(rep, g, nb, seed),
             "damage": cluster_bootstrap(dmg, g, nb, seed),
             "net": cluster_bootstrap(net, g, nb, seed),

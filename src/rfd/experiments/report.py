@@ -257,19 +257,20 @@ def pilot(res: Path) -> list[str]:
         f"self-sourced gate open on {rp['self_sourced_gate_open_rate_failures']} of failures / "
         f"{rp['self_sourced_gate_open_rate_solved']} of solved items.",
         "",
-        "| condition | n fail / solved | repair % [CI] | damage % [CI] | net gain, pts [CI] | p vs random |",
-        "|---|---|---|---|---|---|",
+        "| condition | n fail / solved | items whose continuation changed | repair % [CI] | damage % [CI] | net gain, pts [CI] | p vs random |",
+        "|---|---|---|---|---|---|---|",
     ]
     nl = rp["random null"]
     for name, r in rp.items():
         if not isinstance(r, dict) or "repair" not in r or name == "random null":
             continue
         lines.append(
-            f"| {name} | {r['n_failures']} / {r['n_solved']} | {_ci(r['repair'], True)} | "
-            f"{_ci(r['damage'], True)} | {_ci(r['net'], True)} | {nl['p_value_net_ge'][name]:.3f} |"
+            f"| {name} | {r['n_failures']} / {r['n_solved']} | {r.get('frac_items_changed', float('nan')):.2f} | "
+            f"{_ci(r['repair'], True)} | {_ci(r['damage'], True)} | {_ci(r['net'], True)} | "
+            f"{nl['p_value_net_ge'][name]:.3f} |"
         )
     lines += [
-        f"| random null (n={nl['n']}) | | {100 * nl['repair_mean']:.1f} (mean) | {100 * nl['damage_mean']:.1f} (mean) | "
+        f"| random null (n={nl['n']}) | | | {100 * nl['repair_mean']:.1f} (mean) | {100 * nl['damage_mean']:.1f} (mean) | "
         f"{100 * nl['net_mean']:.1f}; {100 * nl['net_q025']:.1f} to {100 * nl['net_q975']:.1f} | |",
         "",
     ]
