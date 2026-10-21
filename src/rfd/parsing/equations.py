@@ -38,6 +38,7 @@ _TOKEN_RE = re.compile(
     r"|(?P<eq>=)"
     r"|(?P<word>[A-Za-z_]+)"
 )
+_CLAUSE_RE = re.compile(r"\n|:|;|\.(?=\s)")
 _PY_OPS = {
     ast.Add: ("+", operator.add),
     ast.Sub: ("-", operator.sub),
@@ -173,50 +174,71 @@ def parse_equations(text: str, validate: bool = True) -> list[Equation]:
     tokens = _tokenize(norm)
     equations: list[Equation] = []
     seg_start = 0
-    for i, (kind, _, _, _) in enumerate(tokens):
+    for i, (kind, _, eq_start, _) in enumerate(tokens):
         if kind != "eq":
             continue
-        # rhs: first number after '=' (skipping words like units/currency)
+        # rhs: first number after '=' (skipping words like units/currency);
+        # "= 1/2" is read as a fraction
         rhs = None
         for k in range(i + 1, min(i + 4, len(tokens))):
             if tokens[k][0] == "num":
                 rhs = tokens[k]
+                if (
+                    k + 2 < len(tokens)
+                    and tokens[k + 1][1] == "/"
+                    and tokens[k + 2][0] == "num"
+                    and tokens[k + 1][2] == tokens[k][3]
+                ):
+                    num_, den = _num(tokens[k][1])[0], _num(tokens[k + 2][1])[0]
+                    if den:
+                        rhs = ("num", repr(num_ / den), tokens[k][2], tokens[k + 2][3])
                 break
             if tokens[k][0] in ("eq", "op", "lp"):
                 # allow a leading minus on rhs
                 if tokens[k][1] == "-" and k + 1 < len(tokens) and tokens[k + 1][0] == "num":
                     rhs = ("num", "-" + tokens[k + 1][1], tokens[k][2], tokens[k + 1][3])
                 break
-        lhs = _clean_lhs(tokens[seg_start:i])
+        # the lhs never crosses a clause boundary (newline, ':', ';', sentence end):
+        # bullet hyphens and numbers from earlier sentences are not operands
+        seg_char = tokens[seg_start - 1][3] if seg_start > 0 else 0
+        bounds = [m.end() for m in _CLAUSE_RE.finditer(norm, seg_char, eq_start)]
+        clause_start = bounds[-1] if bounds else seg_char
+        lhs = _clean_lhs([t for t in tokens[seg_start:i] if t[2] >= clause_start])
         seg_start = i + 1
         if rhs is None:
             continue
         stated, stated_pct = _num(rhs[1].lstrip("-"))
         stated = -stated if rhs[1].startswith("-") else stated
-        found = None
-        for s in range(len(lhs)):  # longest suffix first
-            cand = lhs[s:]
-            for pct_mode in ("number", "fraction"):
-                got = _try_expr(cand, pct_mode)
-                if got is None:
-                    continue
-                expr, steps = got
-                value = steps[-1].computed
-                if (
-                    not validate
-                    or close(value, stated)
-                    or (stated_pct and close(value, stated * 0.01))
-                ):
-                    found = (expr, steps, cand[0][2])
+        found = _match_suffix(lhs, stated, stated_pct)
+        if found is None and not validate:
+            # an arithmetic slip: no suffix evaluates to the stated value, so take
+            # the minimal binary expression right before '=' (then anything valid)
+            for cand in [lhs[-3:]] + [lhs[s_:] for s_ in range(len(lhs))]:
+                got = _try_expr(cand, "number")
+                if got is not None:
+                    found = (got[0], got[1], cand[0][2])
                     break
-            if found:
-                break
         if found is None:
             continue
         expr, steps, start = found
         steps[-1].result = stated  # the stated value is what the text carries forward
         equations.append(Equation(expr, stated, steps, start, rhs[3]))
     return equations
+
+
+def _match_suffix(lhs, stated: float, stated_pct: bool):
+    """Longest token suffix whose value equals the stated result."""
+    for s_ in range(len(lhs)):
+        cand = lhs[s_:]
+        for pct_mode in ("number", "fraction"):
+            got = _try_expr(cand, pct_mode)
+            if got is None:
+                continue
+            expr, steps = got
+            value = steps[-1].computed
+            if close(value, stated) or (stated_pct and close(value, stated * 0.01)):
+                return expr, steps, cand[0][2]
+    return None
 
 
 def program_from_text(text: str) -> list[BinStep]:

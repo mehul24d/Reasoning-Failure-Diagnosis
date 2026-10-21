@@ -57,3 +57,18 @@ def test_parenthesised_unit_words_are_dropped():
     assert _exprs("70 (building blocks) + 46 (stuffed animals) + 29 (rings) = 145 toys") == [
         ("70.0+46.0+29.0", 145.0)
     ]
+
+
+def test_model_text_does_not_cross_clause_boundaries():
+    text = "- Sunday: $189 + $306 = $495. - Monday: $408 + $560 = $968."
+    eqs = parse_equations(text, validate=False)
+    assert [(e.expr, e.stated) for e in eqs] == [("189.0+306.0", 495.0), ("408.0+560.0", 968.0)]
+
+
+def test_slip_takes_minimal_binary_expression():
+    eqs = parse_equations("So the total is 12 + 30 + 7 = 50 apples.", validate=False)
+    assert eqs[0].expr == "30.0+7.0" and not eqs[0].steps[-1].arithmetic_ok
+
+
+def test_fraction_on_rhs():
+    assert _exprs("The probability is 6/12 = 1/2.") == [("6.0/12.0", 0.5)]
