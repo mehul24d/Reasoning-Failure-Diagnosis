@@ -30,8 +30,22 @@ def load(model_cfg: dict[str, Any]) -> LoadedModel:
     tok.padding_side = "left"
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
+    neutralize_generation_config(loaded.model)
     loaded.model.generation_config.pad_token_id = tok.pad_token_id
     return loaded
+
+
+def neutralize_generation_config(model: Any) -> None:
+    """Drop checkpoint sampling defaults. Qwen2.5-Instruct ships
+    repetition_penalty=1.1 (and top_k/top_p/temperature), which HF applies even
+    with do_sample=False, so "greedy" would not be the raw-logit argmax
+    (DECISIONS D12)."""
+    gc = model.generation_config
+    gc.do_sample = False
+    gc.repetition_penalty = 1.0
+    gc.temperature = None
+    gc.top_p = None
+    gc.top_k = None
 
 
 def library_versions() -> dict[str, str]:

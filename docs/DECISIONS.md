@@ -194,3 +194,36 @@ and carry the usual batch-level fp16 noise; this applies equally to real and
 random directions. The exactness tests (fp32 tiny model) still pass. Baseline B
 pre-registration Amendment 1 records this together with the widened additive
 grid.
+
+## D12 (2026-10-22) "Greedy" decoding was silently applying repetition_penalty = 1.1
+
+**How it was found.** The Phase 0 check on the 0.5B debug model failed. Teacher
+forcing reproduced only **94.1%** of the generated tokens, against the
+pre-registered ≥ 0.99, and all 8 traces disagreed within their first 22 tokens.
+fp32 gave **the identical 94.1% and the identical divergence positions**, so
+this was not numerical noise.
+
+**Cause.** The Qwen2.5-0.5B and 1.5B-Instruct checkpoints ship a
+`generation_config.json` with `repetition_penalty: 1.1`, `top_k: 20`,
+`top_p: 0.8` and `temperature: 0.7`. HF `generate()` applies the repetition
+penalty even with `do_sample=False`, so the output was not the argmax of the
+raw logits.
+
+**Fix.**
+- `rfd.harness.model.load` neutralizes the generation config.
+- `rfd.harness.generate.generate` passes `repetition_penalty=1.0` explicitly.
+- The T = 0.7 sampling in the pilot sets `top_p=1`, `top_k=0` and
+  `repetition_penalty=1`.
+- `tests/test_hooks.py::test_greedy_ignores_checkpoint_repetition_penalty`
+  fails without the fix.
+
+**Consequences.**
+- Every 0.5B debug output produced before this fix was generated with the
+  penalty. None of it is reported, and the debug traces must be regenerated
+  before any further debug comparison.
+- No Qwen2.5-1.5B data existed yet, so no reported result is affected.
+- **The archived Semester-7 pilot was also affected**
+  (`rfd.generation.generate_traces`, Qwen2.5-0.5B, 22/50 = 44% on GSM8K). It ran
+  with repetition_penalty 1.1, not pure greedy decoding as `docs/PROGRESS.md`
+  states. We leave that code and its results untouched for reproducibility and
+  record the discrepancy here.

@@ -101,6 +101,7 @@ def generate(
             temperature=None,
             top_p=None,
             top_k=None,
+            repetition_penalty=1.0,  # checkpoint defaults must not alter greedy argmax
             pad_token_id=pad_id,
             logits_processor=LogitsProcessorList([stats]),
             stopping_criteria=stopping,

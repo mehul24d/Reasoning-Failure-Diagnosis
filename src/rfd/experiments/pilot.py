@@ -343,6 +343,8 @@ def cmd_sample(cfg: dict[str, Any]) -> None:
                 do_sample=True,
                 temperature=T,
                 top_p=1.0,
+                top_k=0,
+                repetition_penalty=1.0,
                 max_new_tokens=cfg["harness"]["generation"]["max_new_tokens"],
                 pad_token_id=tok.pad_token_id,
             )

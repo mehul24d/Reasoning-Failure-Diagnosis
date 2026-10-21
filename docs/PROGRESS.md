@@ -5,7 +5,9 @@
 > pivoted to *Self-Sourced Repair*. The code lives in `src/rfd/legacy/`
 > (module paths below are pre-move: `rfd.X` is now `rfd.legacy.X`), and
 > the outputs in `results/legacy_pilot/`. Current work and results:
-> `docs/BASELINE_REPORT.md`; decisions: `docs/DECISIONS.md`.
+> `docs/BASELINE_REPORT.md`; decisions: `docs/DECISIONS.md`. Note: the
+> "greedy" pilot below actually ran with the checkpoint's repetition_penalty
+> = 1.1 (found 2026-10-22, DECISIONS D12).
 
 **Date:** 2026-10-12
 **Pilot config:** Qwen/Qwen2.5-0.5B-Instruct, GSM8K test[0:50], greedy decoding.

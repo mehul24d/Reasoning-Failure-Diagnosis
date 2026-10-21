@@ -106,3 +106,18 @@ def test_single_position_set_and_gating(tiny):
     h = cap.result()
     assert torch.allclose(h[0, 4], target[0]) and not torch.allclose(h[1, 4], target[1])
     assert torch.allclose(h[0, :4], h[1, :4])
+
+
+def test_greedy_ignores_checkpoint_repetition_penalty(tiny):
+    """Qwen2.5-Instruct ships repetition_penalty=1.1; greedy must still be the raw argmax."""
+    model, tok = tiny
+    old = model.generation_config.repetition_penalty
+    model.generation_config.repetition_penalty = 1.5
+    try:
+        outs = generate(model, tok, PREFIXES, max_new_tokens=8, stop_at_final_answer=False)
+        seqs = [p + o.gen_ids for p, o in zip(PREFIXES, outs)]
+        res = forward(model, tok, seqs, return_argmax=True)
+        for p, o, am in zip(PREFIXES, outs, res["argmax"]):
+            assert am[len(p) - 1 : len(p) - 1 + len(o.gen_ids)] == o.gen_ids
+    finally:
+        model.generation_config.repetition_penalty = old
