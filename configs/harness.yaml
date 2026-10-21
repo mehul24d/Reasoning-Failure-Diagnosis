@@ -3,8 +3,8 @@
 seed: 42
 model:
   model_name: "Qwen/Qwen2.5-1.5B-Instruct"
-  device: "auto"        # mps on the project machine (Apple M2, 8 GB)
-  dtype: "float16"      # fp16 activations; TL/HF equivalence checked in phase 0
+  device: "auto"        # cuda > mps > cpu
+  dtype: "auto"         # bf16 on CUDA, fp16 on MPS; TL/HF equivalence checked in phase 0
   trust_remote_code: false
 generation:
   do_sample: false      # greedy everywhere

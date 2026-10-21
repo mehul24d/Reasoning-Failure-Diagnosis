@@ -13,8 +13,19 @@ os.environ.setdefault("PYTORCH_MPS_LOW_WATERMARK_RATIO", "0.5")
 from rfd.generation.model import LoadedModel, load_model  # noqa: E402
 
 
+def resolve_dtype(model_cfg: dict[str, Any]) -> dict[str, Any]:
+    """dtype "auto": bfloat16 on CUDA, float16 on MPS, float32 on CPU."""
+    if model_cfg.get("dtype", "auto") != "auto":
+        return model_cfg
+    from rfd.utils.io import device_for
+
+    device = device_for(model_cfg.get("device", "auto"))
+    dtype = {"cuda": "bfloat16", "mps": "float16"}.get(device, "float32")
+    return {**model_cfg, "dtype": dtype}
+
+
 def load(model_cfg: dict[str, Any]) -> LoadedModel:
-    loaded = load_model(model_cfg)
+    loaded = load_model(resolve_dtype(model_cfg))
     tok = loaded.tokenizer
     tok.padding_side = "left"
     if tok.pad_token_id is None:

@@ -1,0 +1,14 @@
+# LOCAL DEBUG ONLY (8 GB Mac): exercises the pipeline end to end with a small
+# model. Outputs go to results/debug/ (gitignored) and are never reported.
+seed: 42
+model:
+  model_name: "Qwen/Qwen2.5-0.5B-Instruct"
+  device: "auto"
+  dtype: "float16"
+  trust_remote_code: false
+generation:
+  do_sample: false
+  max_new_tokens: 256
+  batch_size: 8
+forward_batch_size: 8
+cache_dir: ".cache"

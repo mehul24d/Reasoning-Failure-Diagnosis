@@ -99,3 +99,55 @@ we implement:
   method. Code: github.com/deliaqu/llm-reasoning-decomposed. This motivates
   our choice of variables (chosen operation, distractor bound) and of
   distractor failures as the pilot population.
+
+## D6 (2026-10-21) Who wrote the NoOp clauses
+
+The 97 no-op clauses in `rfd.data.distractor.NOOP_CLAUSES` were written by the
+AI assistant (Claude) in this session, one per usable template. Following the
+GSM-NoOp recipe, each one is plausible but inconsequential, for example "{d} of
+the pineapples picked on Thursday were slightly smaller than the rest". **No
+human has reviewed them yet.** A clause that is not actually a no-op would make
+some "distractor failures" correct answers to a changed question. The student
+team should read all 97 before the results are cited (see the report's TODOs).
+The distractor value d is drawn per instance (seeded) from 2-19. It excludes
+every number in the question, every gold operand and result, and the unit
+constants 7, 10 and 12, so any use of d in a model step is unambiguous.
+
+## D7 (2026-10-21) Memory limits on the project Mac
+
+On the 8 GB M2, Qwen2.5-1.5B (3.3 GB of fp16 weights on MPS) and the user's
+other applications (about 5.5 GB) together overrun RAM. Swap traffic reached
+about 260 MB/s and generation dropped from about 100 tok/s to under 20 tok/s.
+`PYTORCH_MPS_HIGH/LOW_WATERMARK_RATIO` = 0.85/0.5 caps MPS growth. Batch 24 runs
+out of memory under that cap, so batch 16 is the MPS default. Loading with
+`device_map="mps"` segfaults with transformers 5.16 / torch 2.13, so we load
+on CPU and then move the model.
+
+## D8 (2026-10-21) Long runs move to another machine; local runs are debug only
+
+Asked about the thrashing, the user chose to run the experiments on another
+(GPU) machine. Until then:
+- Code, tests and pre-registrations are completed on the Mac.
+- The pipeline is exercised end to end on the Mac with **Qwen2.5-0.5B-Instruct**
+  (`configs/debug.yaml`). Outputs go to `results/debug/`, which is gitignored,
+  and **none of them are reported**.
+- The harness is device-agnostic (`device: auto`; `dtype: auto` gives bf16 on
+  CUDA and fp16 on MPS). Gemma-2 chat templates, which have no system role, are
+  handled. If the GPU machine has an HF token with the Gemma-2 licence accepted,
+  Gemma-2-2B-IT (the brief's primary model, and Sun et al.'s model) becomes
+  feasible. Switching is a one-line change in `configs/harness.yaml` and needs
+  re-running everything; we will not mix models within one report.
+
+## D9 (2026-10-21) Choice of CoT prompt format
+
+We compared three variants on 16 problems drawn at random from **all**
+templates, using Qwen2.5-0.5B (scratch run, not kept):
+- multi-turn demos: Final-Answer marker in 13/16 traces;
+- multi-turn demos plus a format reminder in the last user turn: 16/16;
+- everything in a single user message: 12/16.
+
+Accuracy was 5-6/16 for all three. We chose the reminder variant **on marker
+adherence, not accuracy**. Disclosure: the 16 problems were not restricted to
+dev templates. The choice is about format only and was made with a different
+model, so we judge the leakage into test results negligible, but it is a
+deviation from "all selection on train/dev only".

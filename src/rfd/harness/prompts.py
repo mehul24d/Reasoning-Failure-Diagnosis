@@ -41,11 +41,19 @@ COT_DEMOS = [
 ]
 
 
+COT_REMINDER = (
+    "(Use the same format: one calculation per step, plain numbers, no LaTeX, then "
+    "'Final Answer: <number>'.)"
+)
+
+
 def cot_messages(question: str) -> list[dict[str, str]]:
+    """System instruction, two demo turns, then the problem plus a format
+    reminder (the reminder raised Final-Answer-marker adherence; DECISIONS D9)."""
     msgs = [{"role": "system", "content": COT_SYSTEM}]
     for q, a in COT_DEMOS:
         msgs += [{"role": "user", "content": f"Problem: {q}"}, {"role": "assistant", "content": a}]
-    msgs.append({"role": "user", "content": f"Problem: {question}"})
+    msgs.append({"role": "user", "content": f"Problem: {question}\n\n{COT_REMINDER}"})
     return msgs
 
 
@@ -82,10 +90,24 @@ def arith_messages(a: int, b: int, op: str, demos: list[tuple[int, int]]) -> lis
     return msgs
 
 
+def merge_system(messages: list[dict[str, str]]) -> list[dict[str, str]]:
+    if not messages or messages[0]["role"] != "system":
+        return messages
+    sys_text, rest = messages[0]["content"], [dict(m) for m in messages[1:]]
+    rest[0]["content"] = f"{sys_text}\n\n{rest[0]['content']}"
+    return rest
+
+
 def chat_ids(
     tokenizer: Any, messages: list[dict[str, str]], assistant_prefix: str = ""
 ) -> list[int]:
     """Token ids of the chat prompt (generation prompt added), plus an optional
-    teacher-forced start of the assistant turn."""
-    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    teacher-forced start of the assistant turn. Templates without a system role
+    (Gemma-2) get the system text prepended to the first user turn."""
+    try:
+        text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    except Exception:  # noqa: BLE001 - jinja raises on unsupported roles
+        text = tokenizer.apply_chat_template(
+            merge_system(messages), tokenize=False, add_generation_prompt=True
+        )
     return tokenizer(text + assistant_prefix, add_special_tokens=False)["input_ids"]
