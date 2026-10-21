@@ -25,6 +25,88 @@ small pilot of our method) — see `docs/BASELINE_REPORT.md`.
 > (sections below, `rfd.legacy.*`) is deprecated and kept only for
 > reproducibility; see `src/rfd/legacy/README.md`.
 
+## Research questions (baseline / feasibility stage)
+
+- **RQ1 (readability):** are content variables (chosen operation, whether a
+  distractor quantity is bound) and evaluation variables (step correct, error
+  type) linearly readable from the residual stream at the start of a step?
+- **RQ2 (causal asymmetry):** does editing content variables repair reasoning
+  while editing evaluation variables does not?
+- **RQ3 (self-sourcing):** in failures, is the *correct* content value still
+  decodable from the model's own activations, so that it can be written back?
+
+The baseline work replicates the two closest papers first:
+**A** = Sun et al. 2025 (correct answers are decodable even when the output is
+wrong); **B** = Yuan et al. 2026 (a correctness probe predicts failure well,
+but steering along it barely repairs). See `docs/BASELINE_REPORT.md`.
+
+## Quickstart
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip install -e . --no-deps
+make test-fast          # unit tests: synthetic data, no GPU, no network
+make debug              # tiny end-to-end run with Qwen2.5-0.5B -> results/debug/ (not reported)
+```
+
+Full runs (GPU recommended; see "Compute" below). Each target writes under
+`results/` and reads its configuration from `configs/*.yaml`:
+
+```bash
+make phase0       # TransformerLens vs HF equivalence + padding/greedy checks
+make baseline-a   # Sun et al.: arithmetic error pilot, probes, selective re-prompting
+make traces       # GSM-Symbolic main + NoOp traces, step labels, activations
+make baseline-b   # Yuan et al.: failure probes + steering with random-direction nulls
+make pilot        # Phase 3 pilot: 2x2 variable readability, RQ3, mini repair test
+make pilot-sample # optional: T=0.7 x5 samples -> stable vs borderline failures
+make report       # regenerate docs/BASELINE_REPORT_TABLES.md (numbers + verdicts) from results/
+```
+
+`HARNESS=configs/other.yaml make baseline-b` swaps the model / device
+configuration. Pre-registrations for every experiment are in `docs/prereg/`,
+and every decision taken along the way is in `docs/DECISIONS.md`.
+
+## Repo layout
+
+```
+src/rfd/
+  data/          GSM8K loaders, GSM-Symbolic + gold programs, NoOp distractors, arithmetic
+  generation/    answer extraction and scoring, HF model loading
+  harness/       hooks (capture / add / project / patch), batched greedy generation,
+                 prompts, TL-equivalence check support
+  parsing/       evaluation-validated equation parser, step labeller (vs gold program)
+  probing/       grouped-CV logistic / diff-in-means probes, shuffled-label nulls
+  steering/      steering engine with the exact greedy divergence shortcut
+  experiments/   phase0_equivalence, collect_traces, baseline_a, baseline_b, pilot, report
+  stats.py       template-clustered bootstrap, AUROC/AUPRC/ECE/Brier
+  plotting.py    report figures
+  legacy/        ARCHIVED SAE phase-segmentation code (see its README)
+configs/         harness, traces, baseline_a, baseline_b, pilot, debug; legacy/
+docs/            BASELINE_REPORT.md, DECISIONS.md, prereg/, PROGRESS.md (archived)
+tests/           pytest suite (synthetic data; tiny random Qwen2 for hook tests); legacy/
+results/         committed measurement files (json/jsonl/csv/png); *.npy caches ignored
+```
+
+## Compute
+
+- The project Mac (Apple M2, 8 GB) can run only the 0.5B debug pipeline next
+  to normal desktop apps (docs/DECISIONS.md D7/D8). The primary model
+  (Qwen2.5-1.5B-Instruct, fp16 3.3 GB) needs about 4.5 GB free plus headroom.
+- On a CUDA GPU (bf16), raise `generation.batch_size` and
+  `forward_batch_size` in `configs/harness.yaml` as memory allows.
+- Outputs are resumable where it matters (`collect_traces generate` appends in
+  chunks).
+- Gemma-2-2B-IT (the brief's primary model) needs an HF token with the licence
+  accepted. Switching means changing `model_name` and re-running every phase;
+  do not mix models in one report.
+
+## Tests
+
+```bash
+make test        # everything, including tests/legacy (marker: legacy)
+make test-fast   # current code only
+```
+
 ## Archived: SAE phase segmentation (deprecated)
 
 ### Research questions
@@ -77,77 +159,7 @@ small pilot of our method) — see `docs/BASELINE_REPORT.md`.
    taxonomy.csv, metrics.json
 ```
 
-## Repo layout
+The archived pilot is reproducible with `make legacy-pilot` (configs in
+`configs/legacy/`, outputs in `results/legacy_pilot/`); its write-up is
+`docs/PROGRESS.md`.
 
-```
-src/rfd/
-  data/           dataset loaders (GSM8K primary, MATH/BBH secondary)
-  generation/     trace generation, answer extraction/scoring
-  sae/            TransformerLens activation extraction, JumpReLU SAE
-  segmentation/   coactivation graph, community detection, changepoints
-  taxonomy/       heuristic failure classifier, CSV templates
-  metrics/        segmentation + sparsity + taxonomy metrics
-  utils/          config/IO/seed helpers
-configs/          model / dataset / sae / segmentation / experiment YAML
-scripts/          run_pilot.sh
-tests/            pytest unit tests (synthetic data, no network/GPU)
-docs/             annotation guidelines + schema, PROGRESS.md
-results/          pilot outputs (gitignored)
-```
-
-## Setup
-
-```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-```
-
-Requires internet access on first run to download the pilot model
-(`Qwen/Qwen2.5-0.5B-Instruct`, ~1GB) and the GSM8K dataset from the
-HuggingFace Hub.
-
-## Running the pilot
-
-```bash
-bash scripts/run_pilot.sh
-# or:
-make pilot
-```
-
-This runs, in order: trace generation (50 GSM8K test problems) -> pilot
-SAE training (on a disjoint 20-problem slice of the GSM8K train split) ->
-SAE feature encoding of the pilot traces -> phase segmentation -> failure
-taxonomy. Outputs land in `results/pilot/` (gitignored — see
-`docs/PROGRESS.md` for what an actual run produced).
-
-## Tests
-
-```bash
-make test   # or: python3 -m pytest -q
-```
-
-All unit tests run on synthetic data — no network access, no model
-download, no GPU required.
-
-## Current status
-
-See `docs/PROGRESS.md` for the authoritative, non-fabricated account of
-what has been run and what is still TODO. Short version:
-
-- [x] Repo skeleton, configs, pytest suite (37 tests, synthetic data)
-- [x] GSM8K loader wired end-to-end; MATH/BBH loaders implemented but not
-      exercised beyond the pilot
-- [x] Trace generation + answer extraction/scoring
-- [x] TransformerLens activation extraction (confirmed working on
-      Qwen2.5-0.5B-Instruct, 24 layers, d_model=896)
-- [x] JumpReLU SAE: implemented and trained at pilot scale (small D, few
-      steps) — **not** the Semester-7 target config (D=65536, L0≈64)
-- [x] Coactivation graph -> Louvain -> changepoint segmentation pipeline,
-      with a positional heuristic for the 4 phase labels
-- [x] Boundary F1 / temporal IoU / phase recovery rate metrics
-- [x] Heuristic failure taxonomy + 20%-manual-check CSV generator
-- [ ] Manual annotation of 20 traces — **not done**, requires a human
-      annotator (CLI tool is ready: `rfd.segmentation.annotate_cli`)
-- [ ] Full-scale SAE training (D=65536) — TODO, Semester 7
-- [ ] MATH / BBH-Logic full runs — TODO, Semester 7
-- [ ] 3-model comparison — TODO, Semester 7
