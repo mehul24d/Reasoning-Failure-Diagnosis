@@ -1,10 +1,11 @@
 """Evaluate a residual edit on recorded greedy traces, with the divergence shortcut.
 
 Greedy decoding is deterministic, so a steered run equals the recorded run up
-to the first position where the steered argmax differs from the recorded
-next token. One teacher-forced pass with the edit finds that position for
-every trace; only traces that diverge are re-generated, from the divergence
-point on, with the edit still active. Exactness against brute-force steered
+to the first position where the steered argmax differs from the unsteered
+one. A steered and an unsteered teacher-forced pass over the same batch
+(identical padding, so fp16 near-ties cancel) find that position for every
+trace; only traces that diverge are re-generated, from the divergence point
+on, with the edit still active. Exactness against brute-force steered
 generation is checked in tests/test_steering.py.
 
 Edit placement:
@@ -38,6 +39,22 @@ class SteerSpec:
     active: list[bool] | None = None  # gate per trace (None = all active)
     name: str = ""
     meta: dict[str, Any] = field(default_factory=dict)
+
+
+_BASE_CACHE: dict[tuple, list[list[int]]] = {}
+
+
+def _base_argmax(
+    model: Any, tok: Any, batch: list[dict[str, Any]], seqs: list[list[int]]
+) -> list[list[int]]:
+    """Unsteered teacher-forced argmax for this exact batch (cached by trace uids)."""
+    key = tuple(t.get("uid") for t in batch) if all("uid" in t for t in batch) else None
+    if key is not None and key in _BASE_CACHE:
+        return _BASE_CACHE[key]
+    am = forward(model, tok, seqs, return_argmax=True)["argmax"]
+    if key is not None:
+        _BASE_CACHE[key] = am
+    return am
 
 
 @dataclass
@@ -93,20 +110,25 @@ def run_condition(
         plens = [len(traces[r]["prompt_ids"]) for r in rows]
         edit = _edit_for(spec, rows, seqs, plens)
         am = forward(model, tok, seqs, hooks={spec.layer: edit}, return_argmax=True)["argmax"]
+        # unsteered reference with IDENTICAL batch layout: fp16 near-ties that differ
+        # between batched generation and teacher forcing cancel out, so only
+        # steering-induced changes count as divergence
+        base = _base_argmax(model, tok, [traces[r] for r in rows], seqs)
         for k, r in enumerate(rows):
             t = traces[r]
             gen, P = t["gen_ids"], plens[k]
             first_k = None
-            k0 = _first_edit_index(spec, r)
-            for g in range(k0, len(gen)):
-                if am[k][P - 1 + g] != gen[g]:
+            for g in range(_first_edit_index(spec, r), len(gen)):
+                if am[k][P - 1 + g] != base[k][P - 1 + g]:
                     first_k = g
                     break
-            # past the recorded end: a recorded EOS must stay EOS unless the
-            # answer line was already complete (generation stopped on it)
+            # past the recorded end (only matters if generation did not stop on a
+            # complete answer line)
             if first_k is None and not t.get("has_final_marker", False):
-                nxt = am[k][P - 1 + len(gen)]
-                if nxt not in eos_ids and len(gen) < max_new_tokens:
+                if (
+                    am[k][P - 1 + len(gen)] != base[k][P - 1 + len(gen)]
+                    and len(gen) < max_new_tokens
+                ):
                     first_k = len(gen)
             if first_k is None:
                 results[r] = SteerResult(t["text"], t["pred"], t["correct"], False, None)

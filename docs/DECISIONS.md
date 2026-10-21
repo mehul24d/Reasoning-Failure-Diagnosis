@@ -175,3 +175,22 @@ steps from the **Qwen2.5-0.5B debug traces**
 
 The pre-registered 30-step inspection (phase0.md §0.3) is still to be done on
 the real Qwen2.5-1.5B traces.
+
+## D11 (2026-10-21) Steering divergence is measured against an unsteered pass with identical batching
+
+**The problem.** In the 0.5B debug run, removing the projection on a *random*
+unit vector, which is a negligible edit, "diverged" 8/8 traces and moved net
+accuracy by up to 25 points on 8 items. The cause was fp16 near-ties: argmax
+under teacher forcing differs from argmax under batched KV-cached generation
+for some tokens, regardless of the edit.
+
+**The fix.** The engine now runs an unsteered teacher-forced pass on exactly
+the same batch (cached per batch) and counts a position as changed only where
+steered argmax ≠ unsteered argmax. Noise then cancels by construction, and the
+zero-strength control should show 0 divergences.
+
+**What remains.** Continuations of truly diverged traces are fresh generations
+and carry the usual batch-level fp16 noise; this applies equally to real and
+random directions. The exactness tests (fp32 tiny model) still pass. Baseline B
+pre-registration Amendment 1 records this together with the widened additive
+grid.

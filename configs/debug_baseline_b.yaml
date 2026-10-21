@@ -11,7 +11,7 @@ probe:
 steer:
   # strength grids (pre-registered)
   project_alphas: [1.0, 8.0]      # Yuan et al.: h - a (h.w) w
-  add_multiples: [1.0, 8.0]       # x ||mu_correct - mu_wrong|| at the steering layer
+  add_multiples: [0.25, 8.0]       # x ||mu_correct - mu_wrong|| at the steering layer
   n_eval_train_per_class: 4   # selection set (train templates), per original outcome
   n_eval_test_per_class: 4    # evaluation set (test templates), per original outcome
   n_random: 2                # matched-norm random directions at the selected strength

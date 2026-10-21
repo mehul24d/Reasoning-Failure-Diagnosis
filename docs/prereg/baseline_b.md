@@ -80,3 +80,18 @@ Committed before any non-debug run of `make baseline-b`. Configs:
   - FAIL if D1 fails.
 - **Expected, from the literature:** high AUROC and a net gain of at most about
   4 points. We report whatever we get.
+
+## Amendment 1 (2026-10-21, before any non-debug run)
+
+Two changes, both made before any Qwen2.5-1.5B data existed:
+
+- **Additive strength grid** widened downward to c in {0.125, 0.25, 0.5, 1, 2, 4,
+  8}. In the 0.5B debug run, c = 1 already broke every correct trace, so the
+  original grid might never have contained a non-destructive strength. Yuan's
+  projection grid {0.5, 1, 2, 5, 8} is unchanged.
+- **Divergence rule in the steering engine.** A token now counts as changed
+  only if the steered teacher-forced argmax differs from an *unsteered*
+  teacher-forced pass over the same batch, rather than from the recorded token.
+  The debug run showed that fp16 near-ties between batched generation and
+  teacher forcing flipped tokens even under random unit-vector projections,
+  which made every trace look diverged (DECISIONS D11).
