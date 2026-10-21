@@ -1,0 +1,14 @@
+# Shared model / generation config for the baseline + pilot experiments.
+# See docs/DECISIONS.md D1 for why this is Qwen2.5-1.5B-Instruct, not Gemma-2-2B-IT.
+seed: 42
+model:
+  model_name: "Qwen/Qwen2.5-1.5B-Instruct"
+  device: "auto"        # mps on the project machine (Apple M2, 8 GB)
+  dtype: "float16"      # fp16 activations; TL/HF equivalence checked in phase 0
+  trust_remote_code: false
+generation:
+  do_sample: false      # greedy everywhere
+  max_new_tokens: 384
+  batch_size: 16        # 24 OOMs on 8 GB under the MPS watermark cap
+forward_batch_size: 8   # teacher-forced activation extraction
+cache_dir: ".cache"

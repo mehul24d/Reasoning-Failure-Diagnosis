@@ -35,7 +35,7 @@ def load_model(model_cfg: dict[str, Any]) -> LoadedModel:
     )
     model = AutoModelForCausalLM.from_pretrained(
         model_cfg["model_name"],
-        torch_dtype=dtype,
+        dtype=dtype,
         trust_remote_code=model_cfg.get("trust_remote_code", False),
     )
     model.to(device)
