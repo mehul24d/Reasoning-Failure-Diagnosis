@@ -1,5 +1,5 @@
-from rfd.taxonomy.arithmetic_check import has_arithmetic_inconsistency
-from rfd.taxonomy.classifier import classify_error
+from rfd.legacy.taxonomy.arithmetic_check import has_arithmetic_inconsistency
+from rfd.legacy.taxonomy.classifier import classify_error
 
 
 def test_arithmetic_check_flags_wrong_equation():

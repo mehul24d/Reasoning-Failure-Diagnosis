@@ -1,10 +1,10 @@
 import numpy as np
 
-from rfd.segmentation.changepoint import detect_changepoints
-from rfd.segmentation.coactivation import build_coactivation_graph
-from rfd.segmentation.community import detect_communities
-from rfd.segmentation.community_activation import compute_community_activation
-from rfd.segmentation.phase_segmenter import segment_trace
+from rfd.legacy.segmentation.changepoint import detect_changepoints
+from rfd.legacy.segmentation.coactivation import build_coactivation_graph
+from rfd.legacy.segmentation.community import detect_communities
+from rfd.legacy.segmentation.community_activation import compute_community_activation
+from rfd.legacy.segmentation.phase_segmenter import segment_trace
 
 
 def _synthetic_two_block_features(seed: int = 0) -> np.ndarray:

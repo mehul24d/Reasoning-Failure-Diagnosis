@@ -1,6 +1,6 @@
 """Run phase segmentation over every pilot trace's cached SAE features.
 
-Usage: python -m rfd.segmentation.run_segmentation --experiment configs/experiment.yaml
+Usage: python -m rfd.legacy.segmentation.run_segmentation --experiment configs/legacy/experiment.yaml
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 from tqdm import tqdm
 
-from rfd.segmentation.phase_segmenter import segment_trace
+from rfd.legacy.segmentation.phase_segmenter import segment_trace
 from rfd.utils.config import load_experiment
 from rfd.utils.io import read_jsonl, write_jsonl
 
@@ -34,7 +34,7 @@ def run_segmentation(experiment_cfg: dict[str, Any]) -> list[dict[str, Any]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--experiment", default="configs/experiment.yaml")
+    parser.add_argument("--experiment", default="configs/legacy/experiment.yaml")
     args = parser.parse_args()
 
     experiment_cfg = load_experiment(args.experiment)

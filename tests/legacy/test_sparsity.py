@@ -1,6 +1,6 @@
 import numpy as np
 
-from rfd.metrics.sparsity import feature_entropy, l0_sparsity
+from rfd.legacy.metrics.sparsity import feature_entropy, l0_sparsity
 
 
 def test_l0_sparsity_counts_nonzero():

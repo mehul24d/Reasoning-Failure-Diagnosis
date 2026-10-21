@@ -1,7 +1,7 @@
 """Trace collection harness: greedy-decodes each pilot problem and saves
 {id, prompt, generated trace, predicted answer, gold answer, correct flag,
 token list} to JSONL. Also usable as a script: `python -m
-rfd.generation.generate_traces --experiment configs/experiment.yaml`.
+rfd.generation.generate_traces --experiment configs/legacy/experiment.yaml`.
 """
 
 from __future__ import annotations
@@ -70,7 +70,7 @@ def run_generation(experiment_cfg: dict[str, Any]) -> list[dict[str, Any]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--experiment", default="configs/experiment.yaml")
+    parser.add_argument("--experiment", default="configs/legacy/experiment.yaml")
     args = parser.parse_args()
 
     experiment_cfg = load_experiment(args.experiment)

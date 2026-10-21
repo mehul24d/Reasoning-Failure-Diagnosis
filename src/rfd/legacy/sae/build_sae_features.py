@@ -5,7 +5,7 @@ Reads traces_file (from generate_traces.py) and sae_checkpoint.pt (from
 train_sae.py); writes one .npz per trace under sae_features_cache/ plus a
 summary JSONL with per-trace sparsity/entropy arrays.
 
-Usage: python -m rfd.sae.build_sae_features --experiment configs/experiment.yaml
+Usage: python -m rfd.legacy.sae.build_sae_features --experiment configs/legacy/experiment.yaml
 """
 
 from __future__ import annotations
@@ -18,9 +18,9 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from rfd.metrics.sparsity import feature_entropy, l0_sparsity
-from rfd.sae.activation_extraction import extract_trace_activations, load_hooked_model, resolve_layer
-from rfd.sae.jumprelu_sae import JumpReLUSAE
+from rfd.legacy.metrics.sparsity import feature_entropy, l0_sparsity
+from rfd.legacy.sae.activation_extraction import extract_trace_activations, load_hooked_model, resolve_layer
+from rfd.legacy.sae.jumprelu_sae import JumpReLUSAE
 from rfd.utils.config import load_experiment
 from rfd.utils.io import ensure_parent, read_jsonl, write_jsonl
 
@@ -82,7 +82,7 @@ def run_feature_extraction(experiment_cfg: dict[str, Any]) -> list[dict[str, Any
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--experiment", default="configs/experiment.yaml")
+    parser.add_argument("--experiment", default="configs/legacy/experiment.yaml")
     args = parser.parse_args()
 
     experiment_cfg = load_experiment(args.experiment)

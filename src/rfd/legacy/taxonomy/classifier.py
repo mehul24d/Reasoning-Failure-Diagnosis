@@ -2,7 +2,7 @@
 
 This is a FIRST-PASS heuristic, not a validated classifier -- it is the
 reason `csv_template.py` exists: at least 20% of labels must be manually
-checked (configs/experiment.yaml:annotation.taxonomy_manual_check_fraction)
+checked (configs/legacy/experiment.yaml:annotation.taxonomy_manual_check_fraction)
 before any claim is made about taxonomy accuracy. TODO for Semester 7:
 replace/augment with a model- or feature-based classifier and report
 agreement with manual labels.
@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from rfd.taxonomy.arithmetic_check import has_arithmetic_inconsistency
+from rfd.legacy.taxonomy.arithmetic_check import has_arithmetic_inconsistency
 
 ERROR_TYPES = [
     "correct",

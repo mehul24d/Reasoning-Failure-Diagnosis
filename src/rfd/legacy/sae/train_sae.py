@@ -9,7 +9,7 @@ Two configs live in configs/sae.yaml:
     pilot *test* traces used for segmentation, to avoid even pilot-level
     train/test leakage in the learned dictionary).
 
-Usage: python -m rfd.sae.train_sae --experiment configs/experiment.yaml
+Usage: python -m rfd.legacy.sae.train_sae --experiment configs/legacy/experiment.yaml
 """
 
 from __future__ import annotations
@@ -25,8 +25,8 @@ from tqdm import tqdm
 from rfd.data.loader import load_split
 from rfd.generation.generate_traces import generate_one
 from rfd.generation.model import load_model
-from rfd.sae.activation_extraction import extract_trace_activations, load_hooked_model, resolve_layer
-from rfd.sae.jumprelu_sae import JumpReLUSAE
+from rfd.legacy.sae.activation_extraction import extract_trace_activations, load_hooked_model, resolve_layer
+from rfd.legacy.sae.jumprelu_sae import JumpReLUSAE
 from rfd.utils.config import load_experiment
 from rfd.utils.io import ensure_parent, write_jsonl
 from rfd.utils.seed import set_seed
@@ -122,7 +122,7 @@ def run_sae_training(experiment_cfg: dict[str, Any], n_train_problems: int = 20)
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--experiment", default="configs/experiment.yaml")
+    parser.add_argument("--experiment", default="configs/legacy/experiment.yaml")
     parser.add_argument("--n-train-problems", type=int, default=20)
     args = parser.parse_args()
 

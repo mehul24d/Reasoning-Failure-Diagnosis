@@ -5,9 +5,9 @@
 Manual annotations are the gold standard that `boundary_f1`, `temporal_iou`,
 and `phase_recovery_rate` (in `src/rfd/metrics/segmentation_metrics.py`)
 are evaluated against. Annotate at least **20 traces** (per
-`configs/experiment.yaml:annotation.n_traces_to_annotate`), and at least
+`configs/legacy/experiment.yaml:annotation.n_traces_to_annotate`), and at least
 **20%** of all traces for the failure-taxonomy manual check
-(`configs/experiment.yaml:annotation.taxonomy_manual_check_fraction`).
+(`configs/legacy/experiment.yaml:annotation.taxonomy_manual_check_fraction`).
 
 ## The four phases
 
@@ -35,7 +35,7 @@ no gaps or overlaps.
 ## Procedure
 
 1. Run `python -m rfd.segmentation.annotate_cli --experiment
-   configs/experiment.yaml` (see its `--help` for sampling options).
+   configs/legacy/experiment.yaml` (see its `--help` for sampling options).
 2. For each sampled trace, the CLI prints the generated trace text with
    token indices every 5 tokens as a ruler.
 3. Read the trace, decide where each phase starts, and enter boundary

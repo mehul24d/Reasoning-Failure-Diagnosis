@@ -2,7 +2,7 @@
 sample of traces. See docs/ANNOTATION_GUIDELINES.md for the procedure and
 docs/annotation_schema.json for the output schema.
 
-Usage: python -m rfd.segmentation.annotate_cli --experiment configs/experiment.yaml
+Usage: python -m rfd.legacy.segmentation.annotate_cli --experiment configs/legacy/experiment.yaml
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from rfd.segmentation.phase_segmenter import PHASES
+from rfd.legacy.segmentation.phase_segmenter import PHASES
 from rfd.utils.config import load_experiment
 from rfd.utils.io import ensure_parent, read_jsonl
 
@@ -73,7 +73,7 @@ def run_annotation(experiment_cfg: dict[str, Any], annotator: str, n_traces: int
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--experiment", default="configs/experiment.yaml")
+    parser.add_argument("--experiment", default="configs/legacy/experiment.yaml")
     parser.add_argument("--annotator", default="annotator1")
     parser.add_argument("--n-traces", type=int, default=None)
     args = parser.parse_args()

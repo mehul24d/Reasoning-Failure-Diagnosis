@@ -1,6 +1,6 @@
 """Build the failure taxonomy CSV + per-error-type metrics for the pilot.
 
-Usage: python -m rfd.taxonomy.run_taxonomy --experiment configs/experiment.yaml
+Usage: python -m rfd.legacy.taxonomy.run_taxonomy --experiment configs/legacy/experiment.yaml
 """
 
 from __future__ import annotations
@@ -9,9 +9,9 @@ import argparse
 import json
 from typing import Any
 
-from rfd.metrics.taxonomy_metrics import compute_per_error_type_metrics
-from rfd.taxonomy.classifier import build_taxonomy_rows
-from rfd.taxonomy.csv_template import write_taxonomy_csv
+from rfd.legacy.metrics.taxonomy_metrics import compute_per_error_type_metrics
+from rfd.legacy.taxonomy.classifier import build_taxonomy_rows
+from rfd.legacy.taxonomy.csv_template import write_taxonomy_csv
 from rfd.utils.config import load_experiment
 from rfd.utils.io import ensure_parent, read_jsonl
 
@@ -41,7 +41,7 @@ def run_taxonomy(experiment_cfg: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--experiment", default="configs/experiment.yaml")
+    parser.add_argument("--experiment", default="configs/legacy/experiment.yaml")
     args = parser.parse_args()
 
     experiment_cfg = load_experiment(args.experiment)

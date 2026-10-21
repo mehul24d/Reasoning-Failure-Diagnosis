@@ -1,4 +1,4 @@
-from rfd.metrics.segmentation_metrics import boundary_f1, phase_recovery_rate, temporal_iou
+from rfd.legacy.metrics.segmentation_metrics import boundary_f1, phase_recovery_rate, temporal_iou
 
 PHASES = ["problem_understanding", "operation_planning", "arithmetic_execution", "self_verification"]
 
