@@ -1,19 +1,33 @@
 # Reasoning Failure Diagnosis
 
-**Automated Phase Segmentation and Diagnostic Taxonomy of Mathematical
-Reasoning Failures using SAE Feature Coactivation**
+**Self-Sourced Repair: Correcting Mathematical Reasoning Failures in Open
+LLMs with Their Own Content Representations**
 
-B.Tech Minor Project, Semester 7.
+B.Tech Minor Project, Semester 7, DTU (Group GP099).
 
 - **Team:** Mehul Dahiya (23/CS/253), Neil Negi (23/CS/278), Harshit Yadav (23/CS/172)
-- **Supervisor:**
+- **Supervisor:** Prof. Shailender Kumar
 
-> Scope note: this repo is the **minor project** only. It does not
-> implement anything from the related major project (no feature
-> injection, no circuit transfer) — see `docs/PROGRESS.md` for the
-> boundary between the two.
+Core idea: a model's internal variables split into *content* variables
+(consumed by the forward pass: the chosen operation, a bound operand, an
+intermediate result, whether a distractor quantity is bound) and
+*evaluation* variables (assessments: is this step correct, what kind of
+error, is the final answer correct). Hypothesis: editing content variables
+repairs reasoning; editing evaluation variables does not. *Self-sourced
+repair* reads the model's own decoded correct value and writes it where the
+computation uses it, only when the decoded and bound values disagree.
 
-## Research questions
+This repo currently holds the **baseline / feasibility work** for that
+direction (replications of Sun et al. 2025 and Yuan et al. 2026, plus a
+small pilot of our method) — see `docs/BASELINE_REPORT.md`.
+
+> **Archived direction.** The earlier SAE phase-segmentation pipeline
+> (sections below, `rfd.legacy.*`) is deprecated and kept only for
+> reproducibility; see `src/rfd/legacy/README.md`.
+
+## Archived: SAE phase segmentation (deprecated)
+
+### Research questions
 
 - **RQ1:** Can a language model's mathematical reasoning trace be
   automatically segmented into interpretable phases (problem
@@ -26,7 +40,7 @@ B.Tech Minor Project, Semester 7.
   feature entropy, such that a taxonomy of failures can be built from
   activation statistics rather than from the final answer alone?
 
-## Pipeline
+### Pipeline
 
 ```
  GSM8K / MATH / BBH-Logic

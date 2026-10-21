@@ -1,5 +1,12 @@
 # Progress Report — Pilot Session
 
+> **Archived (2026-10-21).** This report describes the SAE
+> phase-segmentation direction, which is now deprecated after the project
+> pivoted to *Self-Sourced Repair*. The code lives in `src/rfd/legacy/`
+> (module paths below are pre-move: `rfd.X` is now `rfd.legacy.X`), and
+> the outputs in `results/legacy_pilot/`. Current work and results:
+> `docs/BASELINE_REPORT.md`; decisions: `docs/DECISIONS.md`.
+
 **Date:** 2026-10-12
 **Pilot config:** Qwen/Qwen2.5-0.5B-Instruct, GSM8K test[0:50], greedy decoding.
 
@@ -13,7 +20,7 @@ see the TODO list.
 - [x] Repo skeleton, pyproject, configs, `.gitignore`, pre-commit config.
 - [x] GSM8K loader wired end-to-end (fixed index-sliced splits, seed 42).
 - [x] Trace generation harness (greedy, batch size 1, chat-templated
-      prompts) — **TODO: fill in after `scripts/run_pilot.sh` finishes.**
+      prompts) — run results are in "Pilot run results" below.
 - [x] Answer extraction (`Final Answer:` marker + fallback) and numeric
       exact-match scoring.
 - [x] TransformerLens activation extraction — confirmed working against

@@ -1,7 +1,7 @@
 [project]
 name = "rfd"
 version = "0.1.0"
-description = "Automated Phase Segmentation and Diagnostic Taxonomy of Mathematical Reasoning Failures using SAE feature coactivation"
+description = "Self-Sourced Repair: correcting mathematical reasoning failures in open LLMs with their own content representations (baseline + feasibility work)"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Mehul Dahiya" }]
