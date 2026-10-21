@@ -151,3 +151,27 @@ adherence, not accuracy**. Disclosure: the 16 problems were not restricted to
 dev templates. The choice is about format only and was made with a different
 model, so we judge the leakage into test results negligible, but it is a
 deviation from "all selection on train/dev only".
+
+## D10 (2026-10-21) Parser development check on 0.5B debug traces (not the pre-registered check)
+
+To find parser bugs before the GPU run, the assistant inspected 30 sampled
+steps from the **Qwen2.5-0.5B debug traces**
+(`results/debug/traces/parse_sample.md`, not committed).
+
+- **Extraction of (operation, operands, result) matched the step text in 28/30
+  steps.** Both misses involve inline fractions:
+  - `120 * 1/5` is read as `(120*1)/5`, so the op is labelled `/` instead of
+    `*`;
+  - `5/6 * 5/6` is evaluated left to right, so the value is right but the
+    operands are odd.
+
+  This is a known limitation and is not fixed.
+- **Bugs found and fixed:**
+  - parenthesised unit words (`74 (building blocks) + 46`);
+  - bullet hyphens and earlier-sentence numbers leaking into the left-hand
+    side;
+  - fraction right-hand sides (`= 1/2`);
+  - percent operands (`* 7%` read as 0.07) wrongly labelled "binding".
+
+The pre-registered 30-step inspection (phase0.md §0.3) is still to be done on
+the real Qwen2.5-1.5B traces.

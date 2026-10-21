@@ -58,3 +58,11 @@ def test_char_to_token():
     assert char_to_token(toks, 0) == 0
     assert char_to_token(toks, 4) == 1
     assert char_to_token(toks, 100) == 3
+
+
+def test_percent_operand_is_valid():
+    gold = [BinStep("*", 400000, 0.07, 28000, 28000)]
+    labs = label_steps(
+        "Step 1: fee 400000 * 7% = 28000.\nFinal Answer: 28000", gold, [400000.0, 7.0]
+    )
+    assert labs[0].error_type == "none"

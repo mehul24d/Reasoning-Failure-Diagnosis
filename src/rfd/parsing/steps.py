@@ -90,6 +90,11 @@ def _in(v: float, pool: list[float]) -> bool:
     return any(close(v, p) for p in pool)
 
 
+def _in_pct(v: float, pool: list[float]) -> bool:
+    """Operand membership allowing percent rescaling (7% written as 0.07 or 7)."""
+    return _in(v, pool) or _in(v * 100, pool) or _in(v / 100, pool)
+
+
 def label_steps(
     text: str,
     gold_steps: list[BinStep],
@@ -119,7 +124,7 @@ def label_steps(
             lab.arithmetic_ok = all(s.arithmetic_ok for e in eqs for s in e.steps)
             pool = question_ok + gold_values + produced
             lab.operands_valid = all(
-                _in(v, pool) and not (distractor is not None and close(v, distractor))
+                _in_pct(v, pool) and not (distractor is not None and close(v, distractor))
                 for v in leaves
             )
             lab.on_gold = _in(main.result, gold_results)
