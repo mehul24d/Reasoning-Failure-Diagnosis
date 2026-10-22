@@ -1,8 +1,18 @@
-.PHONY: install test test-fast lint phase0 traces baseline-a baseline-b pilot pilot-sample \
-	report debug legacy-pilot
+.PHONY: install test test-fast lint smoke phase0 traces baseline-a baseline-b pilot pilot-sample \
+	report all debug legacy-pilot
 
 PY ?= python3
-HARNESS ?= configs/harness.yaml
+# primary model: Gemma-2-2B-IT; secondary: HARNESS=configs/qwen2_5_1_5b.yaml
+# (give the secondary its own RESULTS directory; see DECISIONS D13)
+HARNESS ?= configs/gemma2_2b.yaml
+# results root: every "results/..." path is written under $(RESULTS)
+# (default: $RFD_RESULTS_DIR if set, else results/; a Google Drive folder on
+# Colab). Each stage skips itself once complete and resumes mid-way after a
+# crash, so re-running a target is always safe.
+ifeq ($(origin RESULTS), undefined)
+RESULTS := $(if $(RFD_RESULTS_DIR),$(RFD_RESULTS_DIR),results)
+endif
+export RFD_RESULTS_DIR := $(RESULTS)
 export PYTHONPATH := src
 
 install:
@@ -16,6 +26,10 @@ test-fast:
 
 lint:
 	ruff check src tests
+
+# ---- quick GPU-machine check before the long runs (outputs in $(RESULTS)/smoke, not reported)
+smoke:
+	$(PY) -m rfd.experiments.smoke --harness $(HARNESS)
 
 # ---- Phase 0: TL/HF equivalence + GSM-Symbolic traces (shared by B and the pilot)
 phase0:
@@ -49,6 +63,9 @@ pilot-sample:
 # ---- Phase 4: regenerate the numeric tables of docs/BASELINE_REPORT.md from results/
 report:
 	$(PY) -m rfd.experiments.report
+
+# everything, in order (each step resumes / skips)
+all: phase0 baseline-a traces baseline-b pilot pilot-sample report
 
 # ---- tiny end-to-end run with Qwen2.5-0.5B (outputs in results/debug/, never reported)
 debug:
