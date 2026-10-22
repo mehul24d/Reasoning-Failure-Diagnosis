@@ -64,3 +64,14 @@ two-annotator verification listed in the report's TODOs.
   tensor. The scaled embedding is recomputed in float32. The test inputs are
   unchanged. Full-vocabulary logits are kept for the last 32 positions of each
   input; the top-1 statistic still covers every position.
+
+## Amendment 2 (2026-10-23, before any trace was generated; DECISIONS D19)
+
+Reduced-scale profile (`configs/reduced/traces.yaml`): **4 instances per template
+instead of 8** (about 776 traces instead of 1552). Templates, the split (train 50% /
+dev 20% / test 30%, seed 42), the variants, the prompt and the parser are
+unchanged. The instances are a different seeded draw, not a subset of the 8-instance
+set. Consequence: roughly half the test traces and half the distractor failures,
+so every confidence interval downstream is wider. The full profile
+(`configs/traces.yaml`) is unchanged. Phase 0 itself (§0.1) was already run at full
+scale and is not affected.

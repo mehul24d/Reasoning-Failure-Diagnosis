@@ -33,3 +33,6 @@ results/legacy_pilot/
 .claude/
 
 .env
+
+# machine-local make overrides (PROFILE := reduced)
+local.mk

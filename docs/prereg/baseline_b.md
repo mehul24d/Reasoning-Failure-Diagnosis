@@ -108,3 +108,33 @@ Two changes, both made before any Qwen2.5-1.5B data existed:
 - Token log-probabilities for the uncertainty baselines include Gemma-2's
   final logit softcap, i.e. they are the model's actual next-token
   distribution (DECISIONS D13).
+
+## Amendment 3 (2026-10-23, before any Baseline B data; DECISIONS D19)
+
+Reduced-scale profile (`configs/reduced/baseline_b.yaml`), used because of a time
+limit. **Thresholds and criteria D1, D2 are unchanged.** What changes is the amount
+of computation, and with it the statistical power:
+
+| quantity | pre-registered | reduced |
+|---|---|---|
+| traces (Phase 0 amendment 2) | 1552 | about 776 |
+| selection set (train templates), per original outcome | 64 | 32 |
+| evaluation set (test templates), per original outcome | 80 | 40 |
+| random matched-norm directions per condition | **100** | **20** |
+| Yuan projection strengths α | {0.5, 1, 2, 5, 8} | {1, 5} |
+| additive strengths c | {0.125, 0.25, 0.5, 1, 2, 4, 8} | {0.125, 0.5, 2, 8} |
+| random directions per strength in the descriptive sweep band | 10 | 3 |
+
+Consequences, stated before the data:
+- **The "≥ 100 random directions per steering condition" requirement is not met**
+  by this profile. The p-value resolution is 1/21, so p < 0.05 needs the real
+  direction to beat all 20 random ones.
+- With 80 evaluation traces, net-gain confidence intervals will be about ±10
+  points wide, so the **5-point minimal effect of interest cannot be resolved**. The
+  run can show a large effect or rule one out; it cannot distinguish 0 from 5.
+- The probe analyses (D1) are unaffected apart from the smaller trace count.
+- `make report` compares each of these quantities with the pre-registered one from the
+  result files and marks every dependent verdict **provisional**.
+- **Extension path.** Every condition is cached, so `baseline_b steer --force
+  --n-random 100` reuses the 20 completed random directions per kind and computes only
+  the missing 80. The larger evaluation sets would need a full rerun.

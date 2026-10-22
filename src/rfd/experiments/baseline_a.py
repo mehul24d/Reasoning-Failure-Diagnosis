@@ -26,7 +26,7 @@ from typing import Any
 import numpy as np
 
 from rfd.data.arithmetic import ArithProblem, digits_by_place, sample_problems
-from rfd.utils.config import load_run_config
+from rfd.utils.config import load_run_config, record_config
 from rfd.utils.io import read_jsonl
 from rfd.utils.resume import (
     ResultCache,
@@ -678,6 +678,7 @@ def main() -> None:
     ap.add_argument("--force", action="store_true", help="redo a stage that is already complete")
     args = ap.parse_args()
     cfg = _cfg(args.config, args.harness, args.out)
+    record_config(cfg)
     if args.n_per_length:
         cfg["error_pilot"]["n_per_length"] = args.n_per_length
     if args.cmd == "pilot":

@@ -1,0 +1,25 @@
+# REDUCED-SCALE profile (DECISIONS D19; amendment 3 in docs/prereg/baseline_b.md).
+# Pre-registered values are in configs/baseline_b.yaml. The per-condition caches make
+# it possible to extend n_random later without recomputing anything:
+#   python -m rfd.experiments.baseline_b steer --force --n-random 100
+profile: reduced
+# Baseline B: Yuan et al. (2605.09502), correctness probe is diagnostic, not causal.
+# Pre-registration: docs/prereg/baseline_b.md
+harness_config: "configs/gemma2_2b.yaml"
+traces_dir: "results/traces"
+out_dir: "results/baseline_b"
+seed: 42
+probe:
+  C: 0.1                 # Yuan et al.: StandardScaler + L2 logistic, C = 0.1
+  cv_folds: 5            # template-grouped, train templates only
+  positions: ["last", "first_step", "question"]
+steer:
+  # strength grids (pre-registered)
+  project_alphas: [1.0, 5.0]      # Yuan et al.: h - a (h.w) w
+  add_multiples: [0.125, 0.5, 2.0, 8.0]   # x ||mu_correct - mu_wrong|| (amendment 1)
+  n_eval_train_per_class: 32   # selection set (train templates), per original outcome
+  n_eval_test_per_class: 40    # evaluation set (test templates), per original outcome
+  n_random: 20                # matched-norm random directions at the selected strength
+  n_band: 3                   # random directions per strength for the descriptive sweep band
+  band_directions: ["add_diffmeans"]
+n_boot: 10000

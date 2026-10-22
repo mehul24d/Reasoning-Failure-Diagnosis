@@ -61,3 +61,11 @@ def load_run_config(
         if key in cfg:
             cfg[key] = str(results_path(cfg[key]))
     return cfg
+
+
+def record_config(cfg: dict[str, Any]) -> None:
+    """Write the fully resolved config next to a stage's outputs (config_used.json),
+    so every result file set says which profile and sizes produced it."""
+    from rfd.utils.resume import atomic_write_json
+
+    atomic_write_json(Path(cfg["out_dir"]) / "config_used.json", cfg)

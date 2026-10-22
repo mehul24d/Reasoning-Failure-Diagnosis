@@ -25,7 +25,7 @@ import numpy as np
 
 from rfd.probing.probes import fit_probe, grouped_oof_scores, metric
 from rfd.stats import cluster_bootstrap
-from rfd.utils.config import load_run_config
+from rfd.utils.config import load_run_config, record_config
 from rfd.utils.io import read_jsonl
 from rfd.utils.resume import (
     ResultCache,
@@ -753,6 +753,7 @@ def main() -> None:
     ap.add_argument("--force", action="store_true", help="redo a stage that is already complete")
     args = ap.parse_args()
     cfg = load_cfg(args.config, args.harness, args.out, args.traces)
+    record_config(cfg)
     if args.n_random is not None:
         cfg["repair"]["n_random"] = args.n_random
     {

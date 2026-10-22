@@ -20,6 +20,18 @@ MIN_METRIC = 0.75  # held-out AUROC / balanced accuracy threshold
 MIN_RECOVERY = 0.20  # gold-value top-1 in failures
 MIN_EFFECT = 0.05  # 5 points of net accuracy gain
 
+# Scale the pre-registrations call for (docs/prereg/). A run below any of these is
+# a reduced-scale run (DECISIONS D19): its tables say so, and verdicts are provisional.
+PREREG_SCALE = {
+    "instances_per_template": 8,
+    "steer_selection_traces": 128,  # 64 + 64
+    "steer_test_traces": 160,  # 80 + 80
+    "steer_random_directions": 100,
+    "steer_grid_project": 5,
+    "steer_grid_additive": 7,
+    "pilot_random_directions": 100,
+}
+
 
 def _load(path: Path) -> dict[str, Any] | None:
     return json.loads(path.read_text()) if path.exists() else None
@@ -140,6 +152,82 @@ def baseline_a(res: Path) -> list[str]:
     return lines
 
 
+def scale_rows(res: Path) -> list[tuple[str, int, int | None]]:
+    """(quantity, pre-registered value, this run's value or None if unknown), read
+    from the result files only."""
+    rows: list[tuple[str, int, int | None]] = []
+    used = _load(res / "traces" / "config_used.json")
+    if (res / "traces").exists():
+        rows.append(
+            (
+                "instances per template (traces)",
+                PREREG_SCALE["instances_per_template"],
+                used.get("instances_per_template") if used else None,
+            )
+        )
+    st = _load(res / "baseline_b" / "steer.json")
+    if st is not None:
+        rows += [
+            (
+                "Baseline B steering: selection traces",
+                PREREG_SCALE["steer_selection_traces"],
+                st["n_eval_train"],
+            ),
+            (
+                "Baseline B steering: test traces",
+                PREREG_SCALE["steer_test_traces"],
+                st["n_eval_test"],
+            ),
+            (
+                "Baseline B steering: random directions per condition",
+                PREREG_SCALE["steer_random_directions"],
+                min(r["null"]["n"] for r in st["test"].values()),
+            ),
+        ]
+        for kind, sel in st.get("selection_train", {}).items():
+            full = PREREG_SCALE[
+                "steer_grid_project" if kind == "yuan_project" else "steer_grid_additive"
+            ]
+            rows.append((f"Baseline B strength grid: {kind}", full, len(sel["grid"])))
+    rp = _load(res / "pilot" / "repair.json")
+    if rp is not None:
+        rows.append(
+            (
+                "Pilot: random directions",
+                PREREG_SCALE["pilot_random_directions"],
+                rp["random null"]["n"],
+            )
+        )
+    return rows
+
+
+def scale_lines(rows: list[tuple[str, int, int | None]]) -> list[str]:
+    lines = [
+        "| quantity | pre-registered | this run | met |",
+        "|---|---|---|---|",
+    ]
+    for name, want, got in rows:
+        met = "unknown" if got is None else str(got >= want)
+        lines.append(f"| {name} | {want} | {'unknown' if got is None else got} | {met} |")
+    return lines
+
+
+def reduced(rows: list[tuple[str, int, int | None]], prefix: str) -> list[str]:
+    """Names of the `prefix` quantities that fall below the pre-registered scale."""
+    return [n for n, want, got in rows if n.startswith(prefix) and got is not None and got < want]
+
+
+def provisional_note(rows: list[tuple[str, int, int | None]], prefix: str) -> str:
+    below = reduced(rows, prefix)
+    if not below:
+        return ""
+    return (
+        " **Provisional: reduced scale** (below the pre-registered "
+        + "; ".join(n.removeprefix(prefix).strip(": ") or n for n in below)
+        + '; see "Scale vs pre-registration").'
+    )
+
+
 def baseline_b(res: Path) -> list[str]:
     lines = ["## Baseline B: Yuan et al. (2605.09502)", ""]
     pb = _load(res / "baseline_b" / "probe.json")
@@ -207,7 +295,8 @@ def baseline_b(res: Path) -> list[str]:
     v = "PASS" if d1 and all(d2) else ("FAIL" if not d1 else "PARTIAL")
     lines += [
         "",
-        f"**Verdict: {v}** (D1 diagnostic {d1}; D2 net gain < 5 pts for every direction {all(d2)}).",
+        f"**Verdict: {v}** (D1 diagnostic {d1}; D2 net gain < 5 pts for every direction {all(d2)})."
+        + provisional_note(scale_rows(res), "Baseline B"),
         "",
     ]
     return lines
@@ -254,7 +343,8 @@ def pilot(res: Path) -> list[str]:
             f"| top-1 = the bound (wrong) value | {t['bound_top1_rate']:.3f} |",
             f"| op step-position prior = gold | {t['op_step_position_prior_rate']} |",
             "",
-            f"**RQ3 pilot criterion (≥ 20% and > shuffled): {'MET' if rq3_ok else 'NOT MET'}.**",
+            f"**RQ3 pilot criterion (≥ 20% and > shuffled): {'MET' if rq3_ok else 'NOT MET'}.**"
+            + provisional_note(scale_rows(res), "instances per template (traces)"),
             "",
         ]
     else:
@@ -301,6 +391,16 @@ def main() -> None:
         "bootstrap (10,000 resamples) unless stated (Baseline A resamples instances).",
         "",
     ]
+    rows = scale_rows(res)
+    if rows:
+        lines += ["## Scale vs pre-registration", ""] + scale_lines(rows) + [""]
+        if any(got is not None and got < want for _, want, got in rows):
+            lines += [
+                "**This is a reduced-scale run** (DECISIONS D19): every quantity marked False above is "
+                "below what the pre-registrations call for. Verdicts that depend on it are provisional, "
+                "and the pre-registered criteria on sample size (e.g. ≥ 100 random directions) are not met.",
+                "",
+            ]
     for section in (phase0, baseline_a, baseline_b, pilot):
         lines += section(res)
     text = "\n".join(lines) + "\n"

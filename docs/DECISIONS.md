@@ -610,3 +610,51 @@ the worst-case batches before any long run, and fails on an out-of-memory.
 **What carries over.** The Kaggle session produced nothing that is reported.
 Its `equivalence.json` was never retrieved, so Phase 0 is run again here and is
 the first result.
+
+## D19 (2026-10-23) Reduced-scale profile, because of a time limit
+
+**Instruction (user).** There is little time before the presentation to the
+supervisor. Shrink the work so that some baseline results can be shown, in about 6-8
+hours instead of 14-18 at best.
+
+**Why the full run is so long.** From the measured speeds, almost all of it is
+Baseline B's steering: about 410 conditions (strength selection, three directions
+at the selected strength, 3 x 100 random directions, and a descriptive sweep), each
+needing a teacher-forced pass over 128-160 traces plus regeneration of those that
+diverge. Trace generation and the CPU probe fits are small by comparison.
+
+**What was cut** (amendments dated 2026-10-23, written before any data of the affected
+stages existed; sizes in `configs/reduced/`):
+- Traces: 4 instances per template instead of 8 (Phase 0 amendment 2).
+- Baseline B: 32 + 32 selection traces and 40 + 40 test traces instead of
+  64 + 64 and 80 + 80; **20 random directions per condition instead of 100**; 2 projection
+  strengths and 4 additive strengths instead of 5 and 7; a 3-direction sweep band
+  (amendment 3).
+- Pilot: 20 random directions instead of 100 (amendment 2).
+
+**What was not cut.** Every threshold and criterion (AUROC / balanced accuracy
+≥ 0.75 above shuffled, 20% gold-value decodability, 5-point minimal effect); the
+template-grouped splits, template-clustered bootstrap with 10,000 resamples, train-only
+selection, greedy decoding, the model and its precision. **Baseline A is unchanged**: it
+had already started, and it is cheap (about 1.5 hours).
+
+**What it costs scientifically, and how it is kept honest.**
+- The brief's "≥ 100 random directions per steering condition" requirement is not
+  met, and the 5-point minimal effect cannot be resolved with 80 test traces (intervals
+  about ±10 points). Results can show a large effect or rule one out, not decide a
+  small one.
+- `make report` compares the run's actual scale with the pre-registered scale
+  (`report.PREREG_SCALE`, read from the result files) and prints a "Scale vs
+  pre-registration" table. It marks every verdict that depends on a reduced quantity
+  **provisional**. No amount of editing the prose can remove that mark, because it
+  comes from the data. Each stage also writes `config_used.json`.
+- The reduced profile is selected with an untracked `local.mk` (`PROFILE := reduced`),
+  so the repo default stays the full pre-registered scale.
+- **Extension.** Conditions are cached per direction, so the 20 random directions
+  are the start of the 100: `baseline_b steer --force --n-random 100` computes only the
+  missing 80 per direction type, and the pilot is the same. The larger evaluation sets
+  and instance counts would need a full rerun. Results of the reduced profile can be
+  presented as "baseline replication at pilot scale".
+
+**Estimate** (not a measurement): Baseline A about 1 h more, traces 0.7 h, Baseline B
+probes 0.1 h, steering about 2.5 h, pilot about 0.7 h, so 5-6 h in total.

@@ -107,3 +107,14 @@ subsampled to the smallest variable's count of train steps); template-grouped
 - The T = 0.7 stability samples are now seeded per item, so that a resumed run
   draws the same samples (DECISIONS D15). The sampler settings themselves are
   unchanged.
+
+## Amendment 2 (2026-10-23, before any pilot data; DECISIONS D19)
+
+Reduced-scale profile (`configs/reduced/pilot.yaml`): **20 random matched-norm
+directions instead of 100** in the repair test. The traces are the reduced set
+(Phase 0 amendment 2), so there are about half as many distractor failures. The
+variables, probes, strength multiples {1, 2, 4, 8}, conditions and every threshold
+are unchanged. The pilot was already described as low-powered, and this lowers the
+power further. The p-value resolution against the random null is 1/21. `make report`
+marks the repair verdicts provisional. `pilot repair --force --n-random 100` extends the
+null using the cache.

@@ -1,6 +1,12 @@
 .PHONY: install test test-fast lint smoke phase0 traces baseline-a baseline-b pilot pilot-sample \
 	report all debug legacy-pilot
 
+# untracked, machine-local overrides, e.g.  PROFILE := reduced  (see DECISIONS D19)
+-include local.mk
+# full = the pre-registered scale; reduced = the smaller profile in configs/reduced/
+PROFILE ?= full
+CFG_DIR := $(if $(filter reduced,$(PROFILE)),configs/reduced,configs)
+
 PY ?= python3
 # primary model: Gemma-2-2B-IT; secondary: HARNESS=configs/qwen2_5_1_5b.yaml
 # (give the secondary its own RESULTS directory; see DECISIONS D13)
@@ -37,9 +43,9 @@ phase0:
 	$(PY) -m rfd.experiments.phase0_equivalence --config $(HARNESS) --out results/phase0
 
 traces:
-	$(PY) -m rfd.experiments.collect_traces generate --harness $(HARNESS)
-	$(PY) -m rfd.experiments.collect_traces label --harness $(HARNESS)
-	$(PY) -m rfd.experiments.collect_traces extract --harness $(HARNESS)
+	$(PY) -m rfd.experiments.collect_traces generate --config $(CFG_DIR)/traces.yaml --harness $(HARNESS)
+	$(PY) -m rfd.experiments.collect_traces label --config $(CFG_DIR)/traces.yaml --harness $(HARNESS)
+	$(PY) -m rfd.experiments.collect_traces extract --config $(CFG_DIR)/traces.yaml --harness $(HARNESS)
 
 # ---- Phase 1: Baseline A (Sun et al.)
 baseline-a:
@@ -50,16 +56,16 @@ baseline-a:
 
 # ---- Phase 2: Baseline B (Yuan et al.); needs `make traces`
 baseline-b:
-	$(PY) -m rfd.experiments.baseline_b probe --harness $(HARNESS)
-	$(PY) -m rfd.experiments.baseline_b steer --harness $(HARNESS)
+	$(PY) -m rfd.experiments.baseline_b probe --config $(CFG_DIR)/baseline_b.yaml --harness $(HARNESS)
+	$(PY) -m rfd.experiments.baseline_b steer --config $(CFG_DIR)/baseline_b.yaml --harness $(HARNESS)
 
 # ---- Phase 3: pilot of self-sourced repair; needs `make traces`
 pilot:
-	$(PY) -m rfd.experiments.pilot readability --harness $(HARNESS)
-	$(PY) -m rfd.experiments.pilot repair --harness $(HARNESS)
+	$(PY) -m rfd.experiments.pilot readability --config $(CFG_DIR)/pilot.yaml --harness $(HARNESS)
+	$(PY) -m rfd.experiments.pilot repair --config $(CFG_DIR)/pilot.yaml --harness $(HARNESS)
 
 pilot-sample:
-	$(PY) -m rfd.experiments.pilot sample --harness $(HARNESS)
+	$(PY) -m rfd.experiments.pilot sample --config $(CFG_DIR)/pilot.yaml --harness $(HARNESS)
 
 # ---- Phase 4: regenerate the numeric tables of docs/BASELINE_REPORT.md from results/
 report:

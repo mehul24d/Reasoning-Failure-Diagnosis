@@ -30,7 +30,7 @@ from rfd.stats import (
     safe_auprc,
     safe_auroc,
 )
-from rfd.utils.config import load_run_config
+from rfd.utils.config import load_run_config, record_config
 from rfd.utils.io import read_jsonl
 from rfd.utils.resume import (
     ResultCache,
@@ -553,6 +553,7 @@ def main() -> None:
     ap.add_argument("--force", action="store_true", help="redo a stage that is already complete")
     args = ap.parse_args()
     cfg = load_cfg(args.config, args.harness, args.out, args.traces)
+    record_config(cfg)
     if args.n_random is not None:
         cfg["steer"]["n_random"] = args.n_random
         cfg["steer"]["n_band"] = min(cfg["steer"]["n_band"], args.n_random)
