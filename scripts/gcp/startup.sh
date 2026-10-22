@@ -6,6 +6,10 @@ ROOT=/opt/rfd
 mkdir -p $ROOT/logs
 exec >>$ROOT/logs/startup.log 2>&1
 echo "=== startup $(date -u +%FT%TZ)"
+# Automatic package updates restart services after installing (needrestart), which killed the
+# running experiment once: a long run on a fresh image is no place for them.
+systemctl mask --now apt-daily.timer apt-daily-upgrade.timer unattended-upgrades.service 2>/dev/null || true
+mkdir -p /etc/needrestart/conf.d && echo '$nrconf{restart} = "l";' > /etc/needrestart/conf.d/90-rfd.conf
 REPO_URL=$(curl -s -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/attributes/rfd-repo || true)
 BRANCH=$(curl -s -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/attributes/rfd-branch || echo main)
 HARNESS=$(curl -s -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/attributes/rfd-harness || true)
