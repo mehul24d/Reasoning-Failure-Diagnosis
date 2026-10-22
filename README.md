@@ -50,7 +50,8 @@ make debug              # tiny end-to-end run with Qwen2.5-0.5B -> results/debug
 ```
 
 Full runs need a CUDA GPU; see "Compute" below. On Colab, run
-`notebooks/run_on_gpu.ipynb`. Each target writes under `$(RESULTS)` (default
+`notebooks/run_on_gpu.ipynb`; on Kaggle, `notebooks/run_on_kaggle.ipynb` (see
+"Running on Kaggle"). Each target writes under `$(RESULTS)` (default
 `results/`), reads its configuration from `configs/*.yaml`, skips itself once
 complete and resumes after a crash, so re-running a target is always safe:
 
@@ -75,6 +76,40 @@ A results directory is pinned to one model and refuses another. Pre-registration
 for every experiment are in `docs/prereg/`, and every decision taken along the
 way is in `docs/DECISIONS.md`.
 
+## Running on Kaggle
+
+`notebooks/run_on_kaggle.ipynb` is written for **Save & Run All**: it asks
+nothing, stops itself before Kaggle's 12-hour limit, and leaves the results as
+the version's output (DECISIONS D16).
+
+1. **Settings (once).**
+   - Accelerator: *GPU T4 x2* (one GPU is used). Internet: *on*.
+   - *Add-ons → Secrets*: `HF_TOKEN`, from an HF account that accepted the
+     Gemma-2 licence, attached to the notebook.
+2. **First session.** *Save Version → Save & Run All*. The notebook:
+   - clones the repo to `/tmp`;
+   - installs the pinned requirements under a constraints file frozen from
+     Kaggle's own torch / triton / nvidia-* packages, so the preinstalled CUDA
+     torch is never replaced (pip fails instead), and asserts
+     `torch.cuda.is_available()`;
+   - runs the tests and `make smoke`, stopping on any failure;
+   - runs the phases in order until the session budget (11.5 h minus 25 min
+     for zipping) runs out.
+3. **Output** (`/kaggle/working`):
+   - `results/`: the resume state, with `RFD_RESULTS_DIR=/kaggle/working/results`;
+   - `results.zip`: activation shards are left out above 8 GB;
+   - `session_status.json`: per-phase status, also appended to
+     `results/sessions.jsonl`.
+4. **Next sessions.** *Add Input → Your Work →* the previous version's output,
+   or a dataset made from its `results.zip`, then *Save & Run All* again. The
+   restore cell copies the most complete `results/` it finds in `/kaggle/input`
+   without overwriting anything. Finished stages are skipped, and the stage cut
+   off by the deadline resumes where it stopped.
+
+Expect 2-3 sessions in total (about 20-35 T4-hours against a weekly GPU quota of
+about 30 h). When `session_status.json` says `all_complete`, download
+`results.zip`.
+
 ## Repo layout
 
 ```
@@ -88,6 +123,7 @@ src/rfd/
   steering/      steering engine with the exact greedy divergence shortcut
   experiments/   smoke, phase0_equivalence, collect_traces, baseline_a, baseline_b, pilot, report
   utils/resume   results root (RFD_RESULTS_DIR), atomic writes, stage markers, shards, caches
+  utils/session  time-limited notebook sessions: restore, deadline runner, zip (Kaggle)
   stats.py       template-clustered bootstrap, AUROC/AUPRC/ECE/Brier
   plotting.py    report figures
   legacy/        ARCHIVED SAE phase-segmentation code (see its README)

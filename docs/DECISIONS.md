@@ -378,3 +378,62 @@ assembled activation arrays, so Drive stores each array once, as shards.
 - No code path prints, logs or writes it. The smoke test records only whether it
   is set.
 - `.env` is gitignored.
+
+## D16 (2026-10-22) Kaggle variant of the GPU notebook
+
+**Instruction (user).** Add `notebooks/run_on_kaggle.ipynb`:
+- `HF_TOKEN` from `kaggle_secrets`;
+- `RFD_RESULTS_DIR=/kaggle/working/results`;
+- installation that never replaces the preinstalled CUDA torch;
+- a CUDA assertion;
+- restore from an attached dataset;
+- a final zip of the results;
+- safe under *Save & Run All*.
+
+**Design.**
+- **Install.** `pip list --format=freeze` for torch, torchvision, torchaudio,
+  triton and nvidia-* is written to `/tmp/constraints.txt`. The pinned
+  requirements, minus the `torch==` line, are installed with
+  `-c /tmp/constraints.txt`. `pip list` is used rather than `pip freeze`
+  because it always prints `name==version`, whereas `pip freeze` can print
+  `name @ URL` lines, which pip rejects as constraints. If a pinned package
+  needs a different torch, pip fails rather than replacing it. The next cell
+  asserts `torch.cuda.is_available()` and that the torch version is unchanged.
+- **No prompts, nothing silently skipped.** Setup cells raise on failure: a
+  missing secret, a failed install, no CUDA, or a failing test or smoke check.
+  This stops a Save & Run All before it burns GPU hours. Shell commands run
+  through a helper that shows their output and raises on a non-zero exit;
+  `!cmd` would not raise.
+- **Deadline.** `rfd.utils.session.run_targets` runs the make targets in order,
+  each in its own process group, until `T0 + 11.5 h − 25 min`. A target still
+  running then is killed with SIGTERM, then SIGKILL. Every phase is resumable
+  (D15), so the next session continues it. The first failing target stops the
+  chain, because later phases need its outputs. This cell never raises, so the
+  zip cell always runs.
+- **Restore.** `restore_results('/kaggle/input', RESULTS)` finds `results/`
+  folders, or `results*.zip` files when no folder is attached. It takes the one
+  with the most completed-stage markers and copies only files missing from
+  `RESULTS`. It never overwrites, so re-running it is harmless. The
+  model-pinning manifest (D15) still refuses a different model's results.
+- **Zip.** `results.zip` has `results/` as its archive root, so a dataset made
+  from it restores directly. Above 8 GB the activation shards and caches are
+  left out to stay under Kaggle's 20 GB output limit. The `results/` folder
+  itself, which is in the output in full, is then the resume source.
+- **Where things live.**
+  - Code goes in `/tmp`, not `/kaggle/working`, so it is not part of the
+    output.
+  - Assembled activation arrays go in `RFD_SCRATCH_DIR=/tmp/rfd_scratch`.
+  - Only `CUDA_VISIBLE_DEVICES=0` is used on a T4 x2.
+
+**Tested.**
+- `tests/test_session.py` covers:
+  - restore from folders and from a zip, choosing the most complete one and
+    keeping existing files;
+  - stop at the first failure;
+  - a deadline kill of a whole process group;
+  - the zip's light mode.
+- A local dry run executed the notebook's own cells with a stub
+  `kaggle_secrets`, the local repo, and a scratch input holding a previous
+  debug run. Restore copied 56 files, the phases ran under the deadline runner,
+  and the zip and status files were written.
+- The install and smoke cells need Kaggle's GPU image and were not run.
