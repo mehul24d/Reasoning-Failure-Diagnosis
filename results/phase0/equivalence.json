@@ -1,0 +1,88 @@
+{
+  "model": "google/gemma-2-2b-it",
+  "dtype": "torch.float32",
+  "device": "cuda",
+  "attn_implementation": "eager",
+  "layers_checked": [
+    0,
+    6,
+    13,
+    19,
+    25
+  ],
+  "generation_config": {
+    "checkpoint": {
+      "do_sample": null,
+      "temperature": null,
+      "top_p": null,
+      "top_k": null,
+      "repetition_penalty": null
+    },
+    "effective": {
+      "do_sample": false,
+      "temperature": null,
+      "top_p": null,
+      "top_k": null,
+      "repetition_penalty": 1.0
+    },
+    "eos_token_id": [
+      1,
+      107
+    ],
+    "pad_token_id": 0,
+    "cache_implementation": "hybrid",
+    "greedy_neutral": true
+  },
+  "prompt_bos_counts": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "padding_rel_err_median": 1.155380800810235e-06,
+  "padding_rel_err_p99": 2.6046759558084887e-06,
+  "greedy_tf_agreement": 1.0,
+  "greedy_tf_first_divergence": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "greedy_tf_n_tokens": 990,
+  "hf_peak_gpu_gb": 11.325883388519287,
+  "tl_weight_source": "bf16 copy (lossless)",
+  "tl_weights_gpu_gb": 12.048646926879883,
+  "tl_resid_rel_err_median": {
+    "0": 5.676622549799504e-07,
+    "6": 1.2135361657783506e-06,
+    "13": 1.4703867918797187e-06,
+    "19": 1.4052811820874922e-06,
+    "25": 8.226497243413178e-07
+  },
+  "tl_logits_top1_agreement": 1.0,
+  "tl_logits_max_abs_diff_last32": 8.0108642578125e-05,
+  "n_positions": 2083,
+  "pass": {
+    "tl_resid": true,
+    "tl_logits_top1": true,
+    "padding": true,
+    "greedy_tf": true,
+    "generation_config_greedy": true,
+    "single_bos": true
+  },
+  "peak_gpu_gb": 13.043016910552979,
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.9.1+cu129",
+    "transformers": "5.16.1",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.9.0",
+    "platform": "Linux-7.0.0-1014-gcp-x86_64-with-glibc2.39",
+    "transformer_lens": "3.9.0",
+    "datasets": "5.1.0"
+  }
+}

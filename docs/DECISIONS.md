@@ -287,12 +287,28 @@ rule is unchanged, and it may now pick 3 digits, the paper's setting.
 
 ## D14 (2026-10-22) Phase 0 re-run for Gemma-2: what has and has not been run
 
-**Not run yet on Gemma-2-2B-IT itself.** This Mac has no `HF_TOKEN` (the gated
-files return HTTP 401) and 8 GB of RAM, against about 10.5 GB of fp32 weights.
-`make phase0` is therefore the first real step of `notebooks/run_on_gpu.ipynb`,
-right after the smoke test. Its `equivalence.json` (saved to Drive) is the
-pre-registered result. **This entry is to be completed with those numbers. No
-Gemma number is claimed until then.**
+**Result on Gemma-2-2B-IT (2026-10-23, GCP L4, float32, eager attention;
+`results/phase0/equivalence.json`): all six checks pass.**
+
+| check | value | threshold |
+|---|---|---|
+| TL vs HF `resid_post`, median relative error, layers {0, 6, 13, 19, 25} | 1.47e-06 (worst layer) | < 0.01 |
+| TL vs HF logits, top-1 agreement over 2083 positions | 1.0000 (max abs diff, last 32 positions: 8.0e-05) | ≥ 0.99 |
+| padded batch vs single sequence, median relative error | 1.16e-06 (p99 2.6e-06) | < 0.01 |
+| teacher-forced argmax vs batched greedy generation | 1.0000 over 990 tokens | ≥ 0.99 |
+| effective generation config is pure greedy | do_sample False, repetition penalty 1.0, no temperature / top-p / top-k | as stated |
+| one BOS per prompt | [1, 1, 1, 1] | 1 each |
+
+Notes:
+- Gemma-2's checkpoint ships no sampling defaults (all null; unlike Qwen's
+  repetition penalty of 1.1, D12), so the neutralising code had nothing to
+  remove. The check still guards against it.
+- The TL build used the lossless bf16 weight source. Peak GPU memory was
+  13.0 GB, of which TL's weights were 12.0 GB.
+- Library versions: torch 2.9.1+cu129, transformers
+  5.16.1, transformer-lens 3.9.0.
+- The same VM passed `make smoke` (`results/smoke/`), measuring generation at
+  124 tokens/s at the worst-case batch.
 
 **What was run and passed.**
 
