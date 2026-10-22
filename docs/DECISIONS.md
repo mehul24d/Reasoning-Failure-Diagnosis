@@ -22,6 +22,10 @@ as the fallback. **We use the fallback.** Reasons, all checked on this machine:
 Consequence: none of the numbers here are Gemma numbers. Sun et al. used
 Gemma-2-2B-IT, so Baseline A is a cross-model replication, not an exact one.
 
+**Superseded on 2026-10-22 by D13.** The runs move to a Colab T4 with an HF
+token, so Gemma-2-2B-IT becomes the primary model and Qwen the secondary. No
+Qwen2.5-1.5B data had been produced.
+
 ## D2 (2026-10-21) Gold programs come from the GSM-Symbolic *templates*
 
 The brief asks us to extract gold intermediate values from GSM8K-style
@@ -227,3 +231,150 @@ raw logits.
   with repetition_penalty 1.1, not pure greedy decoding as `docs/PROGRESS.md`
   states. We leave that code and its results untouched for reproducibility and
   record the discrepancy here.
+
+## D13 (2026-10-22) Primary model switched to Gemma-2-2B-IT on a Colab T4; Qwen2.5-1.5B becomes secondary
+
+**Instruction (user, 2026-10-22).** Use `google/gemma-2-2b-it` as the primary
+model. The target is a Colab T4: float32, `attn_implementation="eager"`, and
+no system role in the chat template. `HF_TOKEN` comes from the environment.
+Qwen stays as the secondary model.
+
+**Config.**
+- `configs/gemma2_2b.yaml` is the primary harness and the default of every
+  experiment config and of the Makefile (`HARNESS`).
+- The Qwen config moved from `configs/harness.yaml` to
+  `configs/qwen2_5_1_5b.yaml`, unchanged apart from `dtype: auto`, which now
+  gives float32 on GPUs without native bf16 (the T4 has none).
+- A secondary run goes into its own results directory, for example
+  `make all HARNESS=configs/qwen2_5_1_5b.yaml RESULTS=results/qwen2_5_1_5b`.
+  `rfd.utils.resume.check_manifest` refuses to write a second model's outputs
+  into a directory that already holds the first model's, so the report never
+  mixes models.
+
+**Why these settings.**
+- **float32.** The T4 has no native bf16, and fp16 is unsafe for Gemma-2's
+  activation range.
+- **eager attention.** Gemma-2's attention-logit softcapping (50.0) is
+  implemented only in the eager path.
+- **No system role.** Gemma-2's template rejects a system turn. The harness
+  config now says `system_role: false` and `prompts.chat_ids` folds the system
+  text into the first user turn explicitly. Previously it fell back to this
+  only after catching the template's exception.
+
+**Gemma-2-specific fixes made for the switch.** None of these affected Qwen.
+- Teacher-forced log-probs now apply Gemma-2's final logit softcap,
+  30·tanh(z/30) (`harness.generate.lm_logits`). The bare `lm_head` omits it.
+  The argmax is unaffected, because tanh is monotonic, but the token
+  log-probabilities fed to Baseline B's uncertainty baselines would have been
+  wrong.
+- Phase 0 appended the gold answer with `add_special_tokens=True`, which for
+  Gemma inserts a second `<bos>` mid-sequence. It now uses `False`. Phase 0 and
+  the smoke test also check that every prompt carries exactly one BOS.
+- On CUDA the model is loaded with `device_map="cuda"`. Shards go straight to
+  the GPU, and the fp32 weights (≈ 10.5 GB) never sit in the 12 GB Colab host
+  RAM.
+- Batch sizes for the T4: generation 8, teacher-forced passes 4. The smoke
+  test measures peak memory at the worst-case batch.
+
+**Unchanged.** Data, splits, prompts, probes, steering grids and every
+pre-registered threshold. The prompt format (D9) was chosen with Qwen-0.5B and
+is used for Gemma as is, so Gemma's Final-Answer marker adherence is measured,
+not tuned. Each pre-registration has a dated amendment recording the model
+switch.
+
+**Consequence.** Baseline A now runs on Sun et al.'s own model. The digit-length
+rule is unchanged, and it may now pick 3 digits, the paper's setting.
+
+## D14 (2026-10-22) Phase 0 re-run for Gemma-2: what has and has not been run
+
+**Not run yet on Gemma-2-2B-IT itself.** This Mac has no `HF_TOKEN` (the gated
+files return HTTP 401) and 8 GB of RAM, against about 10.5 GB of fp32 weights.
+`make phase0` is therefore the first real step of `notebooks/run_on_gpu.ipynb`,
+right after the smoke test. Its `equivalence.json` (saved to Drive) is the
+pre-registered result. **This entry is to be completed with those numbers. No
+Gemma number is claimed until then.**
+
+**What was run and passed.**
+
+1. **Tiny random Gemma-2** (`tests/test_gemma2.py`; eager attention, softcaps
+   on, bf16-representable weights; CPU, no download):
+   - our HF decoder-layer hook vs TransformerLens `hook_resid_post` at every
+     layer: max relative error < 1e-5;
+   - TL vs HF logits: max absolute difference < 1e-4;
+   - log-probs including the final softcap: error < 1e-4;
+   - greedy generation with left padding is reproduced exactly by teacher
+     forcing.
+
+   A mutation check confirms the TL test fails when the float32 embedding fix
+   (below) is removed.
+2. **The rewritten Phase-0 script, end to end** on Qwen2.5-0.5B in fp32
+   (`configs/debug_fp32.yaml`, local, **debug only, not reported**). This
+   exercises the new low-memory TL path with a lossless bf16 weight source.
+   - TL vs HF resid median relative error ≤ 3.7e-6 at layers {0, 6, 12, 18, 23};
+   - logits top-1 agreement 1.0;
+   - padding median relative error 1.4e-6;
+   - greedy TF agreement 1.0 over 1442 tokens;
+   - generation config: the checkpoint ships `do_sample: true`, T = 0.7,
+     top-p 0.8, top-k 20 and repetition penalty 1.1; the effective config is
+     pure greedy;
+   - a single BOS in every prompt (Qwen has none).
+
+**Phase-0 changes for the T4** (pre-registration amendment 1 in
+`docs/prereg/phase0.md`; thresholds unchanged):
+- Two checks were added:
+  - the effective generation config must be pure greedy, with the
+    checkpoint's own sampling defaults recorded (motivated by D12);
+  - exactly one BOS per prompt.
+- **Memory plan for the TL comparison.** Two fp32 copies (21 GB) fit neither
+  the T4 nor the host RAM.
+  - HF references are computed first. Only the argmax, plus full logits for the
+    last 32 positions, are kept; a 256k vocabulary × 1000 positions would not
+    fit in RAM.
+  - The HF weights are then moved to the CPU as a bf16 copy. This is lossless
+    because the checkpoint is stored in bf16 (5.23 GB for 2.6B parameters), and
+    the script verifies it per tensor.
+  - TL's float32 parameters are allocated directly on the GPU and filled from
+    that copy.
+  - TL scales Gemma's embedding by √2304 in the *source* dtype, which would round
+    in bf16, so `W_E` is recomputed in float32 exactly as TL's fp32 path does.
+
+## D15 (2026-10-22) Every phase is resumable; results can live on Google Drive
+
+**Results root.** Every `results/...` path in a config or on the command line
+resolves under `$RFD_RESULTS_DIR`, which defaults to `results/`. The Makefile
+sets it from `RESULTS=`. On Colab it points to a Drive folder, so outputs
+survive runtime resets. `RFD_SCRATCH_DIR` (Colab local disk) receives the
+assembled activation arrays, so Drive stores each array once, as shards.
+
+**Restart semantics** (`rfd.utils.resume`).
+- Every output file is written to a temporary file and renamed, so it is either
+  whole or absent.
+- A finished stage leaves `.done/<stage>.json`, which records a fingerprint of
+  its input files. A stage is skipped only if its inputs are unchanged, and
+  `--force` redoes it.
+- Long stages save their unit of work as it finishes:
+  - generation: chunks of 64 traces;
+  - activations: shards of 64 traces / 256 arithmetic problems;
+  - probe CV, Baseline-A probes and readability jobs: one cache file each;
+  - steering and repair: every evaluated condition, including each of the
+    100 random directions;
+  - re-prompting and T = 0.7 sampling: per batch or item.
+
+  Caches are keyed on the input fingerprint, so a redone upstream stage
+  invalidates them.
+- **Determinism.** A resumed run forms exactly the same batches as an
+  uninterrupted one: the chunk plan is fixed and checked. The T = 0.7 samples
+  are seeded per item. Results therefore do not depend on where a restart
+  happened.
+- **Tested** on the 0.5B debug model: `kill -9` during generation (after 2/6
+  chunks) and during extraction (after 2/6 shards), then a restart. Traces,
+  step labels and all three activation arrays were **byte-identical** to an
+  uninterrupted run. Unit tests in `tests/test_resume.py`.
+- `parse_sample.md` is never overwritten once it contains manual verdicts.
+
+**Secrets.**
+- The notebook reads `HF_TOKEN` from Colab's secret store into the process
+  environment, and huggingface_hub reads it from there.
+- No code path prints, logs or writes it. The smoke test records only whether it
+  is set.
+- `.env` is gitignored.

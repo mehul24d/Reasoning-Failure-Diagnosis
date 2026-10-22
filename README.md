@@ -49,22 +49,31 @@ make test-fast          # unit tests: synthetic data, no GPU, no network
 make debug              # tiny end-to-end run with Qwen2.5-0.5B -> results/debug/ (not reported)
 ```
 
-Full runs (GPU recommended; see "Compute" below). Each target writes under
-`results/` and reads its configuration from `configs/*.yaml`:
+Full runs need a CUDA GPU; see "Compute" below. On Colab, run
+`notebooks/run_on_gpu.ipynb`. Each target writes under `$(RESULTS)` (default
+`results/`), reads its configuration from `configs/*.yaml`, skips itself once
+complete and resumes after a crash, so re-running a target is always safe:
 
 ```bash
-make phase0       # TransformerLens vs HF equivalence + padding/greedy checks
+export HF_TOKEN=...   # Gemma-2 is gated; read from the environment, never stored
+make smoke        # few-minute check of memory, generation config, prompts (not reported)
+make phase0       # TransformerLens vs HF equivalence + padding/greedy/generation-config checks
 make baseline-a   # Sun et al.: arithmetic error pilot, probes, selective re-prompting
 make traces       # GSM-Symbolic main + NoOp traces, step labels, activations
 make baseline-b   # Yuan et al.: failure probes + steering with random-direction nulls
 make pilot        # Phase 3 pilot: 2x2 variable readability, RQ3, mini repair test
 make pilot-sample # optional: T=0.7 x5 samples -> stable vs borderline failures
 make report       # regenerate docs/BASELINE_REPORT_TABLES.md (numbers + verdicts) from results/
+make all          # all of the above, in order
 ```
 
-`HARNESS=configs/other.yaml make baseline-b` swaps the model / device
-configuration. Pre-registrations for every experiment are in `docs/prereg/`,
-and every decision taken along the way is in `docs/DECISIONS.md`.
+The primary model is **Gemma-2-2B-IT** (`configs/gemma2_2b.yaml`: float32,
+eager attention, no system role). The secondary model, Qwen2.5-1.5B-Instruct,
+goes into its own results directory:
+`make all HARNESS=configs/qwen2_5_1_5b.yaml RESULTS=results/qwen2_5_1_5b`.
+A results directory is pinned to one model and refuses another. Pre-registrations
+for every experiment are in `docs/prereg/`, and every decision taken along the
+way is in `docs/DECISIONS.md`.
 
 ## Repo layout
 
@@ -77,11 +86,13 @@ src/rfd/
   parsing/       evaluation-validated equation parser, step labeller (vs gold program)
   probing/       grouped-CV logistic / diff-in-means probes, shuffled-label nulls
   steering/      steering engine with the exact greedy divergence shortcut
-  experiments/   phase0_equivalence, collect_traces, baseline_a, baseline_b, pilot, report
+  experiments/   smoke, phase0_equivalence, collect_traces, baseline_a, baseline_b, pilot, report
+  utils/resume   results root (RFD_RESULTS_DIR), atomic writes, stage markers, shards, caches
   stats.py       template-clustered bootstrap, AUROC/AUPRC/ECE/Brier
   plotting.py    report figures
   legacy/        ARCHIVED SAE phase-segmentation code (see its README)
-configs/         harness, traces, baseline_a, baseline_b, pilot, debug; legacy/
+configs/         gemma2_2b (primary), qwen2_5_1_5b (secondary), traces, baseline_a,
+                 baseline_b, pilot, debug; legacy/
 docs/            BASELINE_REPORT.md, DECISIONS.md, prereg/, PROGRESS.md (archived)
 tests/           pytest suite (synthetic data; tiny random Qwen2 for hook tests); legacy/
 results/         committed measurement files (json/jsonl/csv/png); *.npy caches ignored
@@ -89,16 +100,19 @@ results/         committed measurement files (json/jsonl/csv/png); *.npy caches 
 
 ## Compute
 
-- The project Mac (Apple M2, 8 GB) can run only the 0.5B debug pipeline next
-  to normal desktop apps (docs/DECISIONS.md D7/D8). The primary model
-  (Qwen2.5-1.5B-Instruct, fp16 3.3 GB) needs about 4.5 GB free plus headroom.
-- On a CUDA GPU (bf16), raise `generation.batch_size` and
-  `forward_batch_size` in `configs/harness.yaml` as memory allows.
-- Outputs are resumable where it matters (`collect_traces generate` appends in
-  chunks).
-- Gemma-2-2B-IT (the brief's primary model) needs an HF token with the licence
-  accepted. Switching means changing `model_name` and re-running every phase;
-  do not mix models in one report.
+- **Target: a Colab T4 (15 GB).** Gemma-2-2B-IT in float32 takes about
+  10.5 GB, so batches are 8 for generation and 4 for teacher-forced passes;
+  `make smoke` measures the worst-case peak.
+  - It needs an HF token with the Gemma licence accepted, in the `HF_TOKEN`
+    environment variable (a Colab secret in the notebook).
+  - On a larger GPU, raise `generation.batch_size` and `forward_batch_size` in
+    `configs/gemma2_2b.yaml`.
+- **Resumability** (DECISIONS D15). Outputs are written atomically and in
+  chunks, shards and per-condition caches under `$RFD_RESULTS_DIR`, a Drive
+  folder in the notebook. A disconnected runtime loses at most the unit of work
+  in progress.
+- The project Mac (Apple M2, 8 GB) runs only the 0.5B debug pipeline
+  (docs/DECISIONS.md D7/D8).
 
 ## Tests
 
