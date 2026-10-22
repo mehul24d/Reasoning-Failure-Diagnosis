@@ -95,3 +95,16 @@ Two changes, both made before any Qwen2.5-1.5B data existed:
   The debug run showed that fp16 near-ties between batched generation and
   teacher forcing flipped tokens even under random unit-vector projections,
   which made every trace look diverged (DECISIONS D11).
+
+## Amendment 2 (2026-10-22, before any non-debug run; DECISIONS D13)
+
+- **Model.** Gemma-2-2B-IT, float32 with eager attention (`configs/gemma2_2b.yaml`).
+  Qwen2.5-1.5B, one of Yuan et al.'s models, becomes the secondary model. The
+  steering layer is still the one selected for the last-token probe, now out of
+  26 layers.
+- **Unchanged:** the positions, steering types, both strength grids
+  (Amendment 1), the selection and evaluation sets, the 100 random directions,
+  and the criteria D1/D2.
+- Token log-probabilities for the uncertainty baselines include Gemma-2's
+  final logit softcap, i.e. they are the model's actual next-token
+  distribution (DECISIONS D13).

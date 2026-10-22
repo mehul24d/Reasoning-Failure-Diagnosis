@@ -96,3 +96,14 @@ subsampled to the smallest variable's count of train steps); template-grouped
   20-60 failures, the CIs will be wide, so we will call the direction
   "supported", "not supported" or "inconclusive", never "significant", unless
   a CI excludes 0.
+
+## Amendment 1 (2026-10-22, before any non-debug run; DECISIONS D13)
+
+- **Model.** Gemma-2-2B-IT, float32 with eager attention (`configs/gemma2_2b.yaml`);
+  Qwen2.5-1.5B becomes the secondary model.
+- **Unchanged:** the population, variables, probes, strength multiples
+  {1, 2, 4, 8}, repair conditions, the 100 random directions and all
+  thresholds.
+- The T = 0.7 stability samples are now seeded per item, so that a resumed run
+  draws the same samples (DECISIONS D15). The sampler settings themselves are
+  unchanged.

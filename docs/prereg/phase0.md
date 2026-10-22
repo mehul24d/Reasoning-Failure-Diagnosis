@@ -43,3 +43,24 @@ We report:
 
 The 30-step check is done by the AI assistant. It does **not** replace the
 two-annotator verification listed in the report's TODOs.
+
+## Amendment 1 (2026-10-22, before any non-debug run; DECISIONS D13, D14)
+
+- **Model.** Gemma-2-2B-IT (`configs/gemma2_2b.yaml`) replaces Qwen2.5-1.5B,
+  which becomes the secondary model (`configs/qwen2_5_1_5b.yaml`). It runs in
+  float32 with eager attention on a CUDA T4. The checked layers are
+  `check_layers(26)` = {0, 6, 13, 19, 25}. The "fp16, differences around 1e-3"
+  note above no longer applies; both sides run in float32.
+- **Added checks.** All four thresholds above are unchanged. Two checks are
+  added, and Phase 0 passes only if they hold as well:
+
+  | check | statistic | threshold |
+  |---|---|---|
+  | effective generation config after loading | do_sample, repetition_penalty, temperature, top_p, top_k | False, 1 (or unset), unset, unset, unset; the checkpoint's own values are recorded |
+  | chat prompts | number of BOS tokens per prompt | exactly 1 |
+
+- **Implementation of the TL side, for memory reasons.** The TL weights are
+  built from a lossless bf16 copy of the HF weights, which is checked per
+  tensor. The scaled embedding is recomputed in float32. The test inputs are
+  unchanged. Full-vocabulary logits are kept for the last 32 positions of each
+  input; the top-1 statistic still covers every position.

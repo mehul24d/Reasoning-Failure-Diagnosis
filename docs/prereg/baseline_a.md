@@ -88,3 +88,14 @@ Committed before any non-debug run of `make baseline-a`. Config:
     CIs, plus the paper's TP-correction and FP-preservation.
   - **Expectation from the paper:** about 10% of true errors corrected. We make
     no directional prediction for accuracy.
+
+## Amendment 1 (2026-10-22, before any non-debug run; DECISIONS D13)
+
+- **Model.** Gemma-2-2B-IT, float32 with eager attention (`configs/gemma2_2b.yaml`).
+  This is Sun et al.'s own model, so the model difference listed above
+  disappears; Qwen2.5-1.5B becomes a secondary replication.
+- **Unchanged:** the digit-length rule, N = max(2000, ⌈300/e⌉) ≤ 6000, the
+  emission-position probing, the P1/P2 protocols, the C1/C2 criteria and
+  every threshold. With Gemma the rule may select 3 digits, the paper's setting.
+- Activations are now written in resumable shards of 256 problems (DECISIONS
+  D15). This does not change any analysis.
