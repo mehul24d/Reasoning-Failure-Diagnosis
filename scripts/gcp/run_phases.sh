@@ -31,25 +31,41 @@ sync_up() {
 finish() {  # finish <state> <detail>: sync, then stop the VM (a stopped VM only costs its disk)
   status "$1" "${2:-}"; sync_up
   echo "[run] $1 ${2:-}; shutting down"; sleep 5; shutdown -h now
+  [ "$1" = complete ] && exit 0
+  exit 1
 }
 
 echo "=== run_phases.sh start $(date -u +%FT%TZ) harness=$HARNESS"
 status starting
 # results from a previous VM / disk, if this disk is empty
 if [ -z "$(ls -A "$RFD_RESULTS_DIR" 2>/dev/null)" ]; then
-  gcloud storage rsync -r -q "$BUCKET/results" "$RFD_RESULTS_DIR" || true
+  if gcloud storage ls "$BUCKET/results/" >/dev/null 2>&1; then
+    gcloud storage rsync -r -q "$BUCKET/results" "$RFD_RESULTS_DIR" || true
+  fi
 fi
 ( while true; do sleep 600; sync_up; done ) &   # periodic sync while the phases run
 
-cd "$REPO" && git pull -q --ff-only || echo "[run] git pull failed; using the checked-out commit"
+# the image installs the NVIDIA driver on first boot: wait for it (up to 20 min)
+for i in $(seq 1 40); do nvidia-smi >/dev/null 2>&1 && break; status waiting_for_gpu_driver "$i/40"; sleep 30; done
+nvidia-smi >/dev/null 2>&1 || finish failed "no working NVIDIA driver after 20 min"
+
+cd "$REPO" || finish failed "no repo at $REPO"
 # python with the image's CUDA torch; a venv that sees it, so pip never replaces it
-if [ ! -x "$ROOT/venv/bin/python" ]; then
+if ! "$ROOT/venv/bin/python" -m pip --version >/dev/null 2>&1; then
+  rm -rf "$ROOT/venv"
   BASEPY=""
   for p in /opt/conda/bin/python3 /usr/bin/python3; do
     "$p" -c "import torch; assert torch.cuda.is_available()" 2>/dev/null && BASEPY=$p && break
   done
   [ -z "$BASEPY" ] && finish failed "no python with CUDA torch on this image"
-  "$BASEPY" -m venv --system-site-packages "$ROOT/venv" || finish failed "venv creation"
+  if ! "$BASEPY" -m venv --system-site-packages "$ROOT/venv" 2>/dev/null; then
+    # Ubuntu images ship python3 without ensurepip
+    rm -rf "$ROOT/venv"
+    apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-venv python3-pip \
+      || finish failed "apt install python3-venv"
+    "$BASEPY" -m venv --system-site-packages "$ROOT/venv" || finish failed "venv creation"
+  fi
+  "$ROOT/venv/bin/python" -m pip --version || finish failed "venv has no pip"
 fi
 PY=$ROOT/venv/bin/python
 status installing

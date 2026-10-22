@@ -12,6 +12,8 @@ HARNESS=$(curl -s -H 'Metadata-Flavor: Google' http://metadata.google.internal/c
 if [ ! -d $ROOT/repo/.git ]; then
   git clone -q --branch "${BRANCH:-main}" "$REPO_URL" $ROOT/repo || { echo "clone failed"; exit 1; }
 fi
+# update the code BEFORE starting the runner: git must not rewrite a script bash is executing
+git -C $ROOT/repo pull -q --ff-only || echo "git pull failed; using the checked-out commit"
 systemctl reset-failed rfd.service 2>/dev/null || true
 # a transient unit: runs detached from this script, survives it exiting
 systemd-run --unit=rfd --description="RFD experiment run" \
