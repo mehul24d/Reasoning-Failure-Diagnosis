@@ -22,7 +22,7 @@ from rfd.legacy.metrics.sparsity import feature_entropy, l0_sparsity
 from rfd.legacy.sae.activation_extraction import extract_trace_activations, load_hooked_model, resolve_layer
 from rfd.legacy.sae.jumprelu_sae import JumpReLUSAE
 from rfd.utils.config import load_experiment
-from rfd.utils.io import ensure_parent, read_jsonl, write_jsonl
+from rfd.utils.io import read_jsonl, write_jsonl
 
 
 def load_sae_checkpoint(checkpoint_path: str | Path) -> JumpReLUSAE:
