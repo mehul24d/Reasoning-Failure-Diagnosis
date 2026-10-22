@@ -1,0 +1,20 @@
+# Gemma-2-2B-IT on a 24 GB NVIDIA L4 (GCP g2-standard-8; DECISIONS D18).
+# Same model, dtype and attention as configs/gemma2_2b.yaml (the T4 config), so
+# results directories are interchangeable (run_manifest.json checks model, dtype,
+# attention); only the batch sizes are larger. `make smoke` measures the worst-case
+# peak memory with these sizes before any long run.
+seed: 42
+model:
+  model_name: "google/gemma-2-2b-it"
+  device: "auto"
+  dtype: "float32"
+  attn_implementation: "eager"
+  system_role: false
+  trust_remote_code: false
+generation:
+  do_sample: false
+  max_new_tokens: 384
+  batch_size: 24        # fp32 weights 10.5 GB + KV cache (~0.2 MB/token) + eager attention maps
+forward_batch_size: 8   # teacher-forced passes (all-layer captures, 256k-vocab argmax)
+acts_dtype: "float16"
+cache_dir: ".cache"

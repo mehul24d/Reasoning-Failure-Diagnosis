@@ -119,6 +119,34 @@ Expect 2-3 sessions in total (about 20-35 T4-hours against a weekly GPU quota of
 about 30 h). When `session_status.json` says `all_complete`, download
 `results.zip`.
 
+## Running on Google Cloud (project `icl-failure`)
+
+A single-L4 VM runs every phase unattended and resumes after any restart
+(DECISIONS D18). The runner is `scripts/gcp/`:
+
+```bash
+gcloud config set project icl-failure
+# once: the Hugging Face token goes into Secret Manager, never into a file or the repo
+read -rs HFT && printf '%s' "$HFT" | gcloud secrets versions add hf-token --data-file=- ; unset HFT
+scripts/gcp/launch.sh        # creates the VM (or starts the stopped one); idempotent
+gcloud storage cat gs://icl-failure-rfd-results/status.json         # progress
+gcloud storage cat gs://icl-failure-rfd-results/logs/run.log | tail  # log
+```
+
+- **VM:** `g2-standard-8` (8 vCPU, 32 GB, one 24 GB NVIDIA L4), a 200 GB boot
+  disk and a Deep Learning image with the CUDA driver and torch. Model settings
+  are `configs/gemma2_2b_l4.yaml`: Gemma-2-2B-IT in float32 with eager attention
+  (the T4 config's model settings) and larger batches.
+- **Order:** install, unit tests, wait for the token, `make smoke`, then
+  phase0, baseline-a, traces, baseline-b, pilot, pilot-sample and report.
+- **Results** live on the VM disk (`/opt/rfd/results`) and are synced to
+  `gs://icl-failure-rfd-results/results` every 10 minutes and after each phase.
+  Start a fresh VM and it restores from the bucket.
+- **Cost control:** the VM shuts itself down when the run completes or fails
+  (a stopped VM costs only its disk). `scripts/gcp/launch.sh` starts it again and
+  the run continues where it stopped.
+- **Fetch the results:** `gcloud storage rsync -r gs://icl-failure-rfd-results/results results`.
+
 ## Repo layout
 
 ```

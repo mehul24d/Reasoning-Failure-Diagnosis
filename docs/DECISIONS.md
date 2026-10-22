@@ -535,3 +535,62 @@ family. The pasted log did not name the package, because `pip -q` hides the
 - `tests/test_install_gpu_env.py` covers the install plan and the
   requirements split.
 - Not yet run on Kaggle itself.
+
+## D18 (2026-10-23) Runs move from Kaggle to Google Cloud (project `icl-failure`, one L4)
+
+**Instruction (user).** Stop working on Kaggle; use the GCP account and the
+project `icl-failure`, and start the work there.
+
+**What was set up in the project.**
+- Defaults: `gcloud config set project icl-failure` (the account is
+  dahiya24mehul@gmail.com; before the change, the default was `research-507316`).
+- APIs enabled: Compute Engine, Cloud Quotas, Secret Manager, IAM.
+- **GPU quota.** `GPUS_ALL_REGIONS` was **0**, which blocks every GPU even
+  though the per-region L4, T4 and V100 quotas were 1. I requested **1** through
+  the Cloud Quotas API (preference `gpus-all-regions-1`), and it was granted
+  immediately. The first attempt failed with HTTP 429, because gcloud charged it
+  to its own shared project; it needs `--billing-project=icl-failure`.
+- Bucket `gs://icl-failure-rfd-results` (us-central1) for results and status.
+- Service account `rfd-runner`, with only:
+  - `storage.objectAdmin` on that bucket;
+  - `secretmanager.secretAccessor` on the secret `hf-token`;
+  - `logging.logWriter`.
+- The secret `hf-token` was created **empty**. Only the user adds the value.
+  The token is not stored in any file, the metadata or the repo.
+
+**Why an L4 and not a T4.**
+- fp32 FLOPs: L4 30 TFLOPS vs T4 8.1.
+- Memory: 24 GB vs 15 GB, so the fp32 Gemma (10.5 GB) leaves room for 3x larger
+  generation batches. Decoding is memory-bandwidth-bound, so throughput scales
+  with batch size.
+- TransformerLens's untied fp32 copy (11.9 GiB, D14) fits comfortably.
+- An L4 hour costs more than a T4 hour, but fewer hours are needed.
+
+**Config.** `configs/gemma2_2b_l4.yaml` has the same model settings as the T4
+config: float32, eager attention, `system_role: false`. Only the batch sizes
+differ (generation 24 instead of 8). `run_manifest.json` checks model, dtype and
+attention, so the two configs' result directories are interchangeable. Batch
+size is a hardware setting, not an experimental one. Greedy decoding with
+left-padding is invariant to it up to fp32 rounding, which Phase 0 checks
+(padding invariance ≤ 1e-2, greedy reproducibility ≥ 0.99). `make smoke` runs
+the worst-case batches before any long run, and fails on an out-of-memory.
+
+**Operation** (`scripts/gcp/`).
+- `launch.sh`: an idempotent create-or-start of the VM `rfd-gemma`
+  (g2-standard-8, Deep Learning pytorch/CUDA 12.9 image, 200 GB disk).
+- The VM's startup script clones the repo and starts `run_phases.sh` as a
+  detached systemd unit on every boot, so a reboot resumes the run.
+- `run_phases.sh`:
+  - installs with `scripts/install_gpu_env.py` into a venv that sees the
+    image's CUDA torch (D17);
+  - runs the unit tests, then waits up to 45 minutes for the `hf-token` secret;
+  - runs the smoke test, then every phase in order;
+  - syncs results to the bucket every 10 minutes and after each phase;
+  - writes `status.json` to the bucket;
+  - shuts the VM down when finished, on a failure, or when the token never
+    arrives, so a failed or idle run does not keep billing.
+- A fresh disk restores from the bucket first.
+
+**What carries over.** The Kaggle session produced nothing that is reported.
+Its `equivalence.json` was never retrieved, so Phase 0 is run again here and is
+the first result.
