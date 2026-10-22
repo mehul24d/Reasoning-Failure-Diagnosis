@@ -50,14 +50,24 @@ for i in $(seq 1 40); do nvidia-smi >/dev/null 2>&1 && break; status waiting_for
 nvidia-smi >/dev/null 2>&1 || finish failed "no working NVIDIA driver after 20 min"
 
 cd "$REPO" || finish failed "no repo at $REPO"
-# python with the image's CUDA torch; a venv that sees it, so pip never replaces it
+# python with the image's CUDA torch
+BASEPY=""
+for p in /opt/conda/bin/python3 /usr/bin/python3; do
+  "$p" -c "import torch; assert torch.cuda.is_available()" 2>/dev/null && BASEPY=$p && break
+done
+[ -z "$BASEPY" ] && finish failed "no python with CUDA torch on this image"
+# This code uses neither torchvision nor torchaudio, but transformers imports them when
+# present. The image can ship one whose build does not match its torch (seen: torchaudio
+# 2.11 on torch 2.9.1, "undefined symbol"), which breaks `import transformers`: remove it.
+for pkg in torchaudio torchvision; do
+  if "$BASEPY" -m pip show "$pkg" >/dev/null 2>&1 && ! "$BASEPY" -c "import $pkg" >/dev/null 2>&1; then
+    echo "[run] $pkg does not import with this torch: uninstalling it"
+    "$BASEPY" -m pip uninstall -y --break-system-packages "$pkg" || "$BASEPY" -m pip uninstall -y "$pkg"
+  fi
+done
+# a venv that sees the image's packages, so pip never replaces torch
 if ! "$ROOT/venv/bin/python" -m pip --version >/dev/null 2>&1; then
   rm -rf "$ROOT/venv"
-  BASEPY=""
-  for p in /opt/conda/bin/python3 /usr/bin/python3; do
-    "$p" -c "import torch; assert torch.cuda.is_available()" 2>/dev/null && BASEPY=$p && break
-  done
-  [ -z "$BASEPY" ] && finish failed "no python with CUDA torch on this image"
   if ! "$BASEPY" -m venv --system-site-packages "$ROOT/venv" 2>/dev/null; then
     # Ubuntu images ship python3 without ensurepip
     rm -rf "$ROOT/venv"
