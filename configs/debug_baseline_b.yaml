@@ -1,6 +1,6 @@
 # DEBUG ONLY copy of baseline_b.yaml with tiny grids (results/debug, never reported)
 # Pre-registration: docs/prereg/baseline_b.md
-harness_config: "configs/harness.yaml"
+harness_config: "configs/debug.yaml"
 traces_dir: "results/traces"
 out_dir: "results/baseline_b"
 seed: 42

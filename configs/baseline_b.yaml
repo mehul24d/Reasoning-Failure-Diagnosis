@@ -1,6 +1,6 @@
 # Baseline B: Yuan et al. (2605.09502), correctness probe is diagnostic, not causal.
 # Pre-registration: docs/prereg/baseline_b.md
-harness_config: "configs/harness.yaml"
+harness_config: "configs/gemma2_2b.yaml"
 traces_dir: "results/traces"
 out_dir: "results/baseline_b"
 seed: 42

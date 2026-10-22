@@ -1,6 +1,6 @@
 # Baseline A: Sun et al. (2507.12379) probing for arithmetic errors.
 # Pre-registration: docs/prereg/baseline_a.md
-harness_config: "configs/harness.yaml"
+harness_config: "configs/gemma2_2b.yaml"
 out_dir: "results/baseline_a"
 seed: 42
 op: "+"
@@ -14,6 +14,7 @@ n_min: 2000
 n_max: 6000
 n_demos: 2
 gen_batch_size: 32
+collect_chunk: 256      # problems per resumable activation shard
 max_new_tokens: 14
 split: { train: 0.7, test: 0.3 }   # instance-level (no templates in this task)
 probe:

@@ -1,5 +1,5 @@
 # DEBUG ONLY copy of pilot.yaml (results/debug, never reported)
-harness_config: "configs/harness.yaml"
+harness_config: "configs/debug.yaml"
 traces_dir: "results/traces"
 out_dir: "results/pilot"
 seed: 42

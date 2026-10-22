@@ -1,5 +1,5 @@
 # Phase 3 PILOT: feasibility slice of self-sourced repair. Pre-registration: docs/prereg/pilot.md
-harness_config: "configs/harness.yaml"
+harness_config: "configs/gemma2_2b.yaml"
 traces_dir: "results/traces"
 out_dir: "results/pilot"
 seed: 42

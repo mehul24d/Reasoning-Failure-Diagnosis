@@ -1,14 +1,16 @@
-# Shared model / generation config for the baseline + pilot experiments.
-# See docs/DECISIONS.md D1 for why this is Qwen2.5-1.5B-Instruct, not Gemma-2-2B-IT.
+# SECONDARY model (DECISIONS D13): Qwen2.5-1.5B-Instruct, the original primary
+# (D1). Run it into its own results directory, e.g.
+#   make baseline-b HARNESS=configs/qwen2_5_1_5b.yaml RESULTS=results/qwen2_5_1_5b
 seed: 42
 model:
   model_name: "Qwen/Qwen2.5-1.5B-Instruct"
   device: "auto"        # cuda > mps > cpu
-  dtype: "auto"         # bf16 on CUDA, fp16 on MPS; TL/HF equivalence checked in phase 0
+  dtype: "auto"         # bf16 on CUDA if supported (fp32 on a T4), fp16 on MPS
   trust_remote_code: false
 generation:
   do_sample: false      # greedy everywhere
   max_new_tokens: 384
   batch_size: 16        # 24 OOMs on 8 GB under the MPS watermark cap
 forward_batch_size: 8   # teacher-forced activation extraction
+acts_dtype: "float16"   # stored activations (range-checked before the cast)
 cache_dir: ".cache"

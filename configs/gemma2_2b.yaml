@@ -1,0 +1,19 @@
+# PRIMARY model (DECISIONS D13): Gemma-2-2B-IT, the model of Sun et al. and of
+# the brief. Target: Colab T4 (15 GB, no bf16), so float32 throughout.
+# Gated checkpoint: HF_TOKEN must be set in the environment (never in a file).
+seed: 42
+model:
+  model_name: "google/gemma-2-2b-it"
+  device: "auto"
+  dtype: "float32"
+  attn_implementation: "eager"   # Gemma-2 attention-logit softcapping is implemented in eager only
+  system_role: false             # Gemma chat template has no system role: system text goes
+                                 # into the first user turn (rfd.harness.prompts.chat_ids)
+  trust_remote_code: false
+generation:
+  do_sample: false
+  max_new_tokens: 384
+  batch_size: 8         # fp32 weights ~10.5 GB + KV cache; 16 does not fit a T4
+forward_batch_size: 4   # teacher-forced passes (all-layer captures, 256k-vocab argmax)
+acts_dtype: "float16"   # stored activations; shards refuse values beyond fp16 range
+cache_dir: ".cache"
