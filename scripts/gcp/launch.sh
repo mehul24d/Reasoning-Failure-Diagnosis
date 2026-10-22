@@ -15,7 +15,9 @@ SA=rfd-runner@$PROJECT.iam.gserviceaccount.com
 HERE=$(cd "$(dirname "$0")" && pwd)
 
 if gcloud compute instances describe "$VM" --project="$PROJECT" --zone="$ZONE" >/dev/null 2>&1; then
-  echo "VM $VM exists: starting it (no-op if running)"
+  echo "VM $VM exists: refreshing its startup script, then starting it (no-op if running)"
+  gcloud compute instances add-metadata "$VM" --project="$PROJECT" --zone="$ZONE" \
+    --metadata-from-file=startup-script="$HERE/startup.sh"
   gcloud compute instances start "$VM" --project="$PROJECT" --zone="$ZONE"
   exit 0
 fi
