@@ -73,12 +73,12 @@ def test_sharded_array_rejects_wrong_layout(tmp_path):
         a.write(2, 5, np.ones((1, 3)))
 
 
-def test_fp16_range_guard():
+def test_fp16_range_guard(tmp_path):
     assert check_fp16_range(np.array([1.0, -300.0]), "x") == 300.0
     with pytest.raises(ValueError):
         check_fp16_range(np.array([7e4]), "x")
     with pytest.raises(ValueError):
-        ShardedArray("unused", "a", (1,), "float16").write(0, 0, np.array([[np.inf]]))
+        ShardedArray(tmp_path, "a", (1,), "float16").write(0, 0, np.array([[np.inf]]))
 
 
 def test_stage_marker_tracks_inputs(tmp_path):
