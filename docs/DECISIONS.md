@@ -450,6 +450,34 @@ assembled activation arrays, so Drive stores each array once, as shards.
   and the zip and status files were written.
 - The install and smoke cells need Kaggle's GPU image and were not run.
 
+**Amendment (2026-10-22): restart safety.**
+- **What happened.** On Kaggle the phases cell failed with
+  `ModuleNotFoundError: No module named 'rfd'`, after Baseline A's collection
+  had saved 4/22 shards. The kernel had restarted, and the cell depended on
+  state from cells 1-6: `sys.path`, the environment variables, the deadline
+  and the token.
+- **Fix.**
+  - Cell 1 now writes that state to `/tmp/rfd_session.py`, and every later
+    cell re-runs it first. It covers paths, environment variables, the HF
+    token from `kaggle_secrets`, `sys.path` and the working directory.
+  - The session start time is kept in `/tmp/rfd_session_start`, so the
+    deadline still counts from the start of the session.
+  - The phase status is saved to `phase_status.json`, which the final cell
+    reads if the kernel restarted in between.
+  - If the code or install is gone, which means a new session, the cells say
+    "use Run All" instead of failing obscurely. Run All skips finished work.
+  - The CUDA check now runs in a subprocess, so the notebook kernel no longer
+    holds a CUDA context (a few hundred MB of the T4) during the phases.
+  - In the Colab notebook, the cells that run `make` now refuse to run without
+    `RFD_RESULTS_DIR` and `HF_TOKEN`. Without the guard, a kernel restart would
+    silently have written results to the clone's local `results/` instead of
+    Drive.
+- **Simulated locally:** a fresh process running only the phases and final
+  cells works; a missing repo gives the "Run All" message.
+- **Note.** In Kaggle's *interactive* editor, `/kaggle/working` survives a
+  kernel restart but not the end of a session. Long runs belong in *Save & Run
+  All*, whose output is kept.
+
 ## D17 (2026-10-22) Installing on preinstalled GPU images: wheels only, image's scientific stack kept
 
 **What failed.** On Kaggle, the D16 install step stopped with

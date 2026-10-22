@@ -111,6 +111,10 @@ the version's output (DECISIONS D16).
    without overwriting anything. Finished stages are skipped, and the stage cut
    off by the deadline resumes where it stopped.
 
+Every cell re-creates its own state, so after a kernel restart you can re-run
+just the cell that stopped. In the interactive editor, `/kaggle/working` does
+not survive the end of a session, so use *Save & Run All* for long runs.
+
 Expect 2-3 sessions in total (about 20-35 T4-hours against a weekly GPU quota of
 about 30 h). When `session_status.json` says `all_complete`, download
 `results.zip`.
