@@ -17,7 +17,9 @@ are computed first; the HF weights are then moved to the CPU as a bfloat16
 copy when that copy is lossless (the checkpoint is stored in bf16), and the
 TL model is allocated directly on the GPU in float32 from it. TL's float32
 conversion of the scaled Gemma embedding is recomputed in float32 on the GPU,
-because scaling a bf16 tensor would round it.
+because scaling a bf16 tensor would round it. TL's logits are computed from its
+own final norm / unembedding / softcap in position chunks (`tl_logits`), since
+TL's Unembed makes a 2.2 GiB transposed copy of W_U per call.
 
 Usage: python -m rfd.experiments.phase0_equivalence [--config CFG] [--out results/phase0]
 """
@@ -106,6 +108,23 @@ def tl_from_hf(model: torch.nn.Module, tok, model_name: str, device: str):
             for r0 in range(0, emb.shape[0], 16384):
                 tl.embed.W_E[r0 : r0 + 16384] = emb[r0 : r0 + 16384].to(device).float() * mult
     return tl, ("bf16 copy (lossless)" if lossless else str(dtype))
+
+
+def tl_logits(tl, resid_final: torch.Tensor, chunk: int = 64) -> torch.Tensor:
+    """TL logits from the last block's output, using TL's own final norm,
+    unembedding and softcap, applied to `chunk` positions at a time (CPU float32
+    result). TL's Unembed.forward builds `W_U.T.contiguous()`, a 2.2 GiB copy for
+    Gemma-2's 256k vocabulary, which does not fit next to the fp32 TL model on a
+    T4. TL does not tie W_E and W_U, so that model alone takes ~11.9 GiB."""
+    from transformer_lens.utilities.activation_functions import apply_softcap
+
+    x = tl.ln_final(resid_final)
+    out = []
+    with torch.no_grad():
+        for s0 in range(0, x.shape[-2], chunk):
+            lg = x[..., s0 : s0 + chunk, :] @ tl.unembed.W_U + tl.unembed.b_U
+            out.append(apply_softcap(lg, tl.cfg.output_logits_soft_cap).float().cpu())
+    return torch.cat(out, -2)
 
 
 def generation_config_report(model: torch.nn.Module) -> dict:
@@ -211,23 +230,31 @@ def main() -> None:
         report["hf_peak_gpu_gb"] = torch.cuda.max_memory_allocated() / 2**30
     tl, report["tl_weight_source"] = tl_from_hf(model, tok, cfg["model"]["model_name"], device)
     del model
+    loaded.model = None  # drop the CPU bf16 copy as well
     _empty_cache(device)
+    if device == "cuda":
+        report["tl_weights_gpu_gb"] = torch.cuda.memory_allocated() / 2**30
     names = [f"blocks.{layer}.hook_resid_post" for layer in LAYERS]
+    last = f"blocks.{tl.cfg.n_layers - 1}.hook_resid_post"
+    wanted = set(names) | {last}
     resid_err = {layer: [] for layer in LAYERS}
     top1 = n_pos = 0
     max_logit_diff = []
     for s, hr, ht1, htail in zip(seqs, hf_resid, hf_top1, hf_tail):
         with torch.no_grad():
-            logits, cache = tl.run_with_cache(
-                torch.tensor([s], device=device), names_filter=lambda n: n in names
+            # return_type=None: TL stops after ln_final; logits via tl_logits (memory)
+            _, cache = tl.run_with_cache(
+                torch.tensor([s], device=device),
+                names_filter=lambda n: n in wanted,
+                return_type=None,
             )
-        tl_logits = logits[0].float()
+        logits = tl_logits(tl, cache[last])[0]
         for j, layer in enumerate(LAYERS):
             resid_err[layer].append(_rel(cache[names[j]][0].float().cpu(), hr[j]))
-        top1 += int((tl_logits.argmax(-1).cpu() == ht1).sum())
+        top1 += int((logits.argmax(-1) == ht1).sum())
         n_pos += len(s)
-        max_logit_diff.append(float((tl_logits[-TAIL:].cpu() - htail).abs().max()))
-        del logits, cache, tl_logits
+        max_logit_diff.append(float((logits[-TAIL:] - htail).abs().max()))
+        del logits, cache
     report["tl_resid_rel_err_median"] = {
         str(k): float(np.median(np.concatenate(v))) for k, v in resid_err.items()
     }

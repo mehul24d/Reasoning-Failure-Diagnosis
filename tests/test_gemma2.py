@@ -90,7 +90,7 @@ def test_phase0_tl_build_matches_hf_hooks(tiny, monkeypatch):
     from transformer_lens import HookedTransformerConfig
     from transformer_lens import loading_from_pretrained as loading
 
-    from rfd.experiments.phase0_equivalence import tl_from_hf
+    from rfd.experiments.phase0_equivalence import tl_from_hf, tl_logits
 
     model, tok = tiny
     seq = SEQS[0]
@@ -140,6 +140,9 @@ def test_phase0_tl_build_matches_hf_hooks(tiny, monkeypatch):
         rel = ((got - ref[layer]).norm(dim=-1) / ref[layer].norm(dim=-1)).max()
         assert float(rel) < 1e-5, (layer, float(rel))
     assert torch.allclose(logits[0], ref_logits, atol=1e-4)
+    # phase 0's chunked TL logits equal TL's own unembedding + softcap
+    chunked = tl_logits(tl, cache["blocks.3.hook_resid_post"], chunk=3)
+    assert torch.allclose(chunked, logits.float().cpu(), atol=1e-5)
 
 
 class _NoSystemTemplate:

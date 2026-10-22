@@ -337,6 +337,18 @@ Gemma number is claimed until then.**
     that copy.
   - TL scales Gemma's embedding by √2304 in the *source* dtype, which would round
     in bf16, so `W_E` is recomputed in float32 exactly as TL's fp32 path does.
+  - **TL's logits are computed in position chunks.** This was added after the
+    first Kaggle attempt ran out of memory, at 14.45 of 14.56 GiB on the T4.
+    - TL does not tie `W_E` and `W_U`, so its fp32 Gemma takes about
+      11.9 GiB, not 9.7.
+    - `Unembed.forward` also builds `W_U.T.contiguous()`, a 2.2 GiB copy, on
+      every call.
+    - Phase 0 therefore runs TL with `return_type=None` and applies TL's own
+      `ln_final`, `W_U`, `b_U` and `apply_softcap` to 64 positions at a time
+      (`tl_logits`). It is the same arithmetic without the copy.
+    - `tests/test_gemma2.py` checks that the chunked logits equal TL's
+      built-in ones within 1e-5.
+    - The 0.5B debug Phase 0 gives numbers identical to the previous run.
 
 ## D15 (2026-10-22) Every phase is resumable; results can live on Google Drive
 
