@@ -1,6 +1,9 @@
 # Pinned to the versions the baselines were developed and debugged with
 # (Apple M2 / MPS, Python 3.12.1). On a CUDA machine install the matching
 # torch wheel for your CUDA version first, then `pip install -r requirements.txt`.
+# On a preinstalled GPU image (Kaggle, Colab) use scripts/install_gpu_env.py,
+# which keeps the image's torch and never compiles (DECISIONS D17).
+# The archived SAE code's extra dependencies are in requirements-legacy.txt.
 torch==2.13.0
 transformers==5.16.1
 transformer-lens==3.9.0
@@ -18,12 +21,6 @@ joblib==1.4.2
 PyYAML==6.0.3
 tqdm==4.67.1
 certifi==2024.2.2
-# legacy (archived SAE phase-segmentation code)
-networkx==3.4.2
-python-louvain==0.16
-ruptures==1.1.10
-hmmlearn==0.3.3
-sae-lens==6.54.0
 # dev
 pytest==9.0.3
 ruff==0.6.9

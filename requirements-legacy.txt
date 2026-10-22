@@ -1,0 +1,9 @@
+# Extra dependencies of the ARCHIVED SAE phase-segmentation code (rfd.legacy,
+# tests/legacy, make legacy-pilot). Not needed for the baselines or the pilot.
+# python-louvain has no wheel at all (source build).
+-r requirements.txt
+networkx==3.4.2
+python-louvain==0.16
+ruptures==1.1.10
+hmmlearn==0.3.3
+sae-lens==6.54.0

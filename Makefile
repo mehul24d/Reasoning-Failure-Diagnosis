@@ -16,13 +16,14 @@ export RFD_RESULTS_DIR := $(RESULTS)
 export PYTHONPATH := src
 
 install:
-	pip install -r requirements.txt && pip install -e ".[dev]" --no-deps
+	pip install -r requirements-legacy.txt && pip install -e ".[dev]" --no-deps
 
 test:
 	$(PY) -m pytest -q
 
+# current code only; tests/legacy needs requirements-legacy.txt
 test-fast:
-	$(PY) -m pytest -q -m "not legacy"
+	$(PY) -m pytest -q -m "not legacy" --ignore=tests/legacy
 
 lint:
 	ruff check src tests
