@@ -83,6 +83,8 @@ def tl_from_hf(model: torch.nn.Module, tok, model_name: str, device: str):
     tl_cfg = loading.get_pretrained_model_config(
         name, hf_cfg=model.config.to_dict(), fold_ln=False, device=device, dtype=dtype
     )
+    # TL moves inputs to cfg.device; it must be where the weights are allocated below
+    tl_cfg.device = device
     state_dict = loading.get_pretrained_state_dict(name, tl_cfg, model, dtype=dtype)
     with torch.device(device):
         tl = HookedTransformer(tl_cfg, tok, move_to_device=False)

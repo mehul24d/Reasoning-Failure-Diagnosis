@@ -124,6 +124,9 @@ def test_phase0_tl_build_matches_hf_hooks(tiny, monkeypatch):
         use_normalization_before_and_after=True,
         original_architecture="Gemma2ForCausalLM",
         dtype=torch.float32,
+        # a device other than the target: tl_from_hf must put config, weights and
+        # inputs on the target device (on a GPU box TL's default would be "cuda")
+        device="meta",
     )
     monkeypatch.setattr(loading, "get_pretrained_model_config", lambda *a, **k: cfg)
     clone = transformers.Gemma2ForCausalLM(_hf_config()).eval()
