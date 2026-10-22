@@ -1,6 +1,7 @@
 """Baseline A: replicate Sun et al. (2507.12379), probing for arithmetic errors.
 
-Subcommands (each writes under results/baseline_a/):
+Subcommands (each writes under results/baseline_a/, skips itself once complete
+and resumes mid-way after a crash; see rfd.utils.resume):
   pilot    error rate per digit length (choose the task size; pre-registered rule)
   collect  greedy answers + residual stream, every layer, at each "emission
            position": the token right before the model emits each answer digit
@@ -17,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -24,18 +26,24 @@ from typing import Any
 import numpy as np
 
 from rfd.data.arithmetic import ArithProblem, digits_by_place, sample_problems
-from rfd.utils.config import load_yaml
-from rfd.utils.io import read_jsonl, write_jsonl
+from rfd.utils.config import load_run_config
+from rfd.utils.io import read_jsonl
+from rfd.utils.resume import (
+    ResultCache,
+    ShardedArray,
+    StageMarker,
+    atomic_write_json,
+    atomic_write_jsonl,
+    check_manifest,
+    file_fingerprint,
+    open_array,
+)
 
 _ANS_RE = re.compile(r"\s*(-?\d+)")
 
 
 def _cfg(path: str, harness: str | None = None, out: str | None = None) -> dict[str, Any]:
-    cfg = load_yaml(path)
-    cfg["harness"] = load_yaml(harness or cfg["harness_config"])
-    if out:
-        cfg["out_dir"] = out
-    return cfg
+    return load_run_config(path, harness, out)
 
 
 def _parse_answer(text: str) -> int | None:
@@ -80,16 +88,26 @@ def _answer_batch(loaded: Any, problems: list[ArithProblem], demos, cfg, capture
 # --------------------------------------------------------------------------- pilot
 
 
-def cmd_pilot(cfg: dict[str, Any]) -> None:
+def cmd_pilot(cfg: dict[str, Any], force: bool = False) -> None:
     from rfd.harness.model import load
     from rfd.utils.seed import set_seed
 
-    set_seed(cfg["seed"])
     out = Path(cfg["out_dir"])
+    stage = StageMarker(out, "pilot")
+    if stage.skip(force):
+        return
+    set_seed(cfg["seed"])
     out.mkdir(parents=True, exist_ok=True)
+    check_manifest(out, cfg["harness"]["model"])
+    cache = ResultCache(out / "cache" / "error_pilot")
     loaded = load(cfg["harness"]["model"])
     rates = {}
     for nd in cfg["error_pilot"]["digit_lengths"]:
+        key = f"len{nd}_n{cfg['error_pilot']['n_per_length']}"
+        if cache.has(key):
+            rates[nd] = cache.get(key)
+            print(nd, rates[nd], "(cached)", flush=True)
+            continue
         demos = _demos(cfg, nd)
         probs = sample_problems(
             cfg["error_pilot"]["n_per_length"],
@@ -107,6 +125,7 @@ def cmd_pilot(cfg: dict[str, Any]) -> None:
                 n_unparsed += pred is None
                 n_err += pred != p.answer
         rates[nd] = {"n": len(probs), "errors": n_err, "unparsed": n_unparsed}
+        cache.put(key, rates[nd])
         print(nd, rates[nd], flush=True)
     chosen = None
     for nd, r in rates.items():
@@ -123,7 +142,8 @@ def cmd_pilot(cfg: dict[str, Any]) -> None:
             "error_rate": rates[nd]["errors"] / rates[nd]["n"],
             "n_problems": cfg["n_max"],
         }
-    (out / "error_pilot.json").write_text(json.dumps({"rates": rates, "chosen": chosen}, indent=2))
+    atomic_write_json(out / "error_pilot.json", {"rates": rates, "chosen": chosen})
+    stage.mark({"chosen": chosen})
     print("chosen", chosen)
 
 
@@ -142,13 +162,20 @@ def _n_digit_tokens(tok: Any, gen_ids: list[int]) -> int:
     return n
 
 
-def cmd_collect(cfg: dict[str, Any], limit: int | None = None) -> None:
+def cmd_collect(cfg: dict[str, Any], limit: int | None = None, force: bool = False) -> None:
+    """Shard c = problems [c * chunk, (c + 1) * chunk): its activations and its
+    answer records are written atomically, so a restart skips finished shards."""
     from rfd.harness.generate import forward
     from rfd.harness.model import library_versions, load
     from rfd.utils.seed import set_seed
 
-    set_seed(cfg["seed"])
     out = Path(cfg["out_dir"])
+    inputs = file_fingerprint(out / "error_pilot.json") + f"-limit{limit}"
+    stage = StageMarker(out, "collect", inputs)
+    if stage.skip(force):
+        return
+    set_seed(cfg["seed"])
+    check_manifest(out, cfg["harness"]["model"])
     chosen = json.loads((out / "error_pilot.json").read_text())["chosen"]
     nd, n = chosen["n_digits"], chosen["n_problems"]
     if limit:
@@ -162,51 +189,62 @@ def cmd_collect(cfg: dict[str, Any], limit: int | None = None) -> None:
     n_layers = len(loaded.model.model.layers)
     d_model = loaded.model.config.hidden_size
     n_slots = nd + 2  # answer digits (+ carry digit, + slack)
-    acts = np.lib.format.open_memmap(
-        out / "acts_emit.npy", mode="w+", dtype=np.float16, shape=(n, n_slots, n_layers, d_model)
+    acts = ShardedArray(
+        out, "acts_emit", (n_slots, n_layers, d_model), cfg["harness"]["acts_dtype"], inputs
     )
-    records = []
+    rec_dir = acts.dir / "records"  # discarded together with stale shards
     bs = cfg["gen_batch_size"]
-    for i in range(0, n, bs):
-        batch = probs[i : i + bs]
-        prefixes, outs, _ = _answer_batch(loaded, batch, demos, cfg, capture=False)
-        n_out = [min(_n_digit_tokens(tok, o.gen_ids), n_slots) for o in outs]
-        seqs = [pre + o.gen_ids for pre, o in zip(prefixes, outs)]
-        # emission position j: the token whose output predicts answer digit j
-        positions = [
-            [len(pre) - 1 + j for j in range(max(k, 1))] for pre, k in zip(prefixes, n_out)
-        ]
-        res = forward(
-            loaded.model,
-            tok,
-            seqs,
-            capture_layers=list(range(n_layers)),
-            capture_positions=positions,
-        )["resid"]  # [bs, L, k, d]
-        for b, k in enumerate(n_out):
-            acts[i + b, : max(k, 1)] = res[b, :, : max(k, 1)].permute(1, 0, 2).half().numpy()
-        for p, pre, o, k in zip(batch, prefixes, outs, n_out):
-            pred = _parse_answer(o.text)
-            records.append(
-                {
-                    "uid": p.uid,
-                    "a": p.a,
-                    "b": p.b,
-                    "op": p.op,
-                    "answer": p.answer,
-                    "pred": pred,
-                    "correct": pred == p.answer,
-                    "text": o.text,
-                    "prompt_len": len(pre),
-                    "n_out_digits": k,
-                    "gen_ids": o.gen_ids,
-                }
-            )
-        if (i // bs) % 10 == 0:
-            n_err = sum(not r["correct"] for r in records)
-            print(f"{len(records)}/{n} done, errors so far {n_err}", flush=True)
-    acts.flush()
-    write_jsonl(out / "collect.jsonl", records)
+    cs = cfg.get("collect_chunk", 256)
+    n_shards = (n + cs - 1) // cs
+    for c in range(n_shards):
+        if acts.has(c) and (rec_dir / f"{c:05d}.jsonl").exists():
+            continue
+        shard = np.zeros((min(cs, n - c * cs), n_slots, n_layers, d_model), np.float32)
+        records = []
+        for i in range(c * cs, min((c + 1) * cs, n), bs):
+            batch = probs[i : min(i + bs, (c + 1) * cs, n)]
+            prefixes, outs, _ = _answer_batch(loaded, batch, demos, cfg, capture=False)
+            n_out = [min(_n_digit_tokens(tok, o.gen_ids), n_slots) for o in outs]
+            seqs = [pre + o.gen_ids for pre, o in zip(prefixes, outs)]
+            # emission position j: the token whose output predicts answer digit j
+            positions = [
+                [len(pre) - 1 + j for j in range(max(k, 1))] for pre, k in zip(prefixes, n_out)
+            ]
+            res = forward(
+                loaded.model,
+                tok,
+                seqs,
+                capture_layers=list(range(n_layers)),
+                capture_positions=positions,
+            )["resid"]  # [bs, L, k, d]
+            for b, k in enumerate(n_out):
+                shard[i - c * cs + b, : max(k, 1)] = res[b, :, : max(k, 1)].permute(1, 0, 2).numpy()
+            for p, pre, o, k in zip(batch, prefixes, outs, n_out):
+                pred = _parse_answer(o.text)
+                records.append(
+                    {
+                        "uid": p.uid,
+                        "a": p.a,
+                        "b": p.b,
+                        "op": p.op,
+                        "answer": p.answer,
+                        "pred": pred,
+                        "correct": pred == p.answer,
+                        "text": o.text,
+                        "prompt_len": len(pre),
+                        "n_out_digits": k,
+                        "gen_ids": o.gen_ids,
+                    }
+                )
+        acts.write(c, c * cs, shard)
+        atomic_write_jsonl(rec_dir / f"{c:05d}.jsonl", records)
+        n_err = sum(not r["correct"] for r in records)
+        print(f"shard {c + 1}/{n_shards} done, errors in shard {n_err}", flush=True)
+    acts.complete(n, n_shards)
+    records = [r for c in range(n_shards) for r in read_jsonl(rec_dir / f"{c:05d}.jsonl")]
+    if [r["uid"] for r in records] != [p.uid for p in probs]:
+        raise RuntimeError("collect shards do not match the problem list; use --force")
+    atomic_write_jsonl(out / "collect.jsonl", records)
     meta = {
         "n_digits": nd,
         "n_problems": n,
@@ -218,7 +256,8 @@ def cmd_collect(cfg: dict[str, Any], limit: int | None = None) -> None:
         "n_unparsed": sum(r["pred"] is None for r in records),
         "versions": library_versions(),
     }
-    (out / "collect_meta.json").write_text(json.dumps(meta, indent=2))
+    atomic_write_json(out / "collect_meta.json", meta)
+    stage.mark({"n_problems": n})
     print(json.dumps({k: v for k, v in meta.items() if k != "versions"}))
 
 
@@ -243,15 +282,19 @@ def _fit_eval(X_tr, y_tr, X_ev_list, C, seed, shuffle=False):
     return [p.predict(X) if len(X) else np.zeros(0, int) for X in X_ev_list]
 
 
-def cmd_analyze(cfg: dict[str, Any]) -> None:
+def cmd_analyze(cfg: dict[str, Any], force: bool = False) -> None:
     from joblib import Parallel, delayed
 
     from rfd.stats import cluster_bootstrap, safe_balanced_accuracy
 
     out = Path(cfg["out_dir"])
+    inputs = file_fingerprint(out / "collect.jsonl")
+    stage = StageMarker(out, "analyze", inputs)
+    if stage.skip(force):
+        return
     meta = json.loads((out / "collect_meta.json").read_text())
     recs = list(read_jsonl(out / "collect.jsonl"))
-    acts = np.load(out / "acts_emit.npy", mmap_mode="r")  # [n, slot, layer, d]
+    acts = open_array(out, "acts_emit")  # [n, slot, layer, d]
     n, n_layers = len(recs), meta["n_layers"]
     C, seed = cfg["probe"]["C"], cfg["seed"]
 
@@ -337,11 +380,18 @@ def cmd_analyze(cfg: dict[str, Any]) -> None:
             "p2_out_pred_te": out_pred_te.tolist(),
         }
 
-    print(f"fitting {n_layers * len(places)} (layer, place) probe sets...", flush=True)
-    results = Parallel(n_jobs=-1, verbose=5)(
-        delayed(job)(layer, place) for layer in range(n_layers) for place in places
-    )
-    by = {(r["layer"], r["place"]): r for r in results}
+    # each (layer, place) job is cached as soon as it finishes (batches of n_cpu)
+    cache = ResultCache(out / "cache" / f"analyze-{inputs}")
+    keys = [(layer, place) for layer in range(n_layers) for place in places]
+    todo = [k for k in keys if not cache.has(f"L{k[0]}_p{k[1]}_n{n}")]
+    print(f"{len(keys)} (layer, place) probe sets, {len(keys) - len(todo)} cached", flush=True)
+    step = max(1, (os.cpu_count() or 1))
+    for b0 in range(0, len(todo), step):
+        batch = todo[b0 : b0 + step]
+        for k, r in zip(batch, Parallel(n_jobs=-1)(delayed(job)(*k) for k in batch)):
+            cache.put(f"L{k[0]}_p{k[1]}_n{n}", r)
+        print(f"analyze {len(keys) - len(todo) + b0 + len(batch)}/{len(keys)}", flush=True)
+    by = {k: cache.get(f"L{k[0]}_p{k[1]}_n{n}") for k in keys}
 
     # error-place view: for each error item, its first (most significant) wrong place
     ep = err_place[err_idx]
@@ -470,8 +520,9 @@ def cmd_analyze(cfg: dict[str, Any]) -> None:
         "paper_P2_mixed": p2,
         "curves": curves,
     }
-    (out / "analysis.json").write_text(json.dumps(summary, indent=2, default=float))
+    atomic_write_json(out / "analysis.json", summary)
     _plot(summary, out, n_layers, places)
+    stage.mark()
     print(json.dumps({k: summary[k] for k in ("n", "n_errors_parsed", "error_place_counts")}))
     print(json.dumps(primary, indent=2, default=float))
 
@@ -485,17 +536,22 @@ def _plot(summary: dict[str, Any], out: Path, n_layers: int, places: list[int]) 
 # --------------------------------------------------------------------------- reprompt
 
 
-def cmd_reprompt(cfg: dict[str, Any]) -> None:
+def cmd_reprompt(cfg: dict[str, Any], force: bool = False) -> None:
     from rfd.harness.generate import generate
     from rfd.harness.model import load
     from rfd.probing.probes import fit_probe
     from rfd.stats import cluster_bootstrap, safe_auroc
     from rfd.utils.seed import set_seed
 
-    set_seed(cfg["seed"])
     out = Path(cfg["out_dir"])
+    inputs = file_fingerprint(out / "collect.jsonl")
+    stage = StageMarker(out, "reprompt", inputs)
+    if stage.skip(force):
+        return
+    set_seed(cfg["seed"])
+    check_manifest(out, cfg["harness"]["model"])
     recs = list(read_jsonl(out / "collect.jsonl"))
-    acts = np.load(out / "acts_emit.npy", mmap_mode="r")[:, 0]  # '=' token, as Sun et al.
+    acts = open_array(out, "acts_emit")[:, 0]  # '=' token, as Sun et al.
     n = len(recs)
     seed = cfg["seed"]
     correct = np.array([r["correct"] for r in recs])
@@ -535,16 +591,21 @@ def cmd_reprompt(cfg: dict[str, Any]) -> None:
         prefixes.append(base + tok(follow, add_special_tokens=False)["input_ids"])
     new_pred = []
     bs = cfg["gen_batch_size"]
+    cache = ResultCache(out / "cache" / f"reprompt-{inputs}")
     for i in range(0, len(prefixes), bs):
-        outs = generate(
-            loaded.model,
-            tok,
-            prefixes[i : i + bs],
-            cfg["max_new_tokens"],
-            stop_at_final_answer=False,
-        )
-        # o.text is only the newly generated continuation after "<<a+b="
-        new_pred += [_parse_answer(o.text) for o in outs]
+
+        def run_batch(i: int = i) -> list[int | None]:
+            outs = generate(
+                loaded.model,
+                tok,
+                prefixes[i : i + bs],
+                cfg["max_new_tokens"],
+                stop_at_final_answer=False,
+            )
+            # o.text is only the newly generated continuation after "<<a+b="
+            return [_parse_answer(o.text) for o in outs]
+
+        new_pred += cache.get_or_compute(f"gen_{i}_bs{bs}_n{len(prefixes)}", run_batch)
     answers = np.array([recs[i]["answer"] for i in te])
     orig_ok = correct[te]
     re_ok = np.array([p == a for p, a in zip(new_pred, answers)])
@@ -580,7 +641,7 @@ def cmd_reprompt(cfg: dict[str, Any]) -> None:
             lambda i: conds["probe_selective"][i].mean() - re_ok[i].mean(), items, nb, seed
         ),
     }
-    write_jsonl(
+    atomic_write_jsonl(
         out / "reprompt.jsonl",
         [
             {
@@ -593,7 +654,8 @@ def cmd_reprompt(cfg: dict[str, Any]) -> None:
             for i, f, o, p, k in zip(te, flag, orig_ok, new_pred, re_ok)
         ],
     )
-    (out / "reprompt.json").write_text(json.dumps(res, indent=2, default=float))
+    atomic_write_json(out / "reprompt.json", res)
+    stage.mark()
     print(
         json.dumps(
             {k: v for k, v in res.items() if k != "detector_val_auroc_by_layer"},
@@ -613,18 +675,19 @@ def main() -> None:
     )
     ap.add_argument("--out", default=None)
     ap.add_argument("--n-per-length", type=int, default=None, help="debug: smaller error pilot")
+    ap.add_argument("--force", action="store_true", help="redo a stage that is already complete")
     args = ap.parse_args()
     cfg = _cfg(args.config, args.harness, args.out)
     if args.n_per_length:
         cfg["error_pilot"]["n_per_length"] = args.n_per_length
     if args.cmd == "pilot":
-        cmd_pilot(cfg)
+        cmd_pilot(cfg, args.force)
     elif args.cmd == "collect":
-        cmd_collect(cfg, args.limit)
+        cmd_collect(cfg, args.limit, args.force)
     elif args.cmd == "analyze":
-        cmd_analyze(cfg)
+        cmd_analyze(cfg, args.force)
     else:
-        cmd_reprompt(cfg)
+        cmd_reprompt(cfg, args.force)
 
 
 if __name__ == "__main__":

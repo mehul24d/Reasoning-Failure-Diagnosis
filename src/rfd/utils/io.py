@@ -21,11 +21,18 @@ def write_jsonl(path: str | Path, records: Iterable[dict[str, Any]]) -> None:
 
 
 def read_jsonl(path: str | Path) -> Iterator[dict[str, Any]]:
+    """Records of a JSONL file. A truncated LAST line (a write killed mid-line)
+    is dropped with a warning; a malformed line anywhere else is an error."""
     with Path(path).open("r") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
+        lines = [ln.strip() for ln in f]
+    lines = [ln for ln in lines if ln]
+    for k, line in enumerate(lines):
+        try:
+            yield json.loads(line)
+        except json.JSONDecodeError:
+            if k != len(lines) - 1:
+                raise
+            print(f"[read_jsonl] {path}: dropping truncated last line")
 
 
 def device_for(preference: str = "auto") -> str:

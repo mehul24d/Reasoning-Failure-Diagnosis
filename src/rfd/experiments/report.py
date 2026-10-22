@@ -14,6 +14,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from rfd.utils.resume import atomic_write_text, results_path
+
 MIN_METRIC = 0.75  # held-out AUROC / balanced accuracy threshold
 MIN_RECOVERY = 0.20  # gold-value top-1 in failures
 MIN_EFFECT = 0.05  # 5 points of net accuracy gain
@@ -53,6 +55,14 @@ def phase0(res: Path) -> list[str]:
             f"| TL vs HF logits top-1 agreement | {eq['tl_logits_top1_agreement']:.4f} | ≥ 0.99 | {eq['pass']['tl_logits_top1']} |",
             f"| padded batch vs single, median rel. error | {eq['padding_rel_err_median']:.2e} | < 0.01 | {eq['pass']['padding']} |",
             f"| teacher-forced argmax reproduces greedy tokens | {eq['greedy_tf_agreement']:.4f} ({eq['greedy_tf_n_tokens']} tokens) | ≥ 0.99 | {eq['pass']['greedy_tf']} |",
+        ]
+        if "generation_config" in eq:  # checks added by phase-0 amendment 1
+            g = eq["generation_config"]
+            lines += [
+                f"| effective generation config is pure greedy (checkpoint: {g['checkpoint']}) | {g['effective']} | do_sample False, no penalty / temperature / top-p / top-k | {eq['pass']['generation_config_greedy']} |",
+                f"| chat prompts carry one BOS | {eq.get('prompt_bos_counts', 'n/a')} | 1 each | {eq['pass']['single_bos']} |",
+            ]
+        lines += [
             "",
         ]
     pr = _load(res / "traces" / "parse_report.json")
@@ -282,7 +292,7 @@ def main() -> None:
     ap.add_argument("--results", default="results")
     ap.add_argument("--out", default="docs/BASELINE_REPORT_TABLES.md")
     args = ap.parse_args()
-    res = Path(args.results)
+    res = results_path(args.results)
     lines = [
         "# Baseline report: generated tables",
         "",
@@ -293,7 +303,10 @@ def main() -> None:
     ]
     for section in (phase0, baseline_a, baseline_b, pilot):
         lines += section(res)
-    Path(args.out).write_text("\n".join(lines) + "\n")
+    text = "\n".join(lines) + "\n"
+    Path(args.out).write_text(text)
+    if res.exists():  # a copy next to the results (e.g. on Drive)
+        atomic_write_text(res / "BASELINE_REPORT_TABLES.md", text)
     print(f"wrote {args.out}")
 
 

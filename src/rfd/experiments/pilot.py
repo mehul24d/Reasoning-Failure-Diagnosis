@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -24,8 +25,17 @@ import numpy as np
 
 from rfd.probing.probes import fit_probe, grouped_oof_scores, metric
 from rfd.stats import cluster_bootstrap
-from rfd.utils.config import load_yaml
-from rfd.utils.io import read_jsonl, write_jsonl
+from rfd.utils.config import load_run_config
+from rfd.utils.io import read_jsonl
+from rfd.utils.resume import (
+    ResultCache,
+    StageMarker,
+    atomic_write_json,
+    atomic_write_jsonl,
+    check_manifest,
+    file_fingerprint,
+    open_array,
+)
 
 OPS = ["+", "-", "*", "/"]
 ERRS = ["none", "planning", "binding", "arithmetic"]
@@ -39,13 +49,7 @@ VARIABLES = {
 
 
 def load_cfg(path: str, harness: str | None, out: str | None, traces: str | None) -> dict[str, Any]:
-    cfg = load_yaml(path)
-    cfg["harness"] = load_yaml(harness or cfg["harness_config"])
-    if out:
-        cfg["out_dir"] = out
-    if traces:
-        cfg["traces_dir"] = traces
-    return cfg
+    return load_run_config(path, harness, out, traces)
 
 
 def _labels(steps: list[dict]) -> dict[str, tuple[np.ndarray, np.ndarray]]:
@@ -80,15 +84,19 @@ def _bucket(pos: np.ndarray, n: int) -> np.ndarray:
 # --------------------------------------------------------------------------- readability
 
 
-def cmd_readability(cfg: dict[str, Any]) -> None:
+def cmd_readability(cfg: dict[str, Any], force: bool = False) -> None:
     from joblib import Parallel, delayed
 
     out = Path(cfg["out_dir"])
-    out.mkdir(parents=True, exist_ok=True)
     tdir = Path(cfg["traces_dir"])
+    inputs = file_fingerprint(tdir / "traces.jsonl", tdir / "steps.jsonl", tdir / "acts_index.json")
+    stage = StageMarker(out, "readability", inputs)
+    if stage.skip(force):
+        return
+    out.mkdir(parents=True, exist_ok=True)
     steps = list(read_jsonl(tdir / "steps.jsonl"))
     traces = {t["uid"]: t for t in read_jsonl(tdir / "traces.jsonl")}
-    acts = np.load(tdir / "acts_steps.npy", mmap_mode="r")
+    acts = open_array(tdir, "acts_steps")
     n_layers = acts.shape[1]
     seed, C, nb = cfg["seed"], cfg["probe"]["C"], cfg["n_boot"]
     split = np.array([s["split"] for s in steps])
@@ -139,7 +147,16 @@ def cmd_readability(cfg: dict[str, Any]) -> None:
         for L in range(n_layers)
         for sh in (False, True)
     ]
-    res = Parallel(n_jobs=-1, verbose=2)(delayed(job)(*j) for j in jobs)
+    cache = ResultCache(out / "cache" / f"readability-{inputs}")
+    key = lambda j: f"{j[0]}|{j[1]}|L{j[2]}|shuf{int(j[3])}"  # noqa: E731
+    todo = [j for j in jobs if not cache.has(key(j))]
+    step = max(1, os.cpu_count() or 1)
+    for b0 in range(0, len(todo), step):
+        batch = todo[b0 : b0 + step]
+        for j, r in zip(batch, Parallel(n_jobs=-1)(delayed(job)(*j) for j in batch)):
+            cache.put(key(j), r)
+        print(f"readability {len(jobs) - len(todo) + b0 + len(batch)}/{len(jobs)}", flush=True)
+    res = [cache.get(key(j)) for j in jobs]
     by = {(r["var"], r["kind"], r["layer"], r["shuffle"]): r for r in res}
 
     summary: dict[str, Any] = {
@@ -274,8 +291,8 @@ def cmd_readability(cfg: dict[str, Any]) -> None:
             "op_step_position_prior_rate": float(np.mean(hit_prior)) if hit_prior else None,
         }
     summary["rq3"] = rq3
-    (out / "readability.json").write_text(json.dumps(summary, indent=2, default=float))
-    write_jsonl(
+    atomic_write_json(out / "readability.json", summary)
+    atomic_write_jsonl(
         out / "content_failures.jsonl",
         [
             {
@@ -300,6 +317,7 @@ def cmd_readability(cfg: dict[str, Any]) -> None:
         cols,
         chance={v: 0.5 if VARIABLES[v][1] == 2 else 0.25 for v in VARIABLES},
     )
+    stage.mark()
     for v, r in summary["variables"].items():
         lg = r["logistic"]
         print(
@@ -317,16 +335,24 @@ def cmd_readability(cfg: dict[str, Any]) -> None:
 # --------------------------------------------------------------------------- sample
 
 
-def cmd_sample(cfg: dict[str, Any]) -> None:
+def cmd_sample(cfg: dict[str, Any], force: bool = False) -> None:
+    import hashlib
+
     import torch
 
     from rfd.generation.answer_extraction import extract_predicted_answer, is_correct
     from rfd.harness.model import load
     from rfd.utils.seed import set_seed
 
-    set_seed(cfg["seed"])
     out = Path(cfg["out_dir"])
     tdir = Path(cfg["traces_dir"])
+    inputs = file_fingerprint(out / "content_failures.jsonl")
+    stage = StageMarker(out, "sample", inputs)
+    if stage.skip(force):
+        return
+    set_seed(cfg["seed"])
+    check_manifest(out, cfg["harness"]["model"])
+    cache = ResultCache(out / "cache" / f"sample-{inputs}")
     traces = {t["uid"]: t for t in read_jsonl(tdir / "traces.jsonl")}
     fails = list(read_jsonl(out / "content_failures.jsonl"))
     loaded = load(cfg["harness"]["model"])
@@ -334,7 +360,12 @@ def cmd_sample(cfg: dict[str, Any]) -> None:
     k, T = cfg["sample"]["k"], cfg["sample"]["temperature"]
     rows = []
     for f in fails:
+        if cache.has(f["uid"]):
+            rows.append(cache.get(f["uid"]))
+            continue
         t = traces[f["uid"]]
+        # per-item seed: the samples do not depend on where a restart resumed
+        torch.manual_seed(cfg["seed"] + int(hashlib.sha1(f["uid"].encode()).hexdigest()[:8], 16))
         ids = torch.tensor([t["prompt_ids"]] * k, device=model.device)
         with torch.no_grad():
             o = model.generate(
@@ -351,27 +382,37 @@ def cmd_sample(cfg: dict[str, Any]) -> None:
         texts = tok.batch_decode(o[:, ids.shape[1] :], skip_special_tokens=True)
         n_ok = sum(is_correct(extract_predicted_answer(x), str(t["gold_answer"])) for x in texts)
         rows.append({"uid": f["uid"], "n_correct_of_k": int(n_ok), "k": k, "stable": n_ok == 0})
-    write_jsonl(out / "stability.jsonl", rows)
+        cache.put(f["uid"], rows[-1])
+    atomic_write_jsonl(out / "stability.jsonl", rows)
+    stage.mark()
     print(json.dumps({"n": len(rows), "n_stable": sum(r["stable"] for r in rows)}))
 
 
 # --------------------------------------------------------------------------- repair
 
 
-def cmd_repair(cfg: dict[str, Any]) -> None:
+def cmd_repair(cfg: dict[str, Any], force: bool = False) -> None:
     import torch
 
     from rfd.harness.model import library_versions, load
     from rfd.steering.engine import SteerSpec, random_directions, run_condition
     from rfd.utils.seed import set_seed
 
-    set_seed(cfg["seed"])
     out = Path(cfg["out_dir"])
     tdir = Path(cfg["traces_dir"])
+    inputs = file_fingerprint(
+        tdir / "traces.jsonl", out / "readability.json", out / "content_failures.jsonl"
+    )
+    stage = StageMarker(out, "repair", inputs)
+    if stage.skip(force):
+        return
+    set_seed(cfg["seed"])
+    check_manifest(out, cfg["harness"]["model"])
+    cache = ResultCache(out / "cache" / f"repair-{inputs}")
     steps = list(read_jsonl(tdir / "steps.jsonl"))
     traces = list(read_jsonl(tdir / "traces.jsonl"))
     tix = {t["uid"]: i for i, t in enumerate(traces)}
-    acts = np.load(tdir / "acts_steps.npy", mmap_mode="r")
+    acts = open_array(tdir, "acts_steps")
     summ = json.loads((out / "readability.json").read_text())
     fails = list(read_jsonl(out / "content_failures.jsonl"))
     labels = _labels(steps)
@@ -522,9 +563,20 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
         mult: float,
         layer_key: str = "L",
         rand: np.ndarray | None = None,
+        tag: str = "",
     ) -> np.ndarray:
         """Final correctness after the edit at each item's first deviating step;
-        `changed` records which items' continuations the edit altered at all."""
+        `changed` records which items' continuations the edit altered at all.
+        Each (condition, strength) result is cached under `tag`."""
+        ck = f"{tag}|{vec_key}|{mult}|{layer_key}|bs{bs}"
+        uids = [b["trace"]["uid"] for b in sub]
+        if cache.has(ck):
+            r = cache.get(ck)
+            if r["uids"] != uids:
+                raise RuntimeError(f"cached condition {ck} was run on other items")
+            changed[:] = False
+            changed[: len(sub)] = r["changed"]
+            return np.array(r["new"], bool)
         new = np.zeros(len(sub), bool)
         changed[:] = False
         by_layer: dict[int, list[int]] = {}
@@ -558,6 +610,10 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
             for i, r in zip(idx, res):
                 new[i] = r.correct
                 changed[i] = r.diverged
+        cache.put(
+            ck,
+            {"uids": uids, "new": new.tolist(), "changed": changed[: len(sub)].tolist()},
+        )
         return new
 
     def rates(sub: list[dict], new: np.ndarray) -> dict[str, Any]:
@@ -581,7 +637,7 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
     # strength selection on TRAIN templates, oracle content condition
     sel = []
     for m in cfg["repair"]["strength_multiples"]:
-        new = run(train_b, "oracle", m)
+        new = run(train_b, "oracle", m, tag="train")
         r = rates(train_b, new)
         sel.append(
             {
@@ -611,7 +667,7 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
     }
     per_item = []
     for name, (key, lk) in conds.items():
-        new = run(test_b, key, best, lk)
+        new = run(test_b, key, best, lk, tag="test")
         results[name] = rates(test_b, new)
         per_item += [
             {"cond": name, "uid": b["trace"]["uid"], "solved": b["solved"], "new_correct": bool(c)}
@@ -635,7 +691,7 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
     R = random_directions(d, cfg["repair"]["n_random"], 1.0, seed + 500).numpy()
     nulls = []
     for k in range(len(R)):
-        new = run(test_b, "oracle", best, "L", rand=R[k])
+        new = run(test_b, "oracle", best, "L", rand=R[k], tag=f"test|random{k}")
         solved = np.array([b["solved"] for b in test_b])
         nulls.append(
             {
@@ -657,8 +713,8 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
             for name in conds
         },
     }
-    (out / "repair.json").write_text(json.dumps(results, indent=2, default=float))
-    write_jsonl(out / "repair_items.jsonl", per_item)
+    atomic_write_json(out / "repair.json", results)
+    atomic_write_jsonl(out / "repair_items.jsonl", per_item)
     from rfd.plotting import condition_bars
 
     rows = [
@@ -683,6 +739,7 @@ def cmd_repair(cfg: dict[str, Any]) -> None:
         out / "fig_pilot_repair_conditions.png",
         "PILOT: net gain on held-out distractor failures + matched solved set",
     )
+    stage.mark()
 
 
 def main() -> None:
@@ -693,14 +750,15 @@ def main() -> None:
     ap.add_argument("--out", default=None)
     ap.add_argument("--traces", default=None)
     ap.add_argument("--n-random", type=int, default=None)
+    ap.add_argument("--force", action="store_true", help="redo a stage that is already complete")
     args = ap.parse_args()
     cfg = load_cfg(args.config, args.harness, args.out, args.traces)
     if args.n_random is not None:
         cfg["repair"]["n_random"] = args.n_random
     {
-        "readability": lambda: cmd_readability(cfg),
-        "sample": lambda: cmd_sample(cfg),
-        "repair": lambda: cmd_repair(cfg),
+        "readability": lambda: cmd_readability(cfg, args.force),
+        "sample": lambda: cmd_sample(cfg, args.force),
+        "repair": lambda: cmd_repair(cfg, args.force),
     }[args.cmd]()
 
 

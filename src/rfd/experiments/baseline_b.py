@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -29,32 +30,36 @@ from rfd.stats import (
     safe_auprc,
     safe_auroc,
 )
-from rfd.utils.config import load_yaml
-from rfd.utils.io import read_jsonl, write_jsonl
+from rfd.utils.config import load_run_config
+from rfd.utils.io import read_jsonl
+from rfd.utils.resume import (
+    ResultCache,
+    StageMarker,
+    atomic_write_json,
+    atomic_write_jsonl,
+    atomic_write_text,
+    check_manifest,
+    file_fingerprint,
+    open_array,
+)
 
 
 def load_cfg(path: str, harness: str | None, out: str | None, traces: str | None) -> dict[str, Any]:
-    cfg = load_yaml(path)
-    cfg["harness"] = load_yaml(harness or cfg["harness_config"])
-    if out:
-        cfg["out_dir"] = out
-    if traces:
-        cfg["traces_dir"] = traces
-    return cfg
+    return load_run_config(path, harness, out, traces)
 
 
 def _load_traces(tdir: Path) -> tuple[list[dict], dict[str, np.ndarray], list[dict]]:
     traces = list(read_jsonl(tdir / "traces.jsonl"))
     steps = list(read_jsonl(tdir / "steps.jsonl"))
     acts = {
-        "last": np.load(tdir / "acts_last.npy", mmap_mode="r"),
-        "question": np.load(tdir / "acts_question.npy", mmap_mode="r"),
+        "last": open_array(tdir, "acts_last"),
+        "question": open_array(tdir, "acts_question"),
     }
     # first step token of each trace (traces without steps fall back to the last token)
     first = {}
     for k, s in enumerate(steps):
         first.setdefault(s["uid"], k)
-    a_steps = np.load(tdir / "acts_steps.npy", mmap_mode="r")
+    a_steps = open_array(tdir, "acts_steps")
     idx = [first.get(t["uid"], -1) for t in traces]
     fs = np.stack(
         [a_steps[k] if k >= 0 else acts["last"][i] for i, k in enumerate(idx)]
@@ -70,14 +75,23 @@ def _auroc_ci(y: np.ndarray, s: np.ndarray, groups: np.ndarray, nb: int, seed: i
 # --------------------------------------------------------------------------- probe
 
 
-def cmd_probe(cfg: dict[str, Any]) -> None:
+def _traces_inputs(tdir: Path) -> str:
+    return file_fingerprint(tdir / "traces.jsonl", tdir / "steps.jsonl", tdir / "acts_index.json")
+
+
+def cmd_probe(cfg: dict[str, Any], force: bool = False) -> None:
     from joblib import Parallel, delayed
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.linear_model import LogisticRegression
 
     out = Path(cfg["out_dir"])
+    tdir = Path(cfg["traces_dir"])
+    inputs = _traces_inputs(tdir)
+    stage = StageMarker(out, "probe", inputs)
+    if stage.skip(force):
+        return
     out.mkdir(parents=True, exist_ok=True)
-    traces, acts, _ = _load_traces(Path(cfg["traces_dir"]))
+    traces, acts, _ = _load_traces(tdir)
     y = np.array([not t["correct"] for t in traces], int)  # 1 = failure (Yuan: wrong = 1)
     groups = np.array([t["template_id"] for t in traces])
     split = np.array([t["split"] for t in traces])
@@ -98,8 +112,18 @@ def cmd_probe(cfg: dict[str, Any]) -> None:
 
     jobs = [(p, L, False) for p in cfg["probe"]["positions"] for L in range(n_layers)]
     jobs += [("last", L, True) for L in range(n_layers)]
-    vals = Parallel(n_jobs=-1, verbose=2)(delayed(layer_cv)(*j) for j in jobs)
-    cv = {(p, L, sh): v for (p, L, sh), v in zip(jobs, vals)}
+    # each CV job is cached when its batch finishes, so a restart refits only the rest
+    cache = ResultCache(out / "cache" / f"probe_cv-{inputs}")
+    key = lambda j: f"{j[0]}_L{j[1]}_shuf{int(j[2])}"  # noqa: E731
+    todo = [j for j in jobs if not cache.has(key(j))]
+    step = max(1, os.cpu_count() or 1)
+    for b0 in range(0, len(todo), step):
+        batch = todo[b0 : b0 + step]
+        for j, v in zip(batch, Parallel(n_jobs=-1)(delayed(layer_cv)(*j) for j in batch)):
+            cache.put(key(j), v)
+        print(f"probe CV {len(jobs) - len(todo) + b0 + len(batch)}/{len(jobs)}", flush=True)
+    cv = {j: cache.get(key(j)) for j in jobs}
+    cv = {j: (float("nan") if v is None else v) for j, v in cv.items()}
     curves = {p: [cv[(p, L, False)] for L in range(n_layers)] for p in cfg["probe"]["positions"]}
     shuffled_curve = [cv[("last", L, True)] for L in range(n_layers)]
 
@@ -201,9 +225,10 @@ def cmd_probe(cfg: dict[str, Any]) -> None:
     base["tfidf_trace_text"] = {"test_auroc": _auroc_ci(y[te], s_txt, groups[te], nb, seed)}
     results["baselines"] = base
 
-    (out / "probe.json").write_text(json.dumps(results, indent=2, default=float))
-    np.savez(out / "directions.npz", **{k: np.asarray(v) for k, v in directions.items()})
-    (out / "directions_meta.json").write_text(
+    atomic_write_json(out / "probe.json", results)
+    _atomic_savez(out / "directions.npz", {k: np.asarray(v) for k, v in directions.items()})
+    atomic_write_text(
+        out / "directions_meta.json",
         json.dumps(
             {
                 "layer": int(directions["layer"]),
@@ -216,7 +241,7 @@ def cmd_probe(cfg: dict[str, Any]) -> None:
                 ),
             },
             indent=2,
-        )
+        ),
     )
     from rfd.plotting import auroc_by_layer
 
@@ -230,6 +255,7 @@ def cmd_probe(cfg: dict[str, Any]) -> None:
         out / "fig_b_probe_auroc_by_layer.png",
         "Failure probe, train-template CV AUROC by layer",
     )
+    stage.mark()
     print(
         json.dumps(
             {k: results[k] for k in ("n_traces", "failure_rate_test", "accuracy_test_by_variant")}
@@ -248,6 +274,12 @@ def cmd_probe(cfg: dict[str, Any]) -> None:
             round(r["logistic"]["test_auroc"]["lo"], 3),
             round(r["logistic"]["test_auroc"]["hi"], 3),
         )
+
+
+def _atomic_savez(path: Path, arrays: dict[str, np.ndarray]) -> None:
+    tmp = path.with_name(f".{path.name}.tmp{os.getpid()}.npz")
+    np.savez(tmp, **arrays)
+    os.replace(tmp, path)
 
 
 # --------------------------------------------------------------------------- steer
@@ -270,16 +302,22 @@ def natural_net(orig: np.ndarray, new: np.ndarray, p_wrong: float) -> float:
     return float(p_wrong * rep - (1 - p_wrong) * dmg)
 
 
-def cmd_steer(cfg: dict[str, Any]) -> None:
+def cmd_steer(cfg: dict[str, Any], force: bool = False) -> None:
     import torch
 
     from rfd.harness.model import library_versions, load
     from rfd.steering.engine import SteerSpec, outcome_rates, random_directions, run_condition
     from rfd.utils.seed import set_seed
 
-    set_seed(cfg["seed"])
     out = Path(cfg["out_dir"])
-    traces = list(read_jsonl(Path(cfg["traces_dir"]) / "traces.jsonl"))
+    tdir = Path(cfg["traces_dir"])
+    inputs = file_fingerprint(tdir / "traces.jsonl", out / "directions.npz")
+    stage = StageMarker(out, "steer", inputs)
+    if stage.skip(force):
+        return
+    set_seed(cfg["seed"])
+    check_manifest(out, cfg["harness"]["model"])
+    traces = list(read_jsonl(tdir / "traces.jsonl"))
     dirs = dict(np.load(out / "directions.npz"))
     L = int(dirs["layer"])
     mu_diff = torch.tensor(dirs["mu_correct_minus_wrong"], dtype=torch.float32)
@@ -319,15 +357,26 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
             return SteerSpec(L, "add", v, strength * norm, name=kind)
         raise ValueError(kind)
 
-    def evaluate(idx: np.ndarray, spec: SteerSpec) -> dict[str, Any]:
-        sub = [traces[i] for i in idx]
-        res = run_condition(model, tok, sub, spec, max_new, batch_size=bs, eos_ids=eos)
-        new = np.array([r.correct for r in res])
-        return {
-            "new_correct": new,
-            "n_diverged": int(sum(r.diverged for r in res)),
-            "texts": [r.text for r in res],
-        }
+    # one cache file per evaluated condition: a restart re-runs only unfinished ones
+    cache = ResultCache(out / "cache" / f"steer-{inputs}")
+
+    def evaluate(
+        idx: np.ndarray, spec: SteerSpec, key: str, keep_texts: bool = False
+    ) -> dict[str, Any]:
+        def compute() -> dict[str, Any]:
+            sub = [traces[i] for i in idx]
+            res = run_condition(model, tok, sub, spec, max_new, batch_size=bs, eos_ids=eos)
+            return {
+                "uids": [t["uid"] for t in sub],
+                "new_correct": [bool(r.correct) for r in res],
+                "n_diverged": int(sum(r.diverged for r in res)),
+                "texts": [r.text for r in res] if keep_texts else None,
+            }
+
+        r = cache.get_or_compute(f"{key}|bs{bs}", compute)
+        if r["uids"] != [traces[i]["uid"] for i in idx]:
+            raise RuntimeError(f"cached condition {key} was run on other traces")
+        return {**r, "new_correct": np.array(r["new_correct"], bool)}
 
     kinds = {
         "yuan_project": sc["project_alphas"],
@@ -344,7 +393,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
         "versions": library_versions(),
     }
     # 0. numerical-noise control: zero strength must not change any trace
-    zero = evaluate(e_test, spec_for("add_diffmeans", 0.0))
+    zero = evaluate(e_test, spec_for("add_diffmeans", 0.0), "zero")
     log["zero_strength_n_diverged"] = zero["n_diverged"]
 
     # 1. strength selection on TRAIN templates
@@ -352,7 +401,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
     for kind, grid in kinds.items():
         rows = []
         for s in grid:
-            r = evaluate(e_train, spec_for(kind, s))
+            r = evaluate(e_train, spec_for(kind, s), f"train|{kind}|{s}")
             net = natural_net(correct[e_train], r["new_correct"], p_wrong_train)
             rows.append(
                 {
@@ -373,7 +422,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
     per_trace = []
     for kind in kinds:
         s = selection[kind]["selected"]
-        r = evaluate(e_test, spec_for(kind, s))
+        r = evaluate(e_test, spec_for(kind, s), f"test|{kind}|{s}", keep_texts=True)
         orig = correct[e_test]
         new = r["new_correct"]
         items_groups = groups[e_test]
@@ -405,7 +454,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
         else:
             rand = random_directions(d, sc["n_random"], 1.0, seed + 200 + len(kind))
         for k in range(sc["n_random"]):
-            rr = evaluate(e_test, spec_for(kind, s, rand[k]))
+            rr = evaluate(e_test, spec_for(kind, s, rand[k]), f"test|{kind}|{s}|random{k}")
             null_nets.append(natural_net(orig, rr["new_correct"], p_wrong_test))
             rates = outcome_rates(orig, rr["new_correct"])
             null_rep.append(rates["repair"])
@@ -442,7 +491,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
             flush=True,
         )
     log["test"] = test
-    write_jsonl(out / "steer_test_traces.jsonl", per_trace)
+    atomic_write_jsonl(out / "steer_test_traces.jsonl", per_trace)
 
     # 3. descriptive sweep on TEST with a random band (figure only)
     sweep = {}
@@ -457,7 +506,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
         }
         band_lo, band_hi = [], []
         for s in grid:
-            r = evaluate(e_test, spec_for(kind, s))
+            r = evaluate(e_test, spec_for(kind, s), f"test|{kind}|{s}")
             rates = outcome_rates(correct[e_test], r["new_correct"])
             rows["repair"].append(rates["repair"])
             rows["damage"].append(rates["damage"])
@@ -467,7 +516,9 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
                 nets = [
                     natural_net(
                         correct[e_test],
-                        evaluate(e_test, spec_for(kind, s, rand[k]))["new_correct"],
+                        evaluate(e_test, spec_for(kind, s, rand[k]), f"sweep|{kind}|{s}|band{k}")[
+                            "new_correct"
+                        ],
                         p_wrong_test,
                     )
                     for k in range(sc["n_band"])
@@ -478,7 +529,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
             rows["null_lo"], rows["null_hi"] = band_lo, band_hi
         sweep[kind] = rows
     log["sweep_test_descriptive"] = sweep
-    (out / "steer.json").write_text(json.dumps(log, indent=2, default=float))
+    atomic_write_json(out / "steer.json", log)
     from rfd.plotting import strength_sweep
 
     strength_sweep(
@@ -487,6 +538,7 @@ def cmd_steer(cfg: dict[str, Any]) -> None:
         f"Steering along the failure direction (layer {L}), held-out test templates; "
         "grey band = min-max over random directions",
     )
+    stage.mark()
 
 
 def main() -> None:
@@ -498,6 +550,7 @@ def main() -> None:
     ap.add_argument("--traces", default=None)
     ap.add_argument("--n-random", type=int, default=None, help="debug: fewer random directions")
     ap.add_argument("--per-class", type=int, default=None, help="debug: smaller eval sets")
+    ap.add_argument("--force", action="store_true", help="redo a stage that is already complete")
     args = ap.parse_args()
     cfg = load_cfg(args.config, args.harness, args.out, args.traces)
     if args.n_random is not None:
@@ -506,7 +559,10 @@ def main() -> None:
     if args.per_class is not None:
         cfg["steer"]["n_eval_train_per_class"] = args.per_class
         cfg["steer"]["n_eval_test_per_class"] = args.per_class
-    {"probe": lambda: cmd_probe(cfg), "steer": lambda: cmd_steer(cfg)}[args.cmd]()
+    {
+        "probe": lambda: cmd_probe(cfg, args.force),
+        "steer": lambda: cmd_steer(cfg, args.force),
+    }[args.cmd]()
 
 
 if __name__ == "__main__":

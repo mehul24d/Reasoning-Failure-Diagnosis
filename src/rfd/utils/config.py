@@ -37,3 +37,27 @@ def load_experiment(experiment_config_path: str | Path) -> dict[str, Any]:
                 sub_path = base / sub_path
             exp[key.replace("_config", "")] = load_yaml(sub_path)
     return exp
+
+
+def load_run_config(
+    path: str | Path,
+    harness: str | None = None,
+    out: str | None = None,
+    traces: str | None = None,
+) -> dict[str, Any]:
+    """An experiment config with its harness (model) config inlined under
+    "harness", CLI overrides applied, and every results path mapped into the
+    results root (RFD_RESULTS_DIR, default results/; see rfd.utils.resume)."""
+    from rfd.utils.resume import results_path
+
+    cfg = load_yaml(path)
+    cfg["harness"] = load_yaml(harness or cfg["harness_config"])
+    cfg["harness"].setdefault("acts_dtype", "float16")
+    if out:
+        cfg["out_dir"] = out
+    if traces:
+        cfg["traces_dir"] = traces
+    for key in ("out_dir", "traces_dir"):
+        if key in cfg:
+            cfg[key] = str(results_path(cfg[key]))
+    return cfg
