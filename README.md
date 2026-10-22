@@ -45,6 +45,7 @@ but steering along it barely repairs). See `docs/BASELINE_REPORT.md`.
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt && pip install -e . --no-deps
+# + requirements-legacy.txt for the archived SAE code (make install does both)
 make test-fast          # unit tests: synthetic data, no GPU, no network
 make debug              # tiny end-to-end run with Qwen2.5-0.5B -> results/debug/ (not reported)
 ```
@@ -88,10 +89,14 @@ the version's output (DECISIONS D16).
      Gemma-2 licence, attached to the notebook.
 2. **First session.** *Save Version → Save & Run All*. The notebook:
    - clones the repo to `/tmp`;
-   - installs the pinned requirements under a constraints file frozen from
-     Kaggle's own torch / triton / nvidia-* packages, so the preinstalled CUDA
-     torch is never replaced (pip fails instead), and asserts
-     `torch.cuda.is_available()`;
+   - installs with `scripts/install_gpu_env.py`:
+     - Kaggle's torch / triton / nvidia-* are frozen in a constraints file, so
+       the preinstalled CUDA torch is never replaced (pip fails instead);
+     - wheels only, so nothing is compiled;
+     - the results-relevant libraries at their pinned versions;
+     - Kaggle's own numpy / scipy / pandas / matplotlib are kept;
+     - it writes `install_report.json`;
+   - asserts `torch.cuda.is_available()`;
    - runs the tests and `make smoke`, stopping on any failure;
    - runs the phases in order until the session budget (11.5 h minus 25 min
      for zipping) runs out.
@@ -153,8 +158,8 @@ results/         committed measurement files (json/jsonl/csv/png); *.npy caches 
 ## Tests
 
 ```bash
-make test        # everything, including tests/legacy (marker: legacy)
-make test-fast   # current code only
+make test        # everything, including tests/legacy (needs requirements-legacy.txt)
+make test-fast   # current code only (no legacy dependencies needed)
 ```
 
 ## Archived: SAE phase segmentation (deprecated)

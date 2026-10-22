@@ -437,3 +437,61 @@ assembled activation arrays, so Drive stores each array once, as shards.
   debug run. Restore copied 56 files, the phases ran under the deadline runner,
   and the zip and status files were written.
 - The install and smoke cells need Kaggle's GPU image and were not run.
+
+## D17 (2026-10-22) Installing on preinstalled GPU images: wheels only, image's scientific stack kept
+
+**What failed.** On Kaggle, the D16 install step stopped with
+`Preparing metadata (pyproject.toml) did not run successfully`. The step was
+`pip install -r requirements.txt` without torch, constrained to Kaggle's torch
+family. The pasted log did not name the package, because `pip -q` hides the
+"Collecting …" lines.
+
+**Diagnosis (local, reproducible).**
+- Checked every pin for prebuilt Linux wheels on Python 3.10-3.13.
+  - On **Python 3.13**, `scipy==1.13.1`, `pandas==2.2.2` and
+    `matplotlib==3.9.0` have no wheels, so pip compiles them from source.
+  - `python-louvain==0.16`, which only the archived legacy code uses, has no
+    wheel on any Python.
+  - `transformers-stream-generator`, a transformer-lens dependency, is
+    source-only but pure Python and builds fine.
+  - `scikit-learn==1.9.0` needs Python ≥ 3.11.
+- In a Python 3.13 venv that mimics a GPU image (torch 2.14.1 and the current
+  numpy / scipy / pandas / matplotlib preinstalled), the old command fails with
+  **the same message**. scipy's Meson build needs a Fortran compiler. So the
+  Kaggle image's Python has no wheel for at least one pin. Which one cannot be
+  certain from the truncated log, but the new install avoids every
+  source-build path above.
+
+**Fix.**
+- `requirements.txt` no longer lists the legacy packages; they are in
+  `requirements-legacy.txt`. `make install` installs both. `make test-fast`
+  ignores `tests/legacy`. No current code imports a legacy-only package.
+- `scripts/install_gpu_env.py`, used by both notebooks:
+  - The image's torch, torchvision, torchaudio, triton and nvidia-* are frozen
+    as constraints, as in D16.
+  - It installs with `--only-binary=:all:`, so nothing is compiled; the
+    exception is `transformers-stream-generator`.
+  - The results-relevant libraries are installed at their **exact pins**:
+    transformers, transformer-lens, datasets, huggingface-hub, tokenizers,
+    safetensors, accelerate and scikit-learn.
+  - The other pinned packages keep the image's preinstalled version when there
+    is one. pip may still upgrade them, from wheels only, if a pin requires it.
+  - It shows full pip output and writes `install_report.json` with every
+    resulting version. The versions also go into each experiment's `versions`
+    field, as before.
+- **Deviation from "pinned versions everywhere".** On Kaggle and Colab,
+  numpy / scipy / pandas / matplotlib / joblib / tqdm / PyYAML may differ from
+  the pins, and torch is the image's (as in D16). These packages do not define
+  the model or the probes. scipy's L-BFGS, which scikit-learn's logistic
+  regression uses, can differ in the last digits across versions. The versions
+  used are recorded with every result.
+
+**Tested.**
+- In the Python 3.13 venv, the script installs cleanly:
+  - torch stays 2.14.1, and numpy / scipy / pandas keep their image versions;
+  - transformers 5.16.1, transformer-lens 3.9.0 and scikit-learn 1.9.0 are
+    exact;
+  - all 77 current tests pass in that environment.
+- `tests/test_install_gpu_env.py` covers the install plan and the
+  requirements split.
+- Not yet run on Kaggle itself.
