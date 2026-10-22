@@ -102,12 +102,11 @@ def chat_ids(
     tokenizer: Any, messages: list[dict[str, str]], assistant_prefix: str = ""
 ) -> list[int]:
     """Token ids of the chat prompt (generation prompt added), plus an optional
-    teacher-forced start of the assistant turn. Templates without a system role
-    (Gemma-2) get the system text prepended to the first user turn."""
-    try:
-        text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    except Exception:  # noqa: BLE001 - jinja raises on unsupported roles
-        text = tokenizer.apply_chat_template(
-            merge_system(messages), tokenize=False, add_generation_prompt=True
-        )
+    teacher-forced start of the assistant turn. For templates without a system
+    role (Gemma-2; harness config `system_role: false`, set on the tokenizer by
+    rfd.harness.model.load) the system text is prepended to the first user turn.
+    The template's own BOS is kept; no second one is added."""
+    if not getattr(tokenizer, "rfd_system_role", True):
+        messages = merge_system(messages)
+    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     return tokenizer(text + assistant_prefix, add_special_tokens=False)["input_ids"]

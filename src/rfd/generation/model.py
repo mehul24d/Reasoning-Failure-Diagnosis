@@ -33,10 +33,18 @@ def load_model(model_cfg: dict[str, Any]) -> LoadedModel:
         model_cfg["model_name"],
         trust_remote_code=model_cfg.get("trust_remote_code", False),
     )
+    extra: dict[str, Any] = {}
+    if model_cfg.get("attn_implementation"):
+        extra["attn_implementation"] = model_cfg["attn_implementation"]
+    if device == "cuda":
+        # load shards straight onto the GPU: an fp32 2B model does not fit in
+        # host RAM next to its own upcast on a 12 GB Colab VM
+        extra["device_map"] = "cuda"
     model = AutoModelForCausalLM.from_pretrained(
         model_cfg["model_name"],
         dtype=dtype,
         trust_remote_code=model_cfg.get("trust_remote_code", False),
+        **extra,
     )
     model.to(device)
     model.eval()

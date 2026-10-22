@@ -137,6 +137,16 @@ def generate(
     return results
 
 
+def lm_logits(model: Any, hidden: torch.Tensor) -> torch.Tensor:
+    """LM head on final hidden states, in float32, including Gemma-2's final
+    logit softcapping (cap * tanh(logits / cap)), which the bare lm_head omits."""
+    logits = model.lm_head(hidden).float()
+    cap = getattr(model.config, "final_logit_softcapping", None)
+    if cap:
+        logits = torch.tanh(logits / cap) * cap
+    return logits
+
+
 def padded_offsets(prefixes: list[list[int]]) -> torch.Tensor:
     """Left-pad amount per row for a batch built from `prefixes`."""
     n = max(len(s) for s in prefixes)
@@ -196,7 +206,7 @@ def forward(
         lpn = torch.zeros((bs, n))
         nxt = torch.cat([ids[:, 1:], ids[:, -1:]], 1)
         for s0 in range(0, n, chunk):
-            logits = model.lm_head(hidden[:, s0 : s0 + chunk]).float()
+            logits = lm_logits(model, hidden[:, s0 : s0 + chunk])
             am[:, s0 : s0 + chunk] = logits.argmax(-1).cpu()
             lp = torch.log_softmax(logits, -1)
             lpn[:, s0 : s0 + chunk] = lp.gather(-1, nxt[:, s0 : s0 + chunk, None])[..., 0].cpu()

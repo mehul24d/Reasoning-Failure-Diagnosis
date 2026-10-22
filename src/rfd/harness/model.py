@@ -13,23 +13,41 @@ os.environ.setdefault("PYTORCH_MPS_LOW_WATERMARK_RATIO", "0.5")
 from rfd.generation.model import LoadedModel, load_model  # noqa: E402
 
 
+SAMPLING_FIELDS = ("do_sample", "temperature", "top_p", "top_k", "repetition_penalty")
+
+
 def resolve_dtype(model_cfg: dict[str, Any]) -> dict[str, Any]:
-    """dtype "auto": bfloat16 on CUDA, float16 on MPS, float32 on CPU."""
+    """dtype "auto": bfloat16 on CUDA GPUs that support it (float32 on e.g. a
+    T4), float16 on MPS, float32 on CPU."""
     if model_cfg.get("dtype", "auto") != "auto":
         return model_cfg
+    import torch
+
     from rfd.utils.io import device_for
 
     device = device_for(model_cfg.get("device", "auto"))
-    dtype = {"cuda": "bfloat16", "mps": "float16"}.get(device, "float32")
+    if device == "cuda":
+        dtype = "bfloat16" if torch.cuda.is_bf16_supported(including_emulation=False) else "float32"
+    else:
+        dtype = {"mps": "float16"}.get(device, "float32")
     return {**model_cfg, "dtype": dtype}
 
 
 def load(model_cfg: dict[str, Any]) -> LoadedModel:
+    """Model + tokenizer ready for greedy decoding. Gated checkpoints (Gemma-2)
+    authenticate through the HF_TOKEN environment variable, which
+    huggingface_hub reads itself; the token is never passed or logged here."""
     loaded = load_model(resolve_dtype(model_cfg))
     tok = loaded.tokenizer
     tok.padding_side = "left"
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
+    # chat templates without a system role (Gemma-2): prompts.chat_ids folds the
+    # system text into the first user turn instead of relying on a template error
+    tok.rfd_system_role = bool(model_cfg.get("system_role", True))
+    loaded.model.rfd_checkpoint_sampling = {
+        k: getattr(loaded.model.generation_config, k, None) for k in SAMPLING_FIELDS
+    }
     neutralize_generation_config(loaded.model)
     loaded.model.generation_config.pad_token_id = tok.pad_token_id
     return loaded
