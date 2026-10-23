@@ -1,0 +1,95 @@
+{
+  "harness": "configs/gemma2_2b_l4.yaml",
+  "model": "google/gemma-2-2b-it",
+  "checks": {
+    "attn_implementation": true,
+    "generation_config_greedy": true,
+    "single_bos": true,
+    "system_text_in_first_user_turn": true,
+    "gen_worst_case_fits": true,
+    "forward_worst_case_fits": true,
+    "acts_fit_float16": true,
+    "arith_batch_fits": true,
+    "final_answer_marker_present": true,
+    "zero_strength_no_divergence": true
+  },
+  "hf_token_set": true,
+  "device": "cuda",
+  "dtype": "torch.float32",
+  "attn_implementation": "eager",
+  "load_seconds": 7.0,
+  "weights_gb": 9.739183902740479,
+  "gpu": "NVIDIA L4",
+  "gpu_total_gb": 22.0343017578125,
+  "generation_config": {
+    "checkpoint": {
+      "do_sample": null,
+      "temperature": null,
+      "top_p": null,
+      "top_k": null,
+      "repetition_penalty": null
+    },
+    "effective": {
+      "do_sample": false,
+      "temperature": null,
+      "top_p": null,
+      "top_k": null,
+      "repetition_penalty": 1.0
+    },
+    "eos_token_id": [
+      1,
+      107
+    ],
+    "pad_token_id": 0,
+    "cache_implementation": "hybrid",
+    "greedy_neutral": true
+  },
+  "prompt_head": "<bos><start_of_turn>user\nYou are a careful math solver. Solve the problem step by step. Write each step on its own line, starting with 'Step k:'. Each step does exactly one arithmetic operation (+, -, *, /), written as '<number> <op> <number> = <number>' with plain numbers (no units or LaTeX inside the calculation). After the last step, write '",
+  "prompt_tokens": {
+    "min": 438,
+    "median": 474,
+    "max": 575
+  },
+  "gen_worst_case": {
+    "batch_size": 24,
+    "prompt_len": 575,
+    "new_tokens": 384,
+    "peak_gb": 14.707738876342773,
+    "seconds": 74.4,
+    "tokens_per_s": 123.8
+  },
+  "forward_worst_case": {
+    "batch_size": 8,
+    "seq_len": 959,
+    "peak_gb": 11.278154850006104,
+    "seconds": 5.9,
+    "resid_absmax": 1108.38525390625
+  },
+  "arith_batch": {
+    "batch_size": 32,
+    "peak_gb": 11.798116683959961
+  },
+  "sample_traces": [
+    {
+      "uid": "t000-i01-main",
+      "correct": false,
+      "text": "Step 1: Convert feet to inches: 10 feet * 12 inches/foot = 120 inches.\nStep 2: Convert inches to feet: 8 inches / 12 inches/foot = 0.67 feet.\nStep 3: Calculate the combined length of the remoras: 0.67 feet * 3 inches/foot = 2 inches.\nStep 4: Calculate the percentage: 2 inches / 120 inches * 100% = 1.67%.\nFinal Answer: 1.67 \n"
+    },
+    {
+      "uid": "t000-i01-noop",
+      "correct": true,
+      "text": "Step 1: The dolphin's total length is 10 feet = 120 inches.\nStep 2: The remoras' combined length is 8 * 3 inches = 24 inches.\nStep 3: The remoras' combined length is 24 inches.\nStep 4: The remoras' combined length is 24 / 120 = 0.2.\nStep 5: The percentage of the dolphin's body length is 0.2 * 100 = 20.\nFinal Answer: 20 \n"
+    },
+    {
+      "uid": "t000-i06-main",
+      "correct": true,
+      "text": "Step 1: Convert feet to inches: 90 feet * 12 inches/foot = 1080 inches.\nStep 2: Convert inches to feet: 36 inches / 12 inches/foot = 3 feet.\nStep 3: Calculate the total length of the remoras: 3 feet * 36 inches/foot = 108 inches.\nStep 4: Calculate the percentage of the dolphin's body length: (108 inches / 1080 inches) * 100% = 10%.\nFinal Answer: 10 \n"
+    },
+    {
+      "uid": "t000-i06-noop",
+      "correct": true,
+      "text": "Step 1: The dolphin's total length is 90 feet * 12 inches/foot = 1080 inches.\nStep 2: The remoras' combined length is 3 remoras * 36 inches/remora = 108 inches.\nStep 3: The remoras' combined length is 108 inches.\nStep 4: The remoras' combined length is 108 inches / 1080 inches = 0.1.\nStep 5: The percentage of the dolphin's body length is 0.1 * 100% = 10%.\nFinal Answer: 10 \n"
+    }
+  ],
+  "all_pass": true
+}

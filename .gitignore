@@ -36,3 +36,7 @@ results/legacy_pilot/
 
 # machine-local make overrides (PROFILE := reduced)
 local.mk
+
+# results/traces/traces.jsonl is 7.9 MB (over the 5 MB commit limit): the gzipped copy is committed.
+#   gunzip -k results/traces/traces.jsonl.gz   restores it for rerunning later stages locally.
+results/traces/traces.jsonl

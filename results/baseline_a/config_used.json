@@ -1,0 +1,57 @@
+{
+  "harness_config": "configs/gemma2_2b.yaml",
+  "out_dir": "/opt/rfd/results/baseline_a",
+  "seed": 42,
+  "op": "+",
+  "error_pilot": {
+    "digit_lengths": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "n_per_length": 128
+  },
+  "target_errors": 300,
+  "n_min": 2000,
+  "n_max": 6000,
+  "n_demos": 2,
+  "gen_batch_size": 32,
+  "collect_chunk": 256,
+  "max_new_tokens": 14,
+  "split": {
+    "train": 0.7,
+    "test": 0.3
+  },
+  "probe": {
+    "C": 0.1,
+    "cv_folds": 5,
+    "mlp_hidden": 512,
+    "n_shuffle": 1
+  },
+  "reprompt": {
+    "message": "That step looks suspicious. Let's re-do just this step:"
+  },
+  "n_boot": 10000,
+  "harness": {
+    "seed": 42,
+    "model": {
+      "model_name": "google/gemma-2-2b-it",
+      "device": "auto",
+      "dtype": "float32",
+      "attn_implementation": "eager",
+      "system_role": false,
+      "trust_remote_code": false
+    },
+    "generation": {
+      "do_sample": false,
+      "max_new_tokens": 384,
+      "batch_size": 24
+    },
+    "forward_batch_size": 8,
+    "acts_dtype": "float16",
+    "cache_dir": ".cache"
+  }
+}

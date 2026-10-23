@@ -1,0 +1,320 @@
+{
+  "layer": 20,
+  "norm_mu_diff": 28.57131576538086,
+  "n_eval_train": 64,
+  "n_eval_test": 80,
+  "p_wrong_train": 0.5703125,
+  "p_wrong_test": 0.5208333333333333,
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.9.1+cu129",
+    "transformers": "5.16.1",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.9.0",
+    "platform": "Linux-7.0.0-1014-gcp-x86_64-with-glibc2.39",
+    "transformer_lens": "3.9.0",
+    "datasets": "5.1.0"
+  },
+  "zero_strength_n_diverged": 0,
+  "selection_train": {
+    "yuan_project": {
+      "grid": [
+        {
+          "strength": 1.0,
+          "net_natural": -0.013427734375,
+          "repair": 0.0,
+          "damage": 0.03125,
+          "net": -0.015625,
+          "n_diverged": 9
+        },
+        {
+          "strength": 5.0,
+          "net_natural": -0.0224609375,
+          "repair": 0.03125,
+          "damage": 0.09375,
+          "net": -0.03125,
+          "n_diverged": 33
+        }
+      ],
+      "selected": 1.0
+    },
+    "add_diffmeans": {
+      "grid": [
+        {
+          "strength": 0.125,
+          "net_natural": 0.0,
+          "repair": 0.0,
+          "damage": 0.0,
+          "net": 0.0,
+          "n_diverged": 6
+        },
+        {
+          "strength": 0.5,
+          "net_natural": 0.0,
+          "repair": 0.0,
+          "damage": 0.0,
+          "net": 0.0,
+          "n_diverged": 20
+        },
+        {
+          "strength": 2.0,
+          "net_natural": -0.040283203125,
+          "repair": 0.0,
+          "damage": 0.09375,
+          "net": -0.046875,
+          "n_diverged": 45
+        },
+        {
+          "strength": 8.0,
+          "net_natural": -0.076416015625,
+          "repair": 0.125,
+          "damage": 0.34375,
+          "net": -0.109375,
+          "n_diverged": 64
+        }
+      ],
+      "selected": 0.125
+    },
+    "add_probe": {
+      "grid": [
+        {
+          "strength": 0.125,
+          "net_natural": 0.0,
+          "repair": 0.0,
+          "damage": 0.0,
+          "net": 0.0,
+          "n_diverged": 5
+        },
+        {
+          "strength": 0.5,
+          "net_natural": 0.00439453125,
+          "repair": 0.03125,
+          "damage": 0.03125,
+          "net": 0.0,
+          "n_diverged": 23
+        },
+        {
+          "strength": 2.0,
+          "net_natural": -0.01806640625,
+          "repair": 0.0625,
+          "damage": 0.125,
+          "net": -0.03125,
+          "n_diverged": 46
+        },
+        {
+          "strength": 8.0,
+          "net_natural": -0.18359375,
+          "repair": 0.03125,
+          "damage": 0.46875,
+          "net": -0.21875,
+          "n_diverged": 64
+        }
+      ],
+      "selected": 0.5
+    }
+  },
+  "test": {
+    "yuan_project": {
+      "strength": 1.0,
+      "repair": 0.0,
+      "damage": 0.0,
+      "net": 0.0,
+      "net_natural": 0.0,
+      "n_diverged": 4,
+      "repair_ci": {
+        "estimate": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "damage_ci": {
+        "estimate": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "net_natural_ci": {
+        "estimate": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "null": {
+        "n": 20,
+        "net_mean": 0.004166666666666665,
+        "net_q025": 0.0,
+        "net_q975": 0.02035156249999998,
+        "repair_mean": 0.013750000000000002,
+        "damage_mean": 0.00625,
+        "p_value_net_ge": 1.0
+      }
+    },
+    "add_diffmeans": {
+      "strength": 0.125,
+      "repair": 0.025,
+      "damage": 0.0,
+      "net": 0.012499999999999956,
+      "net_natural": 0.013020833333333332,
+      "n_diverged": 6,
+      "repair_ci": {
+        "estimate": 0.025,
+        "lo": 0.0,
+        "hi": 0.08108108108108109,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "damage_ci": {
+        "estimate": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "net_natural_ci": {
+        "estimate": 0.013020833333333332,
+        "lo": 0.0,
+        "hi": 0.04222972972972973,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "null": {
+        "n": 20,
+        "net_mean": 0.007369791666666665,
+        "net_q025": 0.0,
+        "net_q975": 0.026041666666666664,
+        "repair_mean": 0.01875,
+        "damage_mean": 0.005,
+        "p_value_net_ge": 0.42857142857142855
+      }
+    },
+    "add_probe": {
+      "strength": 0.5,
+      "repair": 0.075,
+      "damage": 0.05,
+      "net": 0.012499999999999956,
+      "net_natural": 0.015104166666666655,
+      "n_diverged": 21,
+      "repair_ci": {
+        "estimate": 0.075,
+        "lo": 0.0,
+        "hi": 0.17073170731707318,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "damage_ci": {
+        "estimate": 0.05,
+        "lo": 0.0,
+        "hi": 0.12121212121212122,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "net_natural_ci": {
+        "estimate": 0.015104166666666655,
+        "lo": -0.03720249187182328,
+        "hi": 0.07621951219512194,
+        "n_valid": 10000,
+        "n_clusters": 29
+      },
+      "null": {
+        "n": 20,
+        "net_mean": 0.0065624999999999946,
+        "net_q025": -0.022916666666666672,
+        "net_q975": 0.060065104166666605,
+        "repair_mean": 0.042499999999999996,
+        "damage_mean": 0.03250000000000001,
+        "p_value_net_ge": 0.2857142857142857
+      }
+    }
+  },
+  "sweep_test_descriptive": {
+    "yuan_project": {
+      "strengths": [
+        1.0,
+        5.0
+      ],
+      "repair": [
+        0.0,
+        0.025
+      ],
+      "damage": [
+        0.0,
+        0.075
+      ],
+      "net": [
+        0.0,
+        -0.022916666666666672
+      ],
+      "null_lo": null,
+      "null_hi": null
+    },
+    "add_diffmeans": {
+      "strengths": [
+        0.125,
+        0.5,
+        2.0,
+        8.0
+      ],
+      "repair": [
+        0.025,
+        0.05,
+        0.1,
+        0.175
+      ],
+      "damage": [
+        0.0,
+        0.1,
+        0.175,
+        0.35
+      ],
+      "net": [
+        0.013020833333333332,
+        -0.021875000000000012,
+        -0.031770833333333345,
+        -0.07656250000000003
+      ],
+      "null_lo": [
+        -1.197916666666667,
+        0.2083333333333326,
+        -4.583333333333335,
+        -16.458333333333336
+      ],
+      "null_hi": [
+        0.0,
+        2.7083333333333326,
+        4.322916666666663,
+        -11.66666666666667
+      ]
+    },
+    "add_probe": {
+      "strengths": [
+        0.125,
+        0.5,
+        2.0,
+        8.0
+      ],
+      "repair": [
+        0.0,
+        0.075,
+        0.075,
+        0.175
+      ],
+      "damage": [
+        0.0,
+        0.05,
+        0.15,
+        0.325
+      ],
+      "net": [
+        0.0,
+        0.015104166666666655,
+        -0.032812500000000015,
+        -0.06458333333333338
+      ],
+      "null_lo": null,
+      "null_hi": null
+    }
+  }
+}

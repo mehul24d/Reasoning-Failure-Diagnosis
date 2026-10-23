@@ -1,0 +1,29 @@
+{
+  "n_digits": 5,
+  "n_problems": 5486,
+  "demos": [
+    [
+      22207,
+      59802
+    ],
+    [
+      83998,
+      48253
+    ]
+  ],
+  "n_layers": 26,
+  "d_model": 2304,
+  "n_slots": 7,
+  "n_errors": 285,
+  "n_unparsed": 0,
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.9.1+cu129",
+    "transformers": "5.16.1",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.9.0",
+    "platform": "Linux-7.0.0-1014-gcp-x86_64-with-glibc2.39",
+    "transformer_lens": "3.9.0",
+    "datasets": "5.1.0"
+  }
+}

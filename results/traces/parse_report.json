@@ -1,0 +1,17 @@
+{
+  "n_traces": 776,
+  "accuracy_by_variant": {
+    "main": 0.48195876288659795,
+    "noop": 0.36082474226804123
+  },
+  "final_marker_rate": 1.0,
+  "traces_with_steps": 1.0,
+  "n_steps": 3114,
+  "step_parse_rate": 0.8503532434168273,
+  "error_type_counts": {
+    "none": 1460,
+    "planning": 812,
+    "binding": 187,
+    "arithmetic": 189
+  }
+}

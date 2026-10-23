@@ -1,0 +1,159 @@
+{
+  "selected_multiple": 1.0,
+  "selection_train": [
+    {
+      "mult": 1.0,
+      "net": 0.0,
+      "repair": 0.0,
+      "damage": 0.0
+    },
+    {
+      "mult": 2.0,
+      "net": 0.0,
+      "repair": 0.0,
+      "damage": 0.0
+    },
+    {
+      "mult": 4.0,
+      "net": 0.0,
+      "repair": 0.0,
+      "damage": 0.0
+    },
+    {
+      "mult": 8.0,
+      "net": 0.0,
+      "repair": 0.0,
+      "damage": 0.0
+    }
+  ],
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.9.1+cu129",
+    "transformers": "5.16.1",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.9.0",
+    "platform": "Linux-7.0.0-1014-gcp-x86_64-with-glibc2.39",
+    "transformer_lens": "3.9.0",
+    "datasets": "5.1.0"
+  },
+  "oracle content steering": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 0.0,
+    "repair": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    }
+  },
+  "self-sourced gated steering": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 0.0,
+    "repair": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    }
+  },
+  "evaluation steering -> correct": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 0.0,
+    "repair": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    }
+  },
+  "oracle residual patch (matched correct run)": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 0.0,
+    "repair": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 10000,
+      "n_clusters": 10
+    }
+  },
+  "self_sourced_gate_open_rate_failures": 0.6666666666666666,
+  "self_sourced_gate_open_rate_solved": 0.42857142857142855,
+  "random null": {
+    "n": 20,
+    "net_mean": 0.0022727272727272735,
+    "net_q025": 0.0,
+    "net_q975": 0.023863636363636306,
+    "repair_mean": 0.003333333333333333,
+    "damage_mean": 0.0,
+    "p_value_net_ge": {
+      "oracle content steering": 1.0,
+      "self-sourced gated steering": 1.0,
+      "evaluation steering -> correct": 1.0,
+      "oracle residual patch (matched correct run)": 1.0
+    }
+  }
+}

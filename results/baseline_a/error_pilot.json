@@ -1,0 +1,39 @@
+{
+  "rates": {
+    "3": {
+      "n": 128,
+      "errors": 3,
+      "unparsed": 0
+    },
+    "4": {
+      "n": 128,
+      "errors": 1,
+      "unparsed": 0
+    },
+    "5": {
+      "n": 128,
+      "errors": 7,
+      "unparsed": 0
+    },
+    "6": {
+      "n": 128,
+      "errors": 21,
+      "unparsed": 0
+    },
+    "7": {
+      "n": 128,
+      "errors": 26,
+      "unparsed": 0
+    },
+    "8": {
+      "n": 128,
+      "errors": 44,
+      "unparsed": 0
+    }
+  },
+  "chosen": {
+    "n_digits": 5,
+    "error_rate": 0.0546875,
+    "n_problems": 5486
+  }
+}

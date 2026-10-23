@@ -1,0 +1,55 @@
+{"step_row": 53, "uid": "t001-i15-noop", "variable": "content/4-class: operation", "gold": 3, "bound": 2, "split": "train"}
+{"step_row": 118, "uid": "t003-i27-noop", "variable": "content/4-class: operation", "gold": 1, "bound": 0, "split": "train"}
+{"step_row": 125, "uid": "t003-i37-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 299, "uid": "t008-i17-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 322, "uid": "t009-i21-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 325, "uid": "t009-i27-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 330, "uid": "t009-i44-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 374, "uid": "t012-i21-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 3, "split": "test"}
+{"step_row": 381, "uid": "t012-i24-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 3, "split": "test"}
+{"step_row": 905, "uid": "t027-i14-noop", "variable": "content/4-class: operation", "gold": 1, "bound": 2, "split": "train"}
+{"step_row": 919, "uid": "t027-i43-noop", "variable": "content/4-class: operation", "gold": 1, "bound": 2, "split": "train"}
+{"step_row": 926, "uid": "t027-i49-noop", "variable": "content/4-class: operation", "gold": 1, "bound": 2, "split": "train"}
+{"step_row": 978, "uid": "t029-i17-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 0, "split": "train"}
+{"step_row": 1012, "uid": "t031-i13-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 3, "split": "test"}
+{"step_row": 1048, "uid": "t032-i29-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 0, "split": "dev"}
+{"step_row": 1064, "uid": "t033-i08-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 3, "split": "dev"}
+{"step_row": 1105, "uid": "t034-i34-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 1, "split": "train"}
+{"step_row": 1166, "uid": "t036-i31-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 1200, "uid": "t037-i48-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 1230, "uid": "t039-i04-noop", "variable": "content/4-class: operation", "gold": 3, "bound": 2, "split": "train"}
+{"step_row": 1264, "uid": "t039-i38-noop", "variable": "content/4-class: operation", "gold": 3, "bound": 2, "split": "train"}
+{"step_row": 1333, "uid": "t041-i00-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 1348, "uid": "t041-i35-noop", "variable": "content/4-class: operation", "gold": 1, "bound": 0, "split": "train"}
+{"step_row": 1379, "uid": "t042-i34-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 1406, "uid": "t043-i17-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 1410, "uid": "t043-i41-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 1415, "uid": "t043-i48-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 1421, "uid": "t043-i49-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 1428, "uid": "t044-i18-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 1437, "uid": "t044-i27-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 1452, "uid": "t045-i10-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 0, "split": "test"}
+{"step_row": 1486, "uid": "t046-i48-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 1663, "uid": "t052-i20-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 1735, "uid": "t054-i36-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 1943, "uid": "t061-i42-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 1, "split": "train"}
+{"step_row": 1959, "uid": "t062-i07-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 1977, "uid": "t062-i28-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 1992, "uid": "t063-i04-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 2002, "uid": "t063-i15-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 2010, "uid": "t064-i01-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 2025, "uid": "t064-i35-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "dev"}
+{"step_row": 2040, "uid": "t065-i00-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 2065, "uid": "t065-i37-noop", "variable": "content/4-class: operation", "gold": 2, "bound": 3, "split": "train"}
+{"step_row": 2073, "uid": "t066-i03-noop", "variable": "content/4-class: operation", "gold": 3, "bound": 0, "split": "test"}
+{"step_row": 2121, "uid": "t068-i15-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 2131, "uid": "t068-i17-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 2138, "uid": "t068-i31-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 2145, "uid": "t068-i42-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 2456, "uid": "t079-i03-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 2469, "uid": "t079-i34-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "test"}
+{"step_row": 2571, "uid": "t083-i00-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 2576, "uid": "t083-i16-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 2581, "uid": "t083-i24-noop", "variable": "content/4-class: operation", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 2952, "uid": "t095-i26-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}
+{"step_row": 2971, "uid": "t095-i42-noop", "variable": "content/binary: distractor used", "gold": 0, "bound": 1, "split": "train"}

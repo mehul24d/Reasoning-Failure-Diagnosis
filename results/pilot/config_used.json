@@ -1,0 +1,49 @@
+{
+  "profile": "reduced",
+  "harness_config": "configs/gemma2_2b.yaml",
+  "traces_dir": "/opt/rfd/results/traces",
+  "out_dir": "/opt/rfd/results/pilot",
+  "seed": 42,
+  "probe": {
+    "C": 0.1,
+    "cv_folds": 5,
+    "step_buckets": 6,
+    "kinds": [
+      "logistic",
+      "diffmeans"
+    ]
+  },
+  "sample": {
+    "temperature": 0.7,
+    "k": 5
+  },
+  "repair": {
+    "strength_multiples": [
+      1.0,
+      2.0,
+      4.0,
+      8.0
+    ],
+    "n_random": 20
+  },
+  "n_boot": 10000,
+  "harness": {
+    "seed": 42,
+    "model": {
+      "model_name": "google/gemma-2-2b-it",
+      "device": "auto",
+      "dtype": "float32",
+      "attn_implementation": "eager",
+      "system_role": false,
+      "trust_remote_code": false
+    },
+    "generation": {
+      "do_sample": false,
+      "max_new_tokens": 384,
+      "batch_size": 24
+    },
+    "forward_batch_size": 8,
+    "acts_dtype": "float16",
+    "cache_dir": ".cache"
+  }
+}
