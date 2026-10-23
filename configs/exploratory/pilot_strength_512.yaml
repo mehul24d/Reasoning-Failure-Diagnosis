@@ -1,0 +1,20 @@
+# EXPLORATORY diagnostic, NOT a pre-registered experiment and NOT part of the pilot verdicts
+# (DECISIONS D20): does the pilot's single-token edit change any continuation at all when it is made
+# absurdly large? Same repair code as configs/reduced/pilot.yaml, one strength multiple of 512,
+# its own output directory (results/pilot_diag_512), 2 random directions.
+harness_config: "configs/gemma2_2b_l4.yaml"
+traces_dir: "results/traces"
+out_dir: "results/pilot_diag_512"
+seed: 42
+probe:
+  C: 0.1
+  cv_folds: 5
+  step_buckets: 6
+  kinds: ["logistic", "diffmeans"]
+sample:
+  temperature: 0.7
+  k: 5
+repair:
+  strength_multiples: [512.0]
+  n_random: 2
+n_boot: 1000
