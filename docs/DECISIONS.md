@@ -658,3 +658,37 @@ had already started, and it is cheap (about 1.5 hours).
 
 **Estimate** (not a measurement): Baseline A about 1 h more, traces 0.7 h, Baseline B
 probes 0.1 h, steering about 2.5 h, pilot about 0.7 h, so 5-6 h in total.
+
+## D20 (2026-10-23) Exploratory check of the pilot's repair edit (not a pre-registered experiment)
+
+**Why.** The pilot's repair test reported "items whose continuation changed: 0.00" in every
+condition, including the oracle residual patch and the strengths up to 8×. That is
+either a real floor effect or a bug that stops the edit from being applied. A
+bug would have made the pilot's headline number meaningless, so it was checked before any
+interpretation.
+
+**What was run.** The same repair code (`pilot repair`), the same probes and class
+means, at one strength multiple of 64 and one of 512 (`configs/exploratory/`), 2 random
+directions, into separate directories (`results/pilot_diag_64`, `results/pilot_diag_512`).
+The pilot's own `results/pilot/` is untouched.
+
+**Result.**
+- The edit is applied. At 64× and 512× it changes the continuation of 68% (oracle
+  content), 59% (self-sourced gated) and 100% (evaluation) of the items. The pre-registered
+  multiples {1, 2, 4, 8} are far too weak for a single-token edit at the first token of a step.
+  The oracle residual patch (replace one position's residual with the matched correct run's)
+  changes 0 items, because the two residuals at that token are nearly identical.
+- The oracle content edit gives net +22.7 points [5.0, 42.1], but random directions of the same
+  norm give +18.2 (512×) and +15.9 (64×) (means of 2), and evaluation steering gives +13.6
+  [0.0, 26.1]. So large perturbations repair some failures regardless of direction, and there is
+  no sign of a content-specific effect. With 15 failures and 2 random directions, this is
+  not a test either.
+
+**Status.** Exploratory: not part of any verdict, not pre-registered, and not a
+substitute for the pilot. It supports calling RQ2 "inconclusive" rather than "refuted", and
+motivates the redesign in report §4 (edits across the step, calibrated norms, more failures,
+≥ 100 random directions).
+
+**Operational note.** The exploratory run restarted the finished VM. Its auto-runner had to
+be stopped by hand, and the VM then ran idle for about 2.5 hours before being stopped.
+`rfd-gemma` is now TERMINATED (disk cost only).

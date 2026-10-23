@@ -1,0 +1,5 @@
+{
+  "model_name": "google/gemma-2-2b-it",
+  "dtype": "float32",
+  "attn_implementation": "eager"
+}

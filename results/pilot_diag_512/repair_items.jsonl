@@ -1,0 +1,88 @@
+{"cond": "oracle content steering", "uid": "t008-i17-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t012-i21-noop", "solved": false, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t012-i24-noop", "solved": false, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t031-i13-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t036-i31-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t037-i48-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t042-i34-noop", "solved": false, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t045-i10-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t066-i03-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t068-i15-noop", "solved": false, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t068-i17-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t068-i31-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t068-i42-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t079-i03-noop", "solved": false, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t079-i34-noop", "solved": false, "new_correct": false}
+{"cond": "oracle content steering", "uid": "t008-i48-noop", "solved": true, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t031-i41-noop", "solved": true, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t037-i03-noop", "solved": true, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t042-i43-noop", "solved": true, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t045-i46-noop", "solved": true, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t066-i45-noop", "solved": true, "new_correct": true}
+{"cond": "oracle content steering", "uid": "t079-i41-noop", "solved": true, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t008-i17-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t012-i21-noop", "solved": false, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t012-i24-noop", "solved": false, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t031-i13-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t036-i31-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t037-i48-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t042-i34-noop", "solved": false, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t045-i10-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t066-i03-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t068-i15-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t068-i17-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t068-i31-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t068-i42-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t079-i03-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t079-i34-noop", "solved": false, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t008-i48-noop", "solved": true, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t031-i41-noop", "solved": true, "new_correct": false}
+{"cond": "self-sourced gated steering", "uid": "t037-i03-noop", "solved": true, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t042-i43-noop", "solved": true, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t045-i46-noop", "solved": true, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t066-i45-noop", "solved": true, "new_correct": true}
+{"cond": "self-sourced gated steering", "uid": "t079-i41-noop", "solved": true, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t008-i17-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t012-i21-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t012-i24-noop", "solved": false, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t031-i13-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t036-i31-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t037-i48-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t042-i34-noop", "solved": false, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t045-i10-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t066-i03-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t068-i15-noop", "solved": false, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t068-i17-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t068-i31-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t068-i42-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t079-i03-noop", "solved": false, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t079-i34-noop", "solved": false, "new_correct": false}
+{"cond": "evaluation steering -> correct", "uid": "t008-i48-noop", "solved": true, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t031-i41-noop", "solved": true, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t037-i03-noop", "solved": true, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t042-i43-noop", "solved": true, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t045-i46-noop", "solved": true, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t066-i45-noop", "solved": true, "new_correct": true}
+{"cond": "evaluation steering -> correct", "uid": "t079-i41-noop", "solved": true, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t008-i17-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t012-i21-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t012-i24-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t031-i13-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t036-i31-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t037-i48-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t042-i34-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t045-i10-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t066-i03-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t068-i15-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t068-i17-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t068-i31-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t068-i42-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t079-i03-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t079-i34-noop", "solved": false, "new_correct": false}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t008-i48-noop", "solved": true, "new_correct": true}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t031-i41-noop", "solved": true, "new_correct": true}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t037-i03-noop", "solved": true, "new_correct": true}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t042-i43-noop", "solved": true, "new_correct": true}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t045-i46-noop", "solved": true, "new_correct": true}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t066-i45-noop", "solved": true, "new_correct": true}
+{"cond": "oracle residual patch (matched correct run)", "uid": "t079-i41-noop", "solved": true, "new_correct": true}

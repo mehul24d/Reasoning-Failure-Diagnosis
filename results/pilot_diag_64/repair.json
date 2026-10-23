@@ -1,0 +1,141 @@
+{
+  "selected_multiple": 64.0,
+  "selection_train": [
+    {
+      "mult": 64.0,
+      "net": 0.025000000000000022,
+      "repair": 0.03571428571428571,
+      "damage": 0.0
+    }
+  ],
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.9.1+cu129",
+    "transformers": "5.16.1",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.9.0",
+    "platform": "Linux-7.0.0-1014-gcp-x86_64-with-glibc2.39",
+    "transformer_lens": "3.9.0",
+    "datasets": "5.1.0"
+  },
+  "oracle content steering": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 0.6818181818181818,
+    "repair": {
+      "estimate": 0.3333333333333333,
+      "lo": 0.09090909090909091,
+      "hi": 0.5833333333333334,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.22727272727272724,
+      "lo": 0.050000000000000044,
+      "hi": 0.42105263157894735,
+      "n_valid": 1000,
+      "n_clusters": 10
+    }
+  },
+  "self-sourced gated steering": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 0.5909090909090909,
+    "repair": {
+      "estimate": 0.2,
+      "lo": 0.0,
+      "hi": 0.5,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.13636363636363635,
+      "lo": 0.0,
+      "hi": 0.3503409090909088,
+      "n_valid": 1000,
+      "n_clusters": 10
+    }
+  },
+  "evaluation steering -> correct": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 1.0,
+    "repair": {
+      "estimate": 0.26666666666666666,
+      "lo": 0.09090909090909091,
+      "hi": 0.42857142857142855,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.14285714285714285,
+      "lo": 0.0,
+      "hi": 0.4289682539682536,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.13636363636363635,
+      "lo": 0.0,
+      "hi": 0.26086956521739135,
+      "n_valid": 1000,
+      "n_clusters": 10
+    }
+  },
+  "oracle residual patch (matched correct run)": {
+    "n_failures": 15,
+    "n_solved": 7,
+    "frac_items_changed": 0.0,
+    "repair": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "damage": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 1000,
+      "n_clusters": 10
+    },
+    "net": {
+      "estimate": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_valid": 1000,
+      "n_clusters": 10
+    }
+  },
+  "self_sourced_gate_open_rate_failures": 0.6666666666666666,
+  "self_sourced_gate_open_rate_solved": 0.42857142857142855,
+  "random null": {
+    "n": 2,
+    "net_mean": 0.1590909090909091,
+    "net_q025": 0.13749999999999998,
+    "net_q975": 0.1806818181818182,
+    "repair_mean": 0.23333333333333334,
+    "damage_mean": 0.0,
+    "p_value_net_ge": {
+      "oracle content steering": 0.3333333333333333,
+      "self-sourced gated steering": 1.0,
+      "evaluation steering -> correct": 1.0,
+      "oracle residual patch (matched correct run)": 1.0
+    }
+  }
+}
