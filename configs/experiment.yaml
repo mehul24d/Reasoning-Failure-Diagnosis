@@ -1,0 +1,65 @@
+# Consolidated configuration (plan Appendix E, Table 25).
+# Values marked `provisional: true` are fixed in the pre-registration of the experiment that uses them.
+
+generation:
+  greedy:
+    temperature: 0.0
+    do_sample: false
+    repetition_penalty: 1.0   # explicitly disabled; never inherit a model default
+    top_p: null
+    top_k: null
+    batch_size: 1
+    max_new_tokens: 512       # provisional
+  sampled_subset:
+    temperature: 0.7
+    k: 5
+    do_sample: true
+  prompt_styles: [marked, terse]
+  paraphrases_per_style: 3
+
+data:
+  instances_per_template: 8          # 4 in the reduced preliminary run (decision D19)
+  template_split:                    # by template; test >= 40 templates
+    train: 40
+    dev: 20
+    test: 40
+    provisional: true
+  min_test_failures: 320
+  min_test_templates: 40
+
+probing:
+  positions: [step_first, step_last, final_answer]   # step_first is primary
+  primary_position: step_first
+  regularisation:
+    penalty: l2
+    lambda_grid_exponents: [-4, -3, -2, -1, 0, 1, 2]   # lambda = 10^k
+    provisional: true
+  cv_folds: 5                       # grouped by template
+  shuffled_label_permutations: 100  # within template groups
+  seeds: [0, 1, 2, 3, 4]
+
+statistics:
+  bootstrap_resamples: 10000        # template-clustered
+  ci: 0.95
+  fdr_q: 0.05                       # Benjamini-Hochberg
+  e0_correction: holm               # across depth bands
+
+thresholds:
+  sae_fvu_max: 0.40
+  sae_delta_ce_max: 0.20            # nats per token
+  rq1_min_score: 0.75               # held-out balanced accuracy / AUROC, and above shuffled
+  rq2_alarm_fpr: 0.10               # provisional
+  rq3_min_top1_gold: 0.20           # D_V >= 0.20 and G_V > max(G_shuf, G_prior)
+  stable_failure: "no sampled run correct"   # provisional
+  kappa_min: 0.6
+
+annotation:
+  fraction: 0.20
+  annotators: 2
+
+equivalence_checks:                 # Table 5; errors are relative (||a-b|| / ||b||)
+  resid_max_rel_err: 0.01
+  top1_agreement_min: 0.99
+  padded_vs_single_max_rel_err: 0.01
+  teacher_forced_reproduction_min: 0.99
+  bos_tokens_per_prompt: 1
