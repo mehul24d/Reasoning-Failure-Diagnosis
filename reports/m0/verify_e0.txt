@@ -1,0 +1,140 @@
+== A. Provenance
+e0 json sha256 98543a86015942db41a3ab7f7f5cd2cef92663c1f1c7f90bf1ef1b11cbb03ce5  csv sha256 41a52a204ee7a3d201883dfa500a2b0dbd6478223f581de726cbd2cbeba79773  log sha256 ccd9cb1ee485d54ad77d8506dfd63464d601445d3908068795a39acbf853fb0d
+PASS  A1 traces file hash  [2f7e58bf4024aeed]
+PASS  A2 SAE validation JSON hash  [c598c75b8e29f3b5]
+PASS  A3 analysis/ and harness/ unchanged since b2feb8b (which contains the S1c patch)  [git diff b2feb8b HEAD -- analysis harness: empty]
+PASS  A4 no uncommitted changes in analysis/ or harness/  [clean]
+
+== B. Layers
+csv rows 1347714  columns ['problem_id', 'template_id', 'prompt', 'correct', 'layer', 'token_id', 'rel_pos', 'resid_norm', 'recon_err', 'l0', 'entropy']
+PASS  B1 CSV layer set == expected  [[0, 4, 8, 9, 14, 17, 18, 21, 24]]
+PASS  B2 JSON layers per band == expected  [{'early': [0, 4, 8], 'middle': [9, 14, 17], 'late': [18, 21, 24]}]
+PASS  B3 no failing SAE layer (11, 25) used
+PASS  B4 every used layer passed SAE validation
+PASS  B5 band assignment 0-8/9-17/18-25
+PASS  B6 re-derived 'up to 3 evenly spaced passing layers per band' == used  [{'early': [0, 4, 8], 'middle': [9, 14, 17], 'late': [18, 21, 24]}]
+
+== C. Token accounting
+PASS  C1 identical row count at every layer  [{0: 149746, 4: 149746, 8: 149746, 9: 149746, 14: 149746, 17: 149746, 18: 149746, 21: 149746, 24: 149746}]
+PASS  C2 per-layer count == sum len(output_ids) over 1000 traces  [per-layer 149746 vs traces 149746; gap 0; traces with no output tokens: 0]
+PASS  C3 CSV token ids, order and correct-labels equal the traces at every layer  [layers mismatching: 0]
+PASS  C4 712 / 1000 traces correct  [712]
+PASS  C5 per-layer failed/correct token counts match trace correctness  [failed 52860, correct 96886]
+PASS  C6 early: n_tokens == 3 x per-layer count  [449238 vs 449238]
+PASS  C7 early: n_matched <= n_tokens  [385462/449238 = 0.8580 matched]
+PASS  C6 middle: n_tokens == 3 x per-layer count  [449238 vs 449238]
+PASS  C7 middle: n_matched <= n_tokens  [371759/449238 = 0.8275 matched]
+PASS  C6 late: n_tokens == 3 x per-layer count  [449238 vs 449238]
+PASS  C7 late: n_matched <= n_tokens  [364853/449238 = 0.8122 matched]
+PASS  C8 late band n_tokens == 449238 (seen in the Kaggle log)
+
+== D. Value sanity
+PASS  D1 no NaN/inf in numeric columns
+PASS  D2 no NaN in id/label columns
+PASS  D3 L0 integer in [0, 65536]  [min 17 max 747]
+PASS  D4 0 <= H <= ln(L0) (H = 0 if L0 <= 1), float32 tolerance 1e-4  [violations 0]
+PASS  D5 resid_norm > 0  [min 45.18]
+PASS  D6 recon_err > 0  [min 0.01997]
+PASS  D7 rel_pos in [0, 1]
+per-layer means (L0, H, relative recon error):
+  layer  0  mean L0    80.90  mean H 3.6517  mean rel. recon err 0.0699
+  layer  4  mean L0    62.85  mean H 3.6574  mean rel. recon err 0.1015
+  layer  8  mean L0   118.40  mean H 4.4162  mean rel. recon err 0.1162
+  layer  9  mean L0    96.39  mean H 4.2129  mean rel. recon err 0.1340
+  layer 14  mean L0    86.88  mean H 4.2136  mean rel. recon err 0.1993
+  layer 17  mean L0   152.26  mean H 4.7317  mean rel. recon err 0.1552
+  layer 18  mean L0   116.36  mean H 4.4768  mean rel. recon err 0.1739
+  layer 21  mean L0   117.61  mean H 4.4449  mean rel. recon err 0.1649
+  layer 24  mean L0   178.97  mean H 4.7755  mean rel. recon err 0.1419
+FAIL  D8 per-layer mean L0 plausible for Gemma Scope canonical (20-150)  [range 62.9-179.0]
+PASS  D9 one trace position bin per relative position: rel_pos spans [0,1] per trace  [rel_pos = arange(n)/(n-1); checked via D7 and C3]
+
+== E. Matching (independent binning)
+PASS  E1 norm and recon-error quintiles computed within layer (5 bins each)
+PASS  E2 within-layer quintiles are equal-frequency (max-min <= 1 per layer)
+PASS  E3 every stratum used contains both failed and correct tokens  [51951 matched strata of 218373]
+PASS  E4 early: independent n_matched == JSON  [385462 vs 385462]
+PASS  E4 middle: independent n_matched == JSON  [371759 vs 371759]
+PASS  E4 late: independent n_matched == JSON  [364853 vs 364853]
+
+== F. Independent recomputation of the point estimates
+PASS  F early delta_L0: independent == JSON (rel <= 1e-9)  [indep -0.129337626132  json -0.129337626132  rel 2.15e-16]
+PASS  F early d_L0: independent == JSON (rel <= 1e-9)  [indep -0.00363297955032  json -0.00363297955032  rel 2.39e-16]
+PASS  F early delta_H: independent == JSON (rel <= 1e-9)  [indep -0.00163734731846  json -0.00163734731846  rel 2.81e-14]
+PASS  F early d_H: independent == JSON (rel <= 1e-9)  [indep -0.00309187696908  json -0.00309187696908  rel 3.60e-14]
+PASS  F middle delta_L0: independent == JSON (rel <= 1e-9)  [indep -0.23072980079  json -0.23072980079  rel 2.41e-16]
+PASS  F middle d_L0: independent == JSON (rel <= 1e-9)  [indep -0.00573783397063  json -0.00573783397063  rel 6.05e-16]
+PASS  F middle delta_H: independent == JSON (rel <= 1e-9)  [indep -0.000811763580034  json -0.000811763580034  rel 6.95e-15]
+PASS  F middle d_H: independent == JSON (rel <= 1e-9)  [indep -0.00205165698646  json -0.00205165698646  rel 1.08e-14]
+PASS  F late delta_L0: independent == JSON (rel <= 1e-9)  [indep -1.92406846609  json -1.92406846609  rel 1.15e-16]
+PASS  F late d_L0: independent == JSON (rel <= 1e-9)  [indep -0.0321815366064  json -0.0321815366064  rel 1.08e-15]
+PASS  F late delta_H: independent == JSON (rel <= 1e-9)  [indep -0.010687425356  json -0.010687425356  rel 2.27e-15]
+PASS  F late d_H: independent == JSON (rel <= 1e-9)  [indep -0.0283456273827  json -0.0283456273827  rel 1.40e-14]
+
+== G. Inference
+PASS  G1 early delta_L0: lo <= estimate <= hi  [-0.310889 <= -0.129338 <= 0.0612328]
+PASS  G2 early delta_L0: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.1858, resamples 10000, clusters 500]
+PASS  G1 early delta_H: lo <= estimate <= hi  [-0.00433348 <= -0.00163735 <= 0.00100654]
+PASS  G2 early delta_H: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.211, resamples 10000, clusters 500]
+PASS  G1 early d_L0: lo <= estimate <= hi  [-0.00886446 <= -0.00363298 <= 0.00175422]
+PASS  G2 early d_L0: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.1858, resamples 10000, clusters 500]
+PASS  G1 early d_H: lo <= estimate <= hi  [-0.00820475 <= -0.00309188 <= 0.00190665]
+PASS  G2 early d_H: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.211, resamples 10000, clusters 500]
+PASS  G3 early: sign(d) == sign(delta) for delta_L0
+PASS  G3 early: sign(d) == sign(delta) for delta_H
+PASS  G1 middle delta_L0: lo <= estimate <= hi  [-0.629468 <= -0.23073 <= 0.160719]
+PASS  G2 middle delta_L0: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.2476, resamples 10000, clusters 500]
+PASS  G1 middle delta_H: lo <= estimate <= hi  [-0.00514519 <= -0.000811764 <= 0.00347236]
+PASS  G2 middle delta_H: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.7422, resamples 10000, clusters 500]
+PASS  G1 middle d_L0: lo <= estimate <= hi  [-0.01575 <= -0.00573783 <= 0.00399686]
+PASS  G2 middle d_L0: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.2476, resamples 10000, clusters 500]
+PASS  G1 middle d_H: lo <= estimate <= hi  [-0.0129758 <= -0.00205166 <= 0.00879413]
+PASS  G2 middle d_H: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.7422, resamples 10000, clusters 500]
+PASS  G3 middle: sign(d) == sign(delta) for delta_L0
+PASS  G3 middle: sign(d) == sign(delta) for delta_H
+PASS  G1 late delta_L0: lo <= estimate <= hi  [-2.60844 <= -1.92407 <= -1.32137]
+PASS  G2 late delta_L0: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.0, resamples 10000, clusters 500]
+PASS  G1 late delta_H: lo <= estimate <= hi  [-0.0166035 <= -0.0106874 <= -0.00560914]
+PASS  G2 late delta_H: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.0, resamples 10000, clusters 500]
+PASS  G1 late d_L0: lo <= estimate <= hi  [-0.0438032 <= -0.0321815 <= -0.0218059]
+PASS  G2 late d_L0: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.0, resamples 10000, clusters 500]
+PASS  G1 late d_H: lo <= estimate <= hi  [-0.0439512 <= -0.0283456 <= -0.0147535]
+PASS  G2 late d_H: p in [0,1], n_resamples 10000, n_clusters 500  [p 0.0, resamples 10000, clusters 500]
+PASS  G3 late: sign(d) == sign(delta) for delta_L0
+PASS  G3 late: sign(d) == sign(delta) for delta_H
+PASS  G4 clusters = problems: 500 distinct problem ids  [500]
+PASS  G5 Holm by hand for delta_L0  [p [0.1858, 0.2476, 0.0] -> holm [0.3716, 0.3716, 0.0] (json [0.3716, 0.3716, 0.0])]
+PASS  G5 Holm by hand for delta_H  [p [0.211, 0.7422, 0.0] -> holm [0.422, 0.7422, 0.0] (json [0.422, 0.7422, 0.0])]
+PASS  G5 Holm by hand for d_L0  [p [0.1858, 0.2476, 0.0] -> holm [0.3716, 0.3716, 0.0] (json [0.3716, 0.3716, 0.0])]
+PASS  G5 Holm by hand for d_H  [p [0.211, 0.7422, 0.0] -> holm [0.422, 0.7422, 0.0] (json [0.422, 0.7422, 0.0])]
+
+== H. Log
+PASS  H1 no warnings in the log other than the known torch_dtype deprecation notice  [0 other lines]
+
+== Per-band table
+band    layers        n_tokens n_matched  measure   estimate     95% CI                      p        p_holm
+early   [0, 4, 8]       449238    385462  delta_L0 -0.129338  [-0.310889, +0.061233]  0.1858  0.3716
+early   [0, 4, 8]       449238    385462  delta_H  -0.001637  [-0.004333, +0.001007]  0.2110  0.4220
+early   [0, 4, 8]       449238    385462  d_L0     -0.003633  [-0.008864, +0.001754]  0.1858  0.3716
+early   [0, 4, 8]       449238    385462  d_H      -0.003092  [-0.008205, +0.001907]  0.2110  0.4220
+middle  [9, 14, 17]     449238    371759  delta_L0 -0.230730  [-0.629468, +0.160719]  0.2476  0.3716
+middle  [9, 14, 17]     449238    371759  delta_H  -0.000812  [-0.005145, +0.003472]  0.7422  0.7422
+middle  [9, 14, 17]     449238    371759  d_L0     -0.005738  [-0.015750, +0.003997]  0.2476  0.3716
+middle  [9, 14, 17]     449238    371759  d_H      -0.002052  [-0.012976, +0.008794]  0.7422  0.7422
+late    [18, 21, 24]    449238    364853  delta_L0 -1.924068  [-2.608443, -1.321373]  0.0000  0.0000
+late    [18, 21, 24]    449238    364853  delta_H  -0.010687  [-0.016603, -0.005609]  0.0000  0.0000
+late    [18, 21, 24]    449238    364853  d_L0     -0.032182  [-0.043803, -0.021806]  0.0000  0.0000
+late    [18, 21, 24]    449238    364853  d_H      -0.028346  [-0.043951, -0.014753]  0.0000  0.0000
+
+SUMMARY: 84 PASS, 1 FAIL
+
+== D8 resolution (2026-11-12)
+D8 used a rough plausibility band (mean L0 per layer within 20-150) chosen for this verification; it is NOT a
+pre-registered criterion. The band was exceeded at layer 17 (mean L0 152.3) and layer 24 (179.0).
+Comparison with each SAE's nominal average L0 (from its Gemma Scope id, measured on pre-training data):
+  layer  0  80.9 / 73  = 1.11    layer  4  62.9 / 89  = 0.71    layer  8 118.4 / 111 = 1.07
+  layer  9  96.4 / 118 = 0.82    layer 14  86.9 / 73  = 1.19    layer 17 152.3 / 125 = 1.22
+  layer 18 116.4 / 116 = 1.00    layer 21 117.6 / 111 = 1.06    layer 24 179.0 / 124 = 1.44
+Observed / nominal is 0.71-1.44 across all 9 layers, and the two layers above 150 are ones with high nominal L0.
+Accepted as plausible distribution shift (instruction-tuned model on chat-format reasoning traces vs SAEs trained
+on the pre-trained model's data); this explanation is an untested hypothesis. No other check failed.
