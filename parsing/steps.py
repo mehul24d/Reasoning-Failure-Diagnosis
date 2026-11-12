@@ -28,12 +28,22 @@ whose operands are available:
   3. same result value
   4. same operation and one shared operand    (one operand bound wrongly)
   5. one shared operand
-To be fixed in the S3 pre-registration together with the error-type definitions.
+Only tiers 1-3 use up a gold step; a weak match (tiers 4-5) still gets an error type but leaves
+the gold step free for a later exact match. a / c and a * (1/c) count as the same computation
+(tier 1). To be fixed in the S3 pre-registration together with the error-type definitions.
 
-A step that aligns to nothing is "planning" (the plan's "extra or unmatched step"). When it is
-arithmetically right, its operands are slots or earlier results (never the distractor) and its
-result equals a gold result, it is also marked `extra_valid` (a redundant or re-derived step); `first_error_strict` follows the plan,
-`first_error` skips extra_valid steps. Both are reported.
+Valid re-derivations. A tier-3 step (same result, different operation or operands) that is
+arithmetically right and uses only problem quantities, earlier results or constants of the gold
+program (never the distractor) derives the gold quantity another way (e.g. 300 - (225 + 45)
+instead of 300 - 225 - 45): error "none", rederived=True.
+A "planning" step (unaligned, or tier 5) that is arithmetically right, has such operands, and
+either repeats an earlier computation or produces a value of the gold program is marked
+`extra_valid` (redundant or re-derived). `first_error_strict` follows the plan; `first_error`
+skips extra_valid steps. Both are reported.
+
+Compound steps: aligned by their result; if their stated result is wrong (and the equation is
+not an intermediate link of a chain) the step is an arithmetic error, else it has no type.
+Every stated result in a step ("a = b = c") can be referred to by later steps.
 
 Character spans refer to the original trace text.
 """
@@ -68,6 +78,8 @@ class Step:
     tier: int | None = None                # alignment tier (1 = exact)
     error: str | None = None               # none | planning | binding | arithmetic
     extra_valid: bool = False
+    rederived: bool = False                # aligned by result; a valid other derivation
+    slots: list | None = field(default=None, repr=False)
 
     @property
     def computational(self) -> bool:
@@ -128,14 +140,24 @@ def _rstrip(text: str, s: int, e: int) -> int:
 
 
 # --------------------------------------------------------------------------- operands
-def _gold_values(g: GoldStep) -> tuple[Fraction, Fraction]:
-    return g.a, g.b
-
-
 def _same(r_ref: Ref, r_val: Fraction, g_ref: Ref, g_val: Fraction) -> bool:
     if r_ref is not None and r_ref[0] in ("slot", "res") and r_ref == g_ref:
         return True
     return r_val == g_val
+
+
+def _canon(op: str, a: Fraction, b: Fraction) -> tuple[str, list[Fraction]] | None:
+    """a / c is the same computation as a * (1/c)."""
+    if op == "/":
+        return ("*", sorted([a, 1 / b])) if b != 0 else None
+    if op == "*":
+        return ("*", sorted([a, b]))
+    return None
+
+
+def _equivalent(st: Step, g: GoldStep) -> bool:
+    c1, c2 = _canon(st.op, st.a, st.b), _canon(g.op, g.a, g.b)
+    return c1 is not None and c1 == c2
 
 
 def _pairing(st: Step, g: GoldStep) -> int:
@@ -160,7 +182,7 @@ def _align(st: Step, gold: GoldProgram, matched: set[int]) -> tuple[int | None, 
             continue
         p = _pairing(st, g)
         same_op = st.op == g.op
-        if p == 2 and same_op:
+        if (p == 2 and same_op) or _equivalent(st, g):
             tier = 1
         elif p == 2:
             tier = 2
@@ -188,13 +210,38 @@ def _error_type(st: Step, gold: GoldProgram) -> str:
     if st.gold is None:
         return "planning"
     g = gold.steps[st.gold]
+    right = st.result == _exact(st.op, st.a, st.b)
+    if _equivalent(st, g):
+        return "none" if right else "arithmetic"
+    if st.tier == 3 and right and st.result == g.result and _valid_operands(st, gold):
+        st.rederived = True        # the gold quantity, derived another way (regrouping)
+        return "none"
     if st.op != g.op:
         return "planning"
     if _pairing(st, g) < 2:
         return "binding"
-    if st.result != _exact(st.op, st.a, st.b):
+    if not right:
         return "arithmetic"
     return "none"
+
+
+def _gold_values(gold: GoldProgram) -> set[Fraction]:
+    vals = set()
+    for g in gold.steps:
+        vals.update((g.a, g.b, g.result))
+    return vals
+
+
+def _valid_operands(st: Step, gold: GoldProgram) -> bool:
+    """Operands are problem quantities, earlier results, or constants the gold program uses;
+    never the distractor."""
+    gv = _gold_values(gold)
+    for ref, val in ((st.a_ref, st.a), (st.b_ref, st.b)):
+        if ref[0] == "const" and val not in gv:
+            return False
+        if ref[0] == "slot" and st.slots is not None and st.slots[ref[1]].distractor:
+            return False
+    return True
 
 
 # --------------------------------------------------------------------------- main
@@ -218,27 +265,45 @@ def parse_trace(text: str, style: str, slot_list: list[Slot], gold: GoldProgram)
                 near = slot_list[st.a_ref[1]].start if st.a_ref[0] == "slot" else None
                 st.b_ref, amb_b = _map(st.b, slot_list, realised, real_step, out.steps, near)
                 st.ambiguous = amb_a or amb_b
+                st.slots = slot_list
                 st.gold, st.tier = _align(st, gold, matched)
-                if st.gold is not None:
-                    matched.add(st.gold)
+                if st.gold is not None and st.tier <= 3:
+                    matched.add(st.gold)       # weak matches (tiers 4-5) do not use up a step
                 st.error = _error_type(st, gold)
-                if st.gold is None and st.result == _exact(st.op, st.a, st.b) and \
-                        all(r[0] in ("slot", "res", "rres") for r in (st.a_ref, st.b_ref)) and \
-                        not any(r[0] == "slot" and slot_list[r[1]].distractor
-                                for r in (st.a_ref, st.b_ref)) and \
-                        any(g.result == st.result for g in gold.steps):
-                    st.extra_valid = True
+                right = st.result == _exact(st.op, st.a, st.b)
+                repeat = any(o.op == st.op and sorted([o.a, o.b]) == sorted([st.a, st.b])
+                             for o in out.steps if o.op is not None)
+                if st.error == "planning" and (st.gold is None or st.tier == 5) and right and \
+                        _valid_operands(st, gold) and \
+                        (repeat or st.result in _gold_values(gold)):
+                    st.extra_valid = True      # redundant / repeated / re-derived step
             else:
-                # a compound step is aligned by its result only (no error type)
+                # a compound step is aligned by its result; it has no single operation, so the
+                # only error it can show is a wrong stated result
                 for k, g in enumerate(gold.steps):
                     if k not in matched and g.result == eq.rhs:
                         st.gold, st.tier = k, 3
                         matched.add(k)
                         break
-            realised.append(eq.rhs)
-            real_step.append(i)
+                if not eq.consistent:
+                    st.error = "arithmetic"
+            # every stated result in the step can be referred to later ("a = b = c")
+            for e2 in eqs:
+                realised.append(e2.rhs)
+                real_step.append(i)
         out.steps.append(st)
 
+    # a right, valid "planning" step whose result feeds a correct step is part of a valid
+    # alternative derivation (e.g. 225 + 45 = 270 before 300 - 270 = 30)
+    for st in reversed(out.steps):
+        if st.error != "none" and not st.extra_valid:
+            continue
+        for ref in (st.a_ref, st.b_ref):
+            if ref is not None and ref[0] == "rres":
+                sup = out.steps[ref[1]]
+                if sup.error == "planning" and sup.op is not None and \
+                        sup.result == _exact(sup.op, sup.a, sup.b) and _valid_operands(sup, gold):
+                    sup.extra_valid = True
     errs = [s for s in out.steps if s.error not in (None, "none")]
     out.first_error_strict = errs[0].index if errs else None
     lenient = [s for s in errs if not s.extra_valid]
@@ -255,5 +320,6 @@ def _map(value, slot_list, realised, real_step, steps, near) -> tuple[Ref, bool]
     ref, amb = resolve(value, slot_list, realised, near)
     if ref[0] == "res":
         step = steps[real_step[ref[1]]]
-        ref = ("res", step.gold) if step.gold is not None else ("rres", step.index)
+        strong = step.gold is not None and step.tier is not None and step.tier <= 3
+        ref = ("res", step.gold) if strong else ("rres", step.index)
     return ref, amb

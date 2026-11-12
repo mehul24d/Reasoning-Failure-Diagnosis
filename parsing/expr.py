@@ -77,6 +77,8 @@ class Equation:
     lhs: str
     rhs: Fraction           # stated result
     steps: list[BinStep] = field(default_factory=list)
+    eq_pos: int = -1        # position of the '=' sign
+    chained: bool = False   # an intermediate link of a chain "a = b = c" (see _mark_chains)
 
     @property
     def compound(self) -> bool:
@@ -163,8 +165,9 @@ def _clean(toks: list[_Tok]) -> list[_Tok] | None:
                     and nxt is not None and nxt.kind == "num":
                 out.append(_Tok("op", "*", t.start, t.end))
             elif prev is not None and prev.kind == "op" and prev.text == "/" and \
-                    (len(out) < 2 or out[-2].kind in ("num", "rp")):
-                out.pop()                              # "$9/basket": drop "/" and the unit
+                    (len(out) < 2 or out[-2].kind in ("num", "rp") or
+                     (out[-2].kind == "gap" and len(out) >= 3 and out[-3].kind == "num")):
+                out.pop()        # "$9/basket", "14 strawberries/plant": drop "/" and the unit
             else:
                 out.append(_Tok("gap", t.text, t.start, t.end))   # a word between items
             i += 1
@@ -175,7 +178,21 @@ def _clean(toks: list[_Tok]) -> list[_Tok] | None:
             continue
         out.append(t)
         i += 1
-    return _merge_literals(out)
+    return _merge_literals(_drop_word_parens(out))
+
+
+def _drop_word_parens(toks: list[_Tok]) -> list[_Tok]:
+    """Remove parenthesised asides without numbers: "150 km (each way) * 2"."""
+    out: list[_Tok] = []
+    for t in toks:
+        out.append(t)
+        if t.kind == "rp":
+            k = len(out) - 2
+            while k >= 0 and out[k].kind == "gap":
+                k -= 1
+            if k >= 0 and out[k].kind == "lp" and k < len(out) - 2:
+                del out[k:]
+    return out
 
 
 def _merge_literals(toks: list[_Tok]) -> list[_Tok]:
@@ -319,9 +336,11 @@ def _without_unit_gaps(toks: list[_Tok]) -> list[_Tok]:
     return out
 
 
-def parse_tokens(toks: list[_Tok], raw: str) -> tuple[list[BinStep], int] | None:
+def parse_tokens(toks: list[_Tok], raw: str) -> tuple[list[BinStep], int, bool] | None:
     """Longest suffix of the clause that is a complete expression with an operator.
-    Returns (steps, index of the first token used)."""
+    Returns (steps, start offset, cut) where `cut` says that an operator, a parenthesis or a
+    number-free gap directly before the suffix was left out (the expression may continue to
+    the left, so an inconsistent result must not be trusted)."""
     toks = _resolve_fracs(_without_unit_gaps(toks), raw)
     for i in range(len(toks)):
         unary = toks[i].kind == "op" and toks[i].text == "-" and \
@@ -330,7 +349,8 @@ def parse_tokens(toks: list[_Tok], raw: str) -> tuple[list[BinStep], int] | None
             continue
         steps = _parse_full(toks[i:])
         if steps is not None:
-            return steps, toks[i].start
+            cut = i > 0 and toks[i - 1].kind in ("op", "lp", "rp", "num")
+            return steps, toks[i].start, cut
     return None
 
 
@@ -388,19 +408,38 @@ def find_equations(text: str) -> tuple[list[Equation], int]:
                          and r.group("glue").lower() != "x"):
             skipped += has_op
             continue
+        if "^" in clause:                 # powers are outside the step model
+            skipped += has_op
+            continue
         toks = _clean(_lex(clause, cs))
         got = parse_tokens(toks, clause) if toks else None
         if got is None:
             skipped += has_op
             continue
-        steps, start = got
+        steps, start, cut = got
         rhs = _rhs_value(r)
         if rhs is None:
             skipped += 1
             continue
+        if cut and steps[-1].result != rhs:
+            skipped += 1                  # a truncated, inconsistent left side: do not guess
+            continue
         end = max(e for e in (r.end("num"), r.end("frac"), r.end("mixed"), r.end("pct")))
-        out.append(Equation(start, end, text[start:j].strip(), rhs, steps))
+        out.append(Equation(start, end, text[start:j].strip(), rhs, steps, eq_pos=j))
+    _mark_chains(out)
     return out, skipped
+
+
+def _mark_chains(eqs: list[Equation]) -> None:
+    """Partial evaluation "8*5 + 90 = 40 + 90 = 130": the first '=' states an intermediate form,
+    not a result. When an inconsistent equation's right side starts the next equation and that
+    one is consistent with the same value, the first equation is a chain link: its stated
+    result is replaced by the exact value."""
+    for a, b in zip(eqs, eqs[1:]):
+        if not a.consistent and b.start <= a.end and b.start >= a.eq_pos and b.consistent \
+                and b.rhs == a.value:
+            a.rhs = a.value
+            a.chained = True
 
 
 def first_equation(text: str) -> Equation | None:

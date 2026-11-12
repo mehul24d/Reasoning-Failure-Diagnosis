@@ -97,6 +97,7 @@ def main() -> None:
         s["has_error_step"] += p.first_error is not None
         s["has_error_step_strict"] += p.first_error_strict is not None
         s["extra_valid"] += sum(st.extra_valid for st in p.steps)
+        s["rederived"] += sum(st.rederived for st in p.steps)
         for st in p.steps:
             if st.tier is not None:
                 s[f"tier_{st.tier}"] += 1
@@ -139,7 +140,7 @@ def main() -> None:
                   f"ambiguous={st.ambiguous}",
                   f"* aligned gold step: {st.gold} (tier {st.tier}) "
                   + (f"({g.op}, {g.a_ref}, {g.b_ref}, {g.result})" if g else ""),
-                  f"* error type: {st.error}  extra_valid={st.extra_valid}",
+                  f"* error type: {st.error}  extra_valid={st.extra_valid}  rederived={st.rederived}",
                   "* gold program: " + "; ".join(f"{k}: {x.a} {x.op} {x.b} = {x.result}"
                                                  for k, x in enumerate(prog.steps)),
                   "* manual check: [ ] correct  [ ] wrong (note):", ""]

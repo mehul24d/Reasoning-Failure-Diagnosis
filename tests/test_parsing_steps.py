@@ -221,3 +221,55 @@ def test_terse_line_with_two_equations_and_markdown():
     t = "**4 * 12 = 48** and **48 - 9 = 39**\nAnswer: 39"
     p = _parse(t, style="terse")
     assert [(s.gold, s.error) for s in p.steps] == [(0, "none"), (1, "none")]
+
+
+# ----------------------------------------------------------------------------- v3 cases
+def test_division_by_constant_equals_multiplication_by_reciprocal():
+    q = "A cake has 50 slices. Half are eaten. How many are left?"
+    prog, sl = gold_program(q, "1/2*50 = 25\n#### 25", 25, "gsm_symbolic")
+    assert prog.ok
+    p = parse_trace("Step 1: 50 / 2 = 25\nAnswer: 25", "marked", sl, prog)
+    assert (p.steps[0].gold, p.steps[0].error) == (0, "none")
+
+
+def test_regrouping_is_a_valid_rederivation():
+    q = "Tom had $300. He spent $225 on a bike and $45 on a helmet. How much is left?"
+    prog, sl = gold_program(q, "300 - 225 = 75\n75 - 45 = 30\n#### 30", 30, "gsm_symbolic")
+    p = parse_trace("Step 1: 225 + 45 = 270\nStep 2: 300 - 270 = 30\nAnswer: 30",
+                    "marked", sl, prog)
+    assert p.first_error is None
+    assert p.steps[1].error == "none" and p.steps[1].rederived
+
+
+def test_weak_match_does_not_use_up_gold_step():
+    # step 2 is redundant and shares only an operand with gold 1; gold 1 must stay free
+    p = _parse("Step 1: 4 * 12 = 48\nStep 2: 48 - 0 = 48\nStep 3: 48 - 9 = 39\nAnswer: 39")
+    assert (p.steps[2].gold, p.steps[2].tier, p.steps[2].error) == (1, 1, "none")
+
+
+def test_wrong_compound_step_is_arithmetic_error():
+    p = _parse("Step 1: 4 * 12 - 9 = 40\nAnswer: 40")
+    assert p.steps[0].compound and p.steps[0].error == "arithmetic" and p.first_error == 0
+
+
+def test_chain_registers_final_value():
+    p = _parse("Step 1: 4 * 12 = 40 + 8 = 48\nStep 2: 48 - 9 = 39\nAnswer: 39")
+    assert p.steps[1].a_ref == ("res", 0) and p.first_error is None
+
+
+@pytest.mark.parametrize("text,ops", [
+    ("5 plants * 14 strawberries/plant = 70", ["*"]),
+    ("300 km / 15 km/liter = 20 liters", ["/"]),
+    ("150 km (each way) * 2 = 300 km", ["*"]),
+    ("$10 (salad) + $25 (hamburgers) = $35", ["+"]),
+    ("20 emails/day * 30 days = 600", ["*"]),
+])
+def test_more_unit_forms(text, ops):
+    eqs, _ = find_equations(text)
+    assert len(eqs) == 1 and [s.op for s in eqs[0].steps] == ops and eqs[0].consistent
+
+
+def test_powers_and_truncated_inconsistent_sides_are_rejected():
+    assert find_equations("A = 10000(1 + 0.20/1)^(1*3) = 10000")[0] == []
+    eqs, _ = find_equations("8 minutes/day * 5 days + 90 minutes = 40 minutes + 90 minutes = 130")
+    assert eqs[0].chained and eqs[0].consistent and eqs[-1].rhs == 130
