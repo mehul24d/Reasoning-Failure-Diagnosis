@@ -16,7 +16,8 @@ def test_experiment_config_matches_plan_table_25():
     g = e["generation"]
     assert g["greedy"]["temperature"] == 0.0 and g["greedy"]["repetition_penalty"] == 1.0
     assert g["greedy"]["batch_size"] == 1
-    assert g["sampled_subset"] == {"temperature": 0.7, "k": 5, "do_sample": True}
+    assert {k: g["sampled_subset"][k] for k in ("temperature", "k", "do_sample")} == \
+        {"temperature": 0.7, "k": 5, "do_sample": True}
     assert e["data"]["instances_per_template"] == 8
     assert e["thresholds"]["sae_fvu_max"] == 0.40
     assert e["thresholds"]["sae_delta_ce_max"] == 0.20
@@ -44,3 +45,24 @@ def test_every_template_has_answer_marker_and_problem():
     for spec in all_prompt_specs():
         msg = render_user_message("X", spec)
         assert "Answer:" in msg and msg.endswith("Problem: X")
+
+
+def test_rescope_2026_11_13_changes_no_threshold_or_procedure():
+    """prereg/S2.md amendments A1-A6: compute changes only. Every threshold, the number of
+    random directions / permutations, the bootstrap/CI procedure and the annotation rule stay."""
+    e = experiment_config()
+    assert e["scope"]["minor_project_models"] == ["gemma-2-2b-it"]
+    assert e["generation"]["greedy"]["max_new_tokens"] == 512
+    assert e["generation"]["sampled_subset"]["population"] == "test_failures"
+    assert e["generation"]["batched"]["padding"] == "left"
+    assert e["thresholds"] == {
+        "sae_fvu_max": 0.40, "sae_delta_ce_max": 0.20, "rq1_min_score": 0.75, "rq2_alarm_fpr": 0.10,
+        "rq3_min_top1_gold": 0.20, "stable_failure": "no sampled run correct", "kappa_min": 0.6}
+    assert e["statistics"] == {"bootstrap_resamples": 10000, "ci": 0.95, "fdr_q": 0.05,
+                               "e0_correction": "holm"}
+    assert e["annotation"] == {"fraction": 0.20, "annotators": 2}
+    assert e["probing"]["shuffled_label_permutations"] == 100
+    assert e["equivalence_checks"]["teacher_forced_reproduction_min"] == 0.99
+    assert e["verification"]["threshold_key"] == "teacher_forced_reproduction_min"
+    assert e["cache"]["storage_dtype"] == "float16"
+    assert e["data"]["min_test_failures"] == 320 and e["data"]["min_test_templates"] == 40

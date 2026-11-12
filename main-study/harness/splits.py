@@ -16,12 +16,19 @@ def split_templates(template_ids, n_train: int = 40, n_dev: int = 20, n_test: in
                     seed: int = 0, min_test: int = 40) -> dict[str, list[str]]:
     ids = sorted(set(template_ids))
     total = n_train + n_dev + n_test
-    if len(ids) < total:
-        raise ValueError(f"{len(ids)} templates, but the split needs {total}")
     if len(ids) > total:   # scale proportionally, test gets the rounding remainder
         n_train = round(len(ids) * n_train / total)
         n_dev = round(len(ids) * n_dev / total)
         n_test = len(ids) - n_train - n_dev
+    elif len(ids) < total:
+        # Fewer templates than the nominal split (97 study templates, amendment A6): the test
+        # split keeps its size (>= min_test), and train and dev share the rest in their ratio.
+        rest = len(ids) - n_test
+        if rest < (n_train + n_dev) / 2:
+            raise ValueError(f"{len(ids)} templates, but the split needs {total}: too few to keep "
+                             f"{n_test} test templates and half of train + dev")
+        n_train = round(rest * n_train / (n_train + n_dev))
+        n_dev = rest - n_train
     if n_test < min_test:
         raise ValueError(f"test split has {n_test} templates; at least {min_test} required")
     random.Random(seed).shuffle(ids)

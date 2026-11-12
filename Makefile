@@ -1,5 +1,5 @@
 .PHONY: install test test-fast lint smoke phase0 traces baseline-a baseline-b pilot pilot-sample \
-	report all debug legacy-pilot
+	report all debug legacy-pilot estimate ms-test ms-pipeline ms-status ms-fallback
 
 # untracked, machine-local overrides, e.g.  PROFILE := reduced  (see DECISIONS D19)
 -include local.mk
@@ -87,3 +87,31 @@ debug:
 # Archived SAE phase-segmentation pilot (see src/rfd/legacy/README.md).
 legacy-pilot:
 	bash scripts/legacy/run_pilot.sh
+
+# ==== Main study (main-study/): the minor project on Gemma-2-2B-IT, Kaggle T4s (DECISIONS D21-D27)
+# Run from the repository root. MS_PY is the Python 3.13 venv of main-study/requirements.txt.
+MS := main-study
+MS_PY ?= $(if $(wildcard $(MS)/.venv/bin/python),$(abspath $(MS)/.venv/bin/python),python)
+MS_MODEL ?= gemma-2-2b-it
+MS_STAGES ?= problems,generate,score,verify,cache,sampled,report
+MS_ARGS ?=
+
+# Timed smoke test on the Kaggle T4s (64 GSM8K-train problems x 6 prompts, never the study
+# population) and a projection of GPU-hours per stage and disk use for the full run.
+# Writes main-study/reports/m1/estimate_<model>.{json,md}; exits 2 if over the 25 T4-hour budget.
+estimate:
+	cd $(MS) && PYTHONPATH=. $(MS_PY) -m harness.estimate --model $(MS_MODEL) $(MS_ARGS)
+
+ms-test:
+	cd $(MS) && PYTHONPATH=. $(MS_PY) -m pytest -q
+
+# The study stages in order, resumable (refuses while main-study/prereg/S2.md is a draft).
+ms-pipeline:
+	cd $(MS) && PYTHONPATH=. $(MS_PY) -m harness.pipeline run --model $(MS_MODEL) --stages $(MS_STAGES) $(MS_ARGS)
+
+ms-status:
+	cd $(MS) && PYTHONPATH=. $(MS_PY) -m harness.pipeline status --model $(MS_MODEL)
+
+# Only after a FAILED equivalence check (prereg/S2.md A2): set the HF traces aside, generate with TL.
+ms-fallback:
+	cd $(MS) && PYTHONPATH=. $(MS_PY) -m harness.pipeline fallback --model $(MS_MODEL)
