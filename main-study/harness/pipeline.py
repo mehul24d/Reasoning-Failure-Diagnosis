@@ -169,8 +169,9 @@ def n_gpus() -> int:
 def s2_is_binding() -> bool:
     """prereg/S2.md carries a date on its 'Date committed (binding)' line."""
     for line in S2_PREREG.read_text().splitlines():
-        if "Date committed (binding)" in line:
-            return "_to be filled_" not in line and any(ch.isdigit() for ch in line)
+        if line.lstrip().startswith("* **Date committed (binding):**"):
+            val = line.split(":**", 1)[1]
+            return "_to be filled_" not in val and any(ch.isdigit() for ch in val)
     return False
 
 

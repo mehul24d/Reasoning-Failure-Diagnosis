@@ -12,14 +12,21 @@ intermediate value (operation, operand, result) still decodable from its activat
 a failure could be repaired from the inside ("self-sourced repair"); if no, that is reported as
 a negative result.
 
+**Scope (amended 2026-11-13).** The minor project (RQ1–RQ4, S1–S11) runs on **Gemma-2-2B-IT
+only**, on free Kaggle T4s, and its conclusions apply to 2B only. Gemma-2-9B-IT and
+Qwen2.5-7B-Instruct move to the Semester 8 major project under the RQ8 replication. There, the
+RQ3 feasibility gate is re-checked on 9B before any 9B repair experiment. The research questions,
+the design and every threshold are unchanged. See `docs/PLAN_AMENDMENT_2026-11-13.md` and
+`prereg/S2.md` (A1–A7).
+
 ## Status (2026-11-13)
 
 | Step | Milestone | What | Status |
 |---|---|---|---|
-| S1 | M0 | Equivalence checks, SAE validation, E0 sparsity check | **Done for Gemma-2-2B-IT.** 9B and Qwen-7B pending a GPU |
-| S2 | M1 | Full-scale generation on Gemma-2-9B-IT; step parsing | Parser v4 done and frozen; `prereg/S2.md` drafted; run pending |
-| S3 | M1 | Qwen2.5-7B; sampled subset (T = 0.7, k = 5); gold extraction | Not started |
-| S4 | M1 | Activation caching | Not started |
+| S1 | M0 | Equivalence checks, SAE validation, E0 sparsity check | **Done (Gemma-2-2B-IT).** 9B and Qwen-7B: Semester 8 |
+| S2 | M1 | Full-scale generation on Gemma-2-2B-IT; equivalence gate; step parsing | Pipeline built and tested; parser v4 frozen; `prereg/S2.md` amended, still a draft; run pending |
+| S3 | M1 | Sampled subset (T = 0.7, k = 5, test failures); gold extraction | Built into the same pipeline; run pending |
+| S4 | M1 | Activation caching (residuals, float16, pre-registered positions) | Built into the verified TL pass; run pending |
 | S5–S6 | M2 | E1 directions and probes; E2 readout map; gate G1 | Not started |
 | S7–S8 | M3 | E3 self-sourced feasibility (RQ3); gate G2 | Not started |
 | S9–S11 | M4 | E4 attribution and typology (RQ4); report | Not started |
@@ -55,36 +62,54 @@ so the GSM-Symbolic study problems stay untouched.
    - `reports/m0/parsing_manual_check_v4.md`, `parsing_validation_v4.json`
 6. **First observation (2B, GSM8K train, tool-building only).** The first error in failed
    traces is planning in 42%, binding in 39%, arithmetic in 11%, and none is found in 8%.
-7. **Pre-registrations.** `prereg/E0.md` is committed. `prereg/S2.md` is a **draft**: it covers
-   the population, 8 instances per template, a 40/20/40 template split with seed 0,
-   max_new_tokens 1024, parser v4 frozen with lenient s0 primary, and acceptance criteria.
-8. **Colab notebook for the 9B proof of concept:** `notebooks/colab_9b_poc.ipynb`. It runs
-   S1b, 1,000 traces with a speed log, parser statistics, SAE validation and E0 on one A100.
-9. **Tests:** 108 pass and 2 are skipped (`pytest`). They are offline and use a tiny random model.
+7. **Pre-registrations.** `prereg/E0.md` is committed. `prereg/S2.md` is a **draft**, amended
+   on 2026-11-13. It covers the population, 97 templates × 8 instances × 6 prompts (4,656
+   greedy traces), a 38/19/40 template split with seed 0, max_new_tokens 512 with a stop at the
+   answer line, parser v4 frozen with lenient s0 primary, the batched-generation equivalence
+   gate, the residual cache and the acceptance criteria.
+8. **S2–S4 pipeline for Kaggle T4s** (`harness/pipeline.py`, `harness/batched.py`, `cache/`).
+   - Stages: problems → generate → score → verify → cache → sampled → report.
+   - Every stage is resumable, uses both T4s, and stops cleanly before the session deadline.
+   - Driver: `notebooks/run_on_kaggle.ipynb` (repository root), run as Save & Run All commits.
+   - `make estimate` projects the GPU-hours from a timed smoke test.
+9. **Colab notebook for the 9B proof of concept:** `notebooks/colab_9b_poc.ipynb`, kept for
+   Semester 8.
+10. **Tests:** 124 pass and 2 are skipped (`pytest`). They are offline and use a tiny random
+    model, including an end-to-end run of the pipeline with two workers.
 
 ## What is left
 
-1. **S1 on Gemma-2-9B-IT and Qwen2.5-7B.** This needs one GPU with at least 40 GB, such as an
-   A100. The Colab notebook is ready.
-2. **Group sign-off on `prereg/S2.md`:**
+1. **Group sign-off on `prereg/S2.md`:**
    - the population: the Qu & Gomes no-op data, or the fallback of Apple GSM-Symbolic `main`
      with natural failures;
    - the prompt paraphrases 1 and 2 in `harness/prompts.py`;
-   - the GPU.
-3. **S2–S4:** about 4,800 greedy traces per model, parsing with a fresh 40-step hand check, the
-   sampled subset, gold extraction and activation caching.
-4. **S5–S11:** E1–E4 as in the plan, with gates G1 and G2. E4 needs two annotators on 20% of the
+   - which 97 templates, and whether test is drawn from templates with gold programs (open
+     item 4).
+2. **S2–S4 on Gemma-2-2B-IT:** 4,656 greedy traces, the equivalence gate, the residual cache,
+   the sampled subset, and parsing with a fresh 40-step hand check.
+3. **S5–S11:** E1–E4 as in the plan, with gates G1 and G2. E4 needs two annotators on 20% of the
    failures.
+4. **Semester 8:** S1–S4 on Gemma-2-9B-IT and Qwen2.5-7B-Instruct, then the RQ3 gate re-check
+   on 9B.
 
-**Compute still needed (estimate):** about 50–70 A100 hours, 64 GB RAM and 300–500 GB of disk.
+**Compute for S2–S4 (minor project):** free Kaggle T4s, budget 25 T4 GPU-hours. The measured
+projection is in `reports/m1/estimate_gemma-2-2b-it.md` and `docs/PLAN_AMENDMENT_2026-11-13.md`.
 
 ### Deviations from the plan so far
 
 All deviations are dated in the pre-registrations.
 
+- Minor project on Gemma-2-2B-IT only; 9B and Qwen-7B move to Semester 8 (RQ8). The RQ3 gate is
+  re-checked on 9B there (2026-11-13, A1).
+- Batched Hugging Face generation with a TL equivalence gate, instead of batch size 1 (A2).
+- Stop at the answer line, with max_new_tokens 512 (A3).
+- Residual cache in float16 storage at the pre-registered positions; SAE features computed on
+  CPU (A4).
+- Sampled runs only on test failures (A5).
+- 97 templates, split 38/19/40 (A6).
 - Python 3.13 instead of 3.11.
-- Kaggle 2 × T4 for the 2B model instead of one large GPU.
-- 131k SAEs for 9B, because 65k exists only at one 9B layer.
+- Kaggle 2 × T4 instead of one large GPU.
+- 131k SAEs for 9B (Semester 8), because 65k exists only at one 9B layer.
 - Lenient s0 as the primary label, with strict s0 also reported.
 - The Qu & Gomes no-op data is not public. If it does not arrive, the fallback loses the
   matched distractor pairs.
@@ -98,12 +123,14 @@ All deviations are dated in the pre-registrations.
 | `harness/` | Model loading, equivalence checks, prompts, greedy and sampled generation, scoring, datasets, template splits |
 | `parsing/` | Answer extraction, equation reader, gold programs, step parser and alignment (v4) |
 | `analysis/` | SAE validation, E0 sparsity check, statistics (clustered bootstrap, Holm) |
-| `probes/`, `cache/` | Placeholders for S4–S6 |
+| `cache/` | Positions, the verified TL pass with residual caching, and the store reader |
+| `probes/` | Placeholder for S5–S6 |
 | `configs/` | Models, SAEs, hook sites, every threshold (plan Appendix E) |
 | `prereg/` | Pre-registrations (`E0.md` committed, `S2.md` draft) |
 | `scripts/` | `s1_equivalence.sh`, `s1_sae.sh`, `validate_parsing.py` |
-| `notebooks/` | Kaggle notebooks used for M0, and the Colab 9B notebook |
+| `notebooks/` | Kaggle notebooks used for M0, and the Colab 9B notebook (the S2–S4 driver is `../notebooks/run_on_kaggle.ipynb`) |
 | `reports/m0/` | Every M0 result, run log and hand check |
+| `reports/m1/` | S2–S4 reports, including the compute estimate |
 | `docs/STEPS.md` | Step tracker |
 
 ## Setup
@@ -113,6 +140,8 @@ python3.13 -m venv .venv && source .venv/bin/activate   # 3.13: see requirements
 pip install -r requirements.txt
 pytest                                                    # offline, no downloads
 # GPU (Gemma-2 is gated: accept the licence, set HF_TOKEN in the environment, never in a file)
-bash scripts/s1_equivalence.sh gemma-2-9b-it cuda
-bash scripts/s1_sae.sh gemma-2-9b-it
+# From the repository root, on Kaggle T4s (or run notebooks/run_on_kaggle.ipynb):
+make estimate           # timed smoke test -> reports/m1/estimate_gemma-2-2b-it.md
+make ms-pipeline        # S2-S4, refused while prereg/S2.md is a draft
+make ms-status
 ```

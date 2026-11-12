@@ -1,5 +1,5 @@
 """Helpers for time-limited, non-interactive notebook sessions (Kaggle "Save &
-Run All"; see notebooks/run_on_kaggle.ipynb and DECISIONS D16).
+Run All"; see notebooks/run_baseline_on_kaggle.ipynb and DECISIONS D16).
 
   restore_results  seed the results directory from a previous session's output
                    (an attached dataset / notebook output: a results/ folder or

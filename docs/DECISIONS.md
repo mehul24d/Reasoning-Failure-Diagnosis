@@ -692,3 +692,153 @@ motivates the redesign in report §4 (edits across the step, calibrated norms, m
 **Operational note.** The exploratory run restarted the finished VM. Its auto-runner had to
 be stopped by hand, and the VM then ran idle for about 2.5 hours before being stopped.
 `rfd-gemma` is now TERMINATED (disk cost only).
+
+---
+
+# Main study (`main-study/`): re-scope of the minor project to free Kaggle T4s
+
+D21–D27 were made on 2026-11-13 on the user's instruction. The college cannot provide the ~70
+GPU-hours the original scope needed, so the minor project must fit on free Kaggle T4s
+(2 × 15 GB per session, about 30 h a week) at zero cost. **All of them were recorded before any
+S2, S3 or S4 data existed.** Each is also a dated amendment of `main-study/prereg/S2.md`
+(A1–A7), and of `main-study/prereg/E0.md` for its 9B rows. What does not change:
+- the research questions and the experimental design;
+- every threshold, the number of random directions and permutations, the bootstrap/CI procedure
+  and the manual-annotation requirements, all pinned by
+  `main-study/tests/test_config_prompts.py::test_rescope_2026_11_13_changes_no_threshold_or_procedure`;
+- the precision: no quantisation and no float16 compute for Gemma.
+
+The proposal text that changes with them (plan Sections 4, 6.1, 10, 12, 14) is in
+`main-study/docs/PLAN_AMENDMENT_2026-11-13.md`.
+
+## D21 (2026-11-13) The minor project runs on Gemma-2-2B-IT only; 9B and Qwen move to Semester 8
+
+**Instruction (user).** Minimise GPU time without weakening the study's integrity.
+
+- RQ1–RQ4 and steps S1–S11 run on **Gemma-2-2B-IT** (float32). Its S1 results from M0 (6/6
+  equivalence checks, SAE validation 24/26 layers, E0) are the minor project's S1 results.
+- **Gemma-2-9B-IT and Qwen2.5-7B-Instruct move to the Semester 8 major project**, under the RQ8
+  replication. Nothing is generated for them in the minor project.
+- **Minor-project conclusions apply to Gemma-2-2B-IT only.** The report makes no claim about 9B,
+  Qwen or larger models.
+- **The RQ3 feasibility gate (G2) is re-checked on Gemma-2-9B-IT at the start of Semester 8,**
+  with the same criterion and procedure, before any 9B repair experiment. A 2B pass does not
+  carry over, because readability can change with scale.
+- Cost to the science: one model, so the minor project cannot separate "true of 2B" from "true
+  of models of this kind". That is what RQ8 in Semester 8 is for. It is stated as a limitation in
+  plan §12 and as a risk in §14.
+
+## D22 (2026-11-13) Batched HF generation; the verified TL pass runs only on finished traces
+
+- **Generation:**
+  - Hugging Face `generate` with the KV cache, float32, eager attention, left padding with an
+    attention mask, pure greedy (`harness/batched.py`), batch size 16;
+  - one worker per T4, so a T4 × 2 session generates on both GPUs;
+  - the model's shipped generation config is still neutralised, and `use_model_defaults=False`
+    is still passed.
+- **Before,** batch-1 generation was planned, or generation inside TransformerLens.
+- **Why it is valid:** the TL pass is the only source of activations. So what matters is that TL
+  reproduces the tokens it is given. That is now checked directly on the study traces, not
+  assumed.
+- **Equivalence gate,** pre-registered, `verify` stage:
+  - on ≥ 200 traces stratified by template (3 per template, seed 0, 291 traces), teacher-forced
+    TL logits must reproduce the HF greedy tokens on ≥ 0.99 of tokens, the S1b / Phase 0
+    threshold;
+  - HF records its top-2 logits at every step during generation, so the report gives the
+    **max logit difference** at the HF token and the HF runner-up, the number of traces with
+    any mismatch, and the margins at every mismatch.
+- **Fallback:** if the gate fails, generation is redone with TransformerLens greedy decoding
+  (batch 1, TL KV cache; `make ms-fallback`). The HF traces are kept aside, not deleted, and
+  the report says so.
+- **One T4 per TL copy.** In M0 the float32 TL copy (11.9 GiB, untied unembedding) was split
+  over two T4s and hit CUDA error 719 unless `CUDA_LAUNCH_BLOCKING=1` was set. The verification
+  pass avoids holding the full [T × 256k] float32 logits:
+  - it runs TL with `return_type=None` and takes the last block's `hook_resid_post` (exactly
+    the input to `ln_final`, checked in the TL 2.18 source);
+  - it applies TL's own `ln_final`, `unembed` and the output soft-cap in chunks of 128
+    positions, at the generated positions only.
+
+  So each T4 holds a whole TL copy, the two GPUs run in parallel, and no split is needed. A test
+  checks that the chunked logits equal TL's own forward, with and without a soft-cap.
+  `verification.tl_n_devices: 2` restores the M0 split if a T4 runs out of memory.
+
+## D23 (2026-11-13) Stop at the end of the answer line; max_new_tokens 512
+
+- A trace stops at its end-of-turn token, at 512 new tokens, or at the end of its answer line,
+  whichever comes first. The answer line is a line that starts with the answer marker and has a
+  number after it.
+- 512 replaces the S2 draft's 1024. The draft argued that larger models write longer
+  solutions, which no longer applies: on 2B in M0, 0.4% of traces hit 512.
+- The cap fraction is reported. Truncated traces count as failures and are excluded from failure
+  sets, as before.
+- **Effect on scores:** none expected. On the 776 existing Gemma-2-2B-IT traces of the baseline
+  work, **0** continued after their first complete answer line; Gemma ends its turn there. The
+  rule is a guard against runaway continuations, not a change in what is scored.
+
+## D24 (2026-11-13) The activation cache is written in the same TL pass as the verification
+
+- **What is stored:**
+  - residual stream only, at all 27 sites (h⁽⁰⁾ = `blocks.0.hook_resid_pre`, and
+    `blocks.{l}.hook_resid_post` for l = 0…25);
+  - only at the pre-registered positions: step first token (primary), step last token, and the
+    final-answer token (`main-study/cache/positions.py`);
+  - as float16 shards with an index and a manifest.
+- **Storage only is float16; compute stays float32.** A cast that overflows stops the run.
+- **float16 check:** float32 copies of 32 traces are kept, and the max absolute and relative
+  error are reported, as is the total disk use.
+- **SAE activations** are computed later from the stored residuals on CPU
+  (`cache/store.py`), with the same float16-vs-float32 comparison on SAE features.
+- **Why:** a second pass for caching would double the TL cost, and caching every token would
+  multiply disk use by ~20.
+- **Crash safety:** each trace's index entries are written inside its verification record, in
+  one line, only after its shard is on disk. A crash cannot leave a trace marked done without
+  its residuals.
+
+## D25 (2026-11-13) Sampled runs: test-split failures only
+
+The T = 0.7, k = 5 runs are made only for greedy failures on test templates. They are used
+solely for the stable vs borderline split ("no sampled run correct"), so runs for train/dev
+failures or for solved problems would cost GPU time and feed no analysis.
+
+## D26 (2026-11-13) 97 templates, 8 instances per template, from the power analysis
+
+- **The rule.** The synopsis power analysis needs 213 test failures after Holm. Clustering
+  inflates that by the design effect, and 320 covers a DEFF up to 1.5. So N* = max(320,
+  ⌈213 × DEFF⌉) test failures with s0, from at least 40 templates.
+- **The sizing.**
+  - At the observed 71% accuracy and an 81% s0 rate, 6 instances per template would reach 320.
+  - **8 are kept** (the S2 draft's number). They give about 451 test failures with s0, which
+    meets N* up to a DEFF of 2.1.
+  - Compute does not require fewer instances (D27).
+- **After S2,** DEFF is estimated from the failure-indicator ICC on train and dev templates. If
+  the test failures fall short of N*, instances 9–16 are added before any probe is trained.
+- **Template split.** `harness/splits.py` raised an error for fewer than 100 templates. With 97,
+  test keeps its 40, and train and dev share the rest 2 : 1, giving 38 / 19 / 40.
+- **Open (group decision).** The 97 is the baseline extractor's count (D2). Under the frozen
+  parser v4, only **89 of 100** templates have gold programs; 0, 2, 9, 10, 11, 15, 17, 25, 66, 76
+  and 85 have none. With a plain seed-0 split, about 4 of the 40 test templates would have no
+  s0. Recommended: draw the 40 test templates from templates with gold programs
+  (`prereg/S2.md` open item 4).
+
+## D27 (2026-11-13) Compute budget, `make estimate`, and the Kaggle notebook
+
+- **`make estimate`** (`main-study/harness/estimate.py`) runs a timed smoke test on the Kaggle
+  T4s: 64 GSM8K-train problems × 6 prompts through the real pipeline. GSM8K train keeps the
+  study population untouched, as in M0. It projects T4 GPU-hours per stage (generation,
+  verification + caching, sampled runs, model loads included), Kaggle quota hours and disk use
+  for the pre-registered sizes.
+- **Budget:** 25 T4 GPU-hours, with a 1.25 safety factor. Above it, the run does not start, and
+  the next cut is proposed to the group instead of applied.
+- The measured result is in `docs/PROGRESS.md` and `main-study/reports/m1/estimate_gemma-2-2b-it.md`.
+- **The notebook.** `notebooks/run_on_kaggle.ipynb` now runs the main-study stages in order:
+  estimate, problems, generate, score, verify, cache, sampled, report.
+  - Each Save & Run All commit restores the previous version's output, skips finished stages,
+    resumes a cut-off stage, and stops before the 12-hour limit.
+  - Every GPU stage runs its workers as subprocesses, so the GPUs are released when a stage ends,
+    and the commit ends as soon as nothing is pending.
+  - The baseline notebook of D16 is kept, unchanged, as `notebooks/run_baseline_on_kaggle.ipynb`.
+- **Weights.** The notebook can take the Gemma weights from Kaggle Models
+  (`google/gemma-2/transformers/gemma-2-2b-it/2`, the same 5.25 GB as the HF repository), placed
+  in the HF cache and read offline, when no `HF_TOKEN` secret is attached. The smoke test used
+  that route; the study run can use either.
+- **Guard.** The pipeline refuses to produce study data while `prereg/S2.md` is a draft.

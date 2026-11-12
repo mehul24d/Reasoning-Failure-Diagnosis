@@ -5,11 +5,18 @@ LLMs with Their Own Content Representations**
 
 B.Tech Minor Project, Semester 7, DTU (Group GP099).
 
-> **Branch `neil`: the main study.** [`main-study/`](main-study/) implements the Detailed
-> Research Plan step by step: milestone M0 is done on Gemma-2-2B-IT (equivalence checks, SAE
-> validation, E0, step parser v4), and the S2 pre-registration is drafted. See
-> [`main-study/README.md`](main-study/README.md) for what is done and what is left. The rest of
-> this repository is the earlier baseline and feasibility work, unchanged.
+> **The main study** is [`main-study/`](main-study/). It implements the Detailed Research Plan
+> step by step. Milestone M0 is done on Gemma-2-2B-IT: equivalence checks, SAE validation, E0
+> and step parser v4. The S2–S4 pipeline for free Kaggle T4s is built
+> ([`notebooks/run_on_kaggle.ipynb`](notebooks/run_on_kaggle.ipynb), `make estimate`), and the
+> S2 pre-registration is drafted.
+>
+> **Scope (2026-11-13):** the minor project runs on Gemma-2-2B-IT only, and its conclusions
+> apply to 2B only. Gemma-2-9B-IT and Qwen2.5-7B-Instruct move to Semester 8 (RQ8), where the
+> RQ3 gate is re-checked on 9B ([plan amendment](main-study/docs/PLAN_AMENDMENT_2026-11-13.md)).
+>
+> See [`main-study/README.md`](main-study/README.md) for what is done and what is left. The rest
+> of this repository is the earlier baseline and feasibility work.
 
 - **Team:** Mehul Dahiya (23/CS/253), Neil Negi (23/CS/278), Harshit Yadav (23/CS/172)
 - **Supervisor:** Prof. Shailender Kumar
@@ -57,7 +64,7 @@ make debug              # tiny end-to-end run with Qwen2.5-0.5B -> results/debug
 ```
 
 Full runs need a CUDA GPU; see "Compute" below. On Colab, run
-`notebooks/run_on_gpu.ipynb`; on Kaggle, `notebooks/run_on_kaggle.ipynb` (see
+`notebooks/run_on_gpu.ipynb`; on Kaggle, `notebooks/run_baseline_on_kaggle.ipynb` (see
 "Running on Kaggle"). Each target writes under `$(RESULTS)` (default
 `results/`), reads its configuration from `configs/*.yaml`, skips itself once
 complete and resumes after a crash, so re-running a target is always safe:
@@ -85,7 +92,7 @@ way is in `docs/DECISIONS.md`.
 
 ## Running on Kaggle
 
-`notebooks/run_on_kaggle.ipynb` is written for **Save & Run All**: it asks
+`notebooks/run_baseline_on_kaggle.ipynb` (the baseline phases; the main study uses `notebooks/run_on_kaggle.ipynb`) is written for **Save & Run All**: it asks
 nothing, stops itself before Kaggle's 12-hour limit, and leaves the results as
 the version's output (DECISIONS D16).
 
