@@ -10,6 +10,14 @@
 Usage:
     python scripts/validate_parsing.py --traces data/generated/gemma-2-2b-it/m0_traces_scored.jsonl \
         --out reports/m0/parsing_validation.json --sample-out reports/m0/parsing_sample.md
+
+For traces of any other problem file (S2: GSM-Symbolic), pass the problems JSONL the traces were
+generated from; each trace's gold program is then built from that file's question, solution and
+source (prereg/S2.md):
+    python scripts/validate_parsing.py --traces data/generated/gemma-2-9b-it/s2_traces_scored.jsonl \
+        --problems data/s2_gsms_main_i8.jsonl --label s2_traces \
+        --out reports/m1/parse_coverage_gemma-2-9b-it.json \
+        --sample-out reports/m1/parsing_sample_gemma-2-9b-it.md --seed 4
 """
 from __future__ import annotations
 
@@ -53,6 +61,17 @@ def gold_report(rows, source) -> dict:
             "issues": dict(kinds.most_common())}
 
 
+def load_problems(path) -> dict:
+    """problem_id -> (question, solution, gold answer, source) from a problems JSONL
+    (the format written by harness.datasets)."""
+    out = {}
+    for line in open(path):
+        if line.strip():
+            r = json.loads(line)
+            out[r["problem_id"]] = (r["question"], r["solution"], r["answer"], r["source"])
+    return out
+
+
 def main() -> None:
     from datasets import load_dataset
 
@@ -61,7 +80,11 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--sample-out", required=True)
     ap.add_argument("--seed", type=int, default=0, help="seed of the hand-check sample")
+    ap.add_argument("--problems", default=None,
+                    help="problems JSONL the traces came from (default: GSM8K train by index)")
+    ap.add_argument("--label", default="s1c_traces", help="report key for the trace statistics")
     a = ap.parse_args()
+    problems = load_problems(a.problems) if a.problems else None
 
     gsm = load_dataset("openai/gsm8k", "main", split="train")
     report = {"gold": {"gsm8k_train": gold_report([(r["question"], r["answer"]) for r in gsm],
@@ -76,9 +99,13 @@ def main() -> None:
     stats = {}
     sample_pool = []
     for r in traces:
-        idx = int(r["problem_id"].rsplit("-", 1)[1])
-        row = gsm[idx]
-        prog, sl = gold_program(row["question"], row["answer"], gsm8k_gold(row["answer"]), "gsm8k")
+        if problems is not None:
+            q, sol, ans, src = problems[r["problem_id"]]
+            prog, sl = gold_program(q, sol, ans, src)
+        else:
+            row = gsm[int(r["problem_id"].rsplit("-", 1)[1])]
+            prog, sl = gold_program(row["question"], row["answer"], gsm8k_gold(row["answer"]),
+                                    "gsm8k")
         style = r["prompt"].split("_")[0]
         key = (style, "correct" if r["correct"] else "failed")
         s = stats.setdefault(key, Counter())
@@ -96,6 +123,9 @@ def main() -> None:
         s["no_computational_steps"] += not p.computational
         s["has_error_step"] += p.first_error is not None
         s["has_error_step_strict"] += p.first_error_strict is not None
+        if p.computational:   # type of the first error step (s0), lenient and strict
+            for name, s0 in (("s0", p.first_error), ("s0_strict", p.first_error_strict)):
+                s[f"{name}_" + ("no_error_step" if s0 is None else p.steps[s0].error)] += 1
         s["extra_valid"] += sum(st.extra_valid for st in p.steps)
         s["rederived"] += sum(st.rederived for st in p.steps)
         for st in p.steps:
@@ -124,13 +154,18 @@ def main() -> None:
             "trace_has_error_step_strict": s["has_error_step_strict"] / n,
             "error_type_shares": {k[4:]: v / max(typed, 1) for k, v in s.items()
                                   if k.startswith("err_")},
+            "s0_type_shares": {k[3:]: v / max(n - s["no_computational_steps"], 1)
+                               for k, v in s.items() if k.startswith("s0_")
+                               and not k.startswith("s0_strict_")},
+            "s0_strict_type_shares": {k[10:]: v / max(n - s["no_computational_steps"], 1)
+                                      for k, v in s.items() if k.startswith("s0_strict_")},
         }
-    report["s1c_traces"] = out
+    report[a.label] = out
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(report, indent=2, default=str))
 
     rng = random.Random(a.seed)
-    lines = ["# Random parsed steps (S1c traces) for manual checking", ""]
+    lines = [f"# Random parsed steps ({a.label}) for manual checking", ""]
     for pid, prompt, ok, st, prog in rng.sample(sample_pool, min(40, len(sample_pool))):
         g = prog.steps[st.gold] if st.gold is not None else None
         lines += [f"## {pid} {prompt} trace_correct={ok}",
