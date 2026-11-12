@@ -1,0 +1,181 @@
+{
+  "gold": {
+    "gsm8k_train": {
+      "n": 7473,
+      "ok_rate": 0.8229626655961462,
+      "mean_steps_ok": 3.748130081300813,
+      "ambiguous_step_rate": 0.13685134980335256,
+      "const_operand_rate": 0.15865439688418803,
+      "issues": {
+        "N unparsed equation(s)": 912,
+        "last result N != answer N": 495,
+        "no equations": 213,
+        "inconsistent equation": 3
+      }
+    },
+    "gsm_symbolic_main": {
+      "n": 5000,
+      "ok_rate": 0.4934,
+      "mean_steps_ok": 4.233887312525335,
+      "ambiguous_step_rate": 0.13590844062947066,
+      "const_operand_rate": 0.1601931330472103,
+      "issues": {
+        "N unparsed equation(s)": 2392,
+        "no equations": 1310,
+        "inconsistent equation": 894,
+        "last result N != answer N": 744
+      },
+      "n_templates": 100
+    },
+    "gsm_symbolic_p1": {
+      "n": 5000,
+      "ok_rate": 0.3686,
+      "mean_steps_ok": 6.250135648399349,
+      "ambiguous_step_rate": 0.19154118689105404,
+      "const_operand_rate": 0.17406997342781222,
+      "issues": {
+        "N unparsed equation(s)": 2677,
+        "inconsistent equation": 1458,
+        "last result N != answer N": 1402,
+        "no equations": 436
+      },
+      "n_templates": 100
+    },
+    "gsm_symbolic_p2": {
+      "n": 2500,
+      "ok_rate": 0.2104,
+      "mean_steps_ok": 7.863117870722434,
+      "ambiguous_step_rate": 0.21109481264168556,
+      "const_operand_rate": 0.17925723429790638,
+      "issues": {
+        "N unparsed equation(s)": 1708,
+        "inconsistent equation": 992,
+        "last result N != answer N": 789,
+        "no equations": 115
+      },
+      "n_templates": 50
+    }
+  },
+  "s1c_traces": {
+    "marked/correct": {
+      "traces": 341,
+      "traces_parsed": 284,
+      "steps": 997,
+      "computational": 391,
+      "compound": 61,
+      "aligned": 254,
+      "ambiguous": 29,
+      "no_computational_steps": 128,
+      "has_error_step": 88,
+      "gold_steps": 992,
+      "gold_unmatched": 738,
+      "err_none": 174,
+      "err_planning": 115,
+      "err_binding": 40,
+      "gold_not_ok": 57,
+      "err_arithmetic": 1,
+      "steps_per_trace": 3.51056338028169,
+      "computational_share": 0.3921765295887663,
+      "compound_share_of_computational": 0.15601023017902813,
+      "aligned_share_of_computational": 0.649616368286445,
+      "gold_steps_matched_share": 0.25604838709677424,
+      "trace_has_error_step": 0.30985915492957744,
+      "error_type_shares": {
+        "none": 0.5272727272727272,
+        "planning": 0.3484848484848485,
+        "binding": 0.12121212121212122,
+        "arithmetic": 0.0030303030303030303
+      }
+    },
+    "marked/failed": {
+      "traces": 159,
+      "gold_not_ok": 36,
+      "traces_parsed": 123,
+      "steps": 631,
+      "computational": 170,
+      "compound": 29,
+      "aligned": 97,
+      "ambiguous": 17,
+      "no_computational_steps": 58,
+      "has_error_step": 58,
+      "gold_steps": 565,
+      "gold_unmatched": 468,
+      "err_planning": 94,
+      "err_none": 21,
+      "err_binding": 23,
+      "err_arithmetic": 3,
+      "steps_per_trace": 5.130081300813008,
+      "computational_share": 0.2694136291600634,
+      "compound_share_of_computational": 0.17058823529411765,
+      "aligned_share_of_computational": 0.5705882352941176,
+      "gold_steps_matched_share": 0.1716814159292035,
+      "trace_has_error_step": 0.4715447154471545,
+      "error_type_shares": {
+        "planning": 0.6666666666666666,
+        "none": 0.14893617021276595,
+        "binding": 0.16312056737588654,
+        "arithmetic": 0.02127659574468085
+      }
+    },
+    "terse/correct": {
+      "traces": 371,
+      "traces_parsed": 308,
+      "steps": 2225,
+      "computational": 483,
+      "compound": 65,
+      "aligned": 337,
+      "ambiguous": 45,
+      "no_computational_steps": 125,
+      "has_error_step": 99,
+      "gold_steps": 1095,
+      "gold_unmatched": 758,
+      "err_none": 229,
+      "err_binding": 63,
+      "err_planning": 124,
+      "gold_not_ok": 63,
+      "err_arithmetic": 2,
+      "steps_per_trace": 7.224025974025974,
+      "computational_share": 0.21707865168539325,
+      "compound_share_of_computational": 0.13457556935817805,
+      "aligned_share_of_computational": 0.6977225672877847,
+      "gold_steps_matched_share": 0.30776255707762556,
+      "trace_has_error_step": 0.32142857142857145,
+      "error_type_shares": {
+        "none": 0.5478468899521531,
+        "binding": 0.1507177033492823,
+        "planning": 0.2966507177033493,
+        "arithmetic": 0.004784688995215311
+      }
+    },
+    "terse/failed": {
+      "traces": 129,
+      "gold_not_ok": 30,
+      "traces_parsed": 99,
+      "steps": 1001,
+      "computational": 181,
+      "compound": 34,
+      "aligned": 111,
+      "ambiguous": 13,
+      "no_computational_steps": 31,
+      "has_error_step": 50,
+      "gold_steps": 462,
+      "gold_unmatched": 351,
+      "err_planning": 83,
+      "err_none": 42,
+      "err_binding": 20,
+      "err_arithmetic": 2,
+      "steps_per_trace": 10.11111111111111,
+      "computational_share": 0.18081918081918083,
+      "compound_share_of_computational": 0.1878453038674033,
+      "aligned_share_of_computational": 0.6132596685082873,
+      "gold_steps_matched_share": 0.24025974025974028,
+      "trace_has_error_step": 0.5050505050505051,
+      "error_type_shares": {
+        "planning": 0.564625850340136,
+        "none": 0.2857142857142857,
+        "binding": 0.1360544217687075,
+        "arithmetic": 0.013605442176870748
+      }
+    }
+  }
+}
