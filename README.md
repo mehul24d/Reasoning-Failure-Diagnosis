@@ -5,6 +5,12 @@ LLMs with Their Own Content Representations**
 
 B.Tech Minor Project, Semester 7, DTU (Group GP099).
 
+> **Branch `neil`: the main study.** [`main-study/`](main-study/) implements the Detailed
+> Research Plan step by step: milestone M0 is done on Gemma-2-2B-IT (equivalence checks, SAE
+> validation, E0, step parser v4), and the S2 pre-registration is drafted. See
+> [`main-study/README.md`](main-study/README.md) for what is done and what is left. The rest of
+> this repository is the earlier baseline and feasibility work, unchanged.
+
 - **Team:** Mehul Dahiya (23/CS/253), Neil Negi (23/CS/278), Harshit Yadav (23/CS/172)
 - **Supervisor:** Prof. Shailender Kumar
 

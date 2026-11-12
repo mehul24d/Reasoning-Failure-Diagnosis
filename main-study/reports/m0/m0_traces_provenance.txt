@@ -1,0 +1,16 @@
+S1c attempt 1: pre-registered E0 traces for gemma-2-2b-it (prereg/E0.md)
+file: data/generated/gemma-2-2b-it/m0_traces_scored.jsonl
+sha256: 2f7e58bf4024aeed225e9abe3b6c987f5fbefee9011643d8e2acb86c4d66e776
+lines: 1000
+source: Kaggle notebook neilnegi/notebook16b0352a71, version 1 (scriptVersionId 368526120), GPU T4 x2
+code: git commit 17a24a8 (Kaggle dataset neilnegi/btp-code, version 3)
+command: bash scripts/s1_sae.sh gemma-2-2b-it 2  (step 1: 500 GSM8K-train problems, seed 0, marked_p0 + terse_p0, greedy, max_new_tokens 512)
+score line (harness.score): traces 1000  accuracy 0.712  no answer 0.011  hit max tokens 0.004
+retrieved: 2026-11-12 from the version's output files; re-checked locally: 1000 records, 500 marked_p0 + 500 terse_p0, accuracy 0.712
+
+SAE validation (S1c attempt 2, Kaggle notebook16b0352a71 version 3, scriptVersionId 368626309, code fd813fd, CUDA_LAUNCH_BLOCKING=1)
+file: reports/m0/sae_validation_gemma-2-2b-it.json
+sha256: c598c75b8e29f3b59b610ae6cc90abcbc10625ec578ccfce079b155d9ac806ef
+checked locally: 26 rows (layers 0-25), pass flags agree with fvu_max 0.4 / delta_ce_max 0.2, passing_layers consistent,
+no NaN, no dCE < 0, FVU within [0, 1]; n_tokens 29559 per layer = trace tokens of the first 200 records.
+failing layers: 11 (dCE 0.2343), 25 (dCE 0.2328)

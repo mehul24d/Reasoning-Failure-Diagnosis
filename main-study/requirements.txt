@@ -1,0 +1,28 @@
+# Python 3.13 (deviation from plan Table 18's 3.11, recorded 2026-11-11): TransformerLens 2.x
+# caps numpy < 2 on Python <= 3.12, while datasets >= 4 pulls pyarrow builds that need numpy >= 2.
+# On 3.11 pip resolves both without complaint and transformer_lens then fails at import.
+# Versions below were tested together on 2026-11-11 (35 tests pass).
+# The GPU server writes its exact `pip freeze` to reports/m0/ (scripts/s1_equivalence.sh),
+# and that frozen list is what each pre-registration records.
+#
+# Pins that matter:
+#  - transformer_lens < 3: TransformerLens 4.x removed HookedTransformer; this pipeline uses it.
+#  - transformers >= 4.50: needed for generate(use_model_defaults=False) (see harness/generate.py).
+#  - transformers < 5: TransformerLens 2.x is not built for transformers 5.
+torch>=2.3
+transformers>=4.50,<5        # tested 4.57.6
+transformer_lens>=2.18,<3    # tested 2.18.0
+sae_lens==6.54.14
+datasets>=2.20               # tested 5.0.1
+accelerate>=0.33
+scikit-learn>=1.4
+numpy>=2.0                   # tested 2.5.4; makes a Python <= 3.12 install fail loudly
+scipy>=1.12
+pandas>=2.2
+statsmodels>=0.14
+sympy>=1.12
+matplotlib>=3.8
+seaborn>=0.13
+pyyaml>=6.0
+tqdm>=4.66
+pytest>=8.0

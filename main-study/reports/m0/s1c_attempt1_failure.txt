@@ -1,0 +1,51 @@
+S1c attempt 1 (Kaggle notebook16b0352a71 v1, code 17a24a8, btp-code v3, GPU T4 x2): failure in s1_sae.sh step 2
+(analysis.sae_validation, --n-devices 2), on the first forward pass of layer 0. Copied verbatim from the run cell output.
+
+traces 1000  accuracy 0.712  no answer 0.011  hit max tokens 0.004
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.10s/it]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/kaggle/working/Reasoning-Failure-Diagnosis/analysis/sae_validation.py", line 182, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/working/Reasoning-Failure-Diagnosis/analysis/sae_validation.py", line 178, in main
+    run(a.model, a.traces, a.out, a.layers, a.device, a.max_traces, a.n_devices)
+  File "/kaggle/working/Reasoning-Failure-Diagnosis/analysis/sae_validation.py", line 152, in run
+    row = validate_layer(model, sae, records, layer, tok.bos_token_id)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/utils/_contextlib.py", line 158, in no_grad
+    return func(*args, **kwargs)
+  File "/kaggle/working/Reasoning-Failure-Diagnosis/analysis/sae_validation.py", line 92, in validate_layer
+    clean_logits, cache = model.run_with_cache(toks, names_filter=name)
+                          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/HookedTransformer.py", line 702, in run_with_cache
+    out, cache_dict = super().run_with_cache(
+                      ~~~~~~~~~~~~~~~~~~~~~~^
+        *model_args, remove_batch_dim=remove_batch_dim, **kwargs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/hook_points.py", line 563, in run_with_cache
+    model_out = self(*model_args, **model_kwargs)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1787, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1798, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/HookedTransformer.py", line 641, in forward
+    logits / self.cfg.output_logits_soft_cap
+    ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.AcceleratorError: CUDA error: unspecified launch failure
+Search for `cudaErrorLaunchFailure' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+The CUDA driver logged these messages, which may provide useful details:
+Returning 719 (CUDA_ERROR_LAUNCH_FAILED) from cuMemFree_v2
+
+Loaded pretrained model gemma-2-2b-it into HookedTransformer
+AssertionError: s1_sae.sh failed: see /kaggle/working/s1c.log
+
+Notes: the "~^" marker lines are reconstructed from the on-screen rendering; the file/line/message lines are exact.
+The 2-problem smoke test (seed 99) passed every stage, including this code path, earlier in the same run.
+No sae_validation or e0 output was produced.

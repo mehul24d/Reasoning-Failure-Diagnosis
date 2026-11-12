@@ -1,0 +1,65 @@
+# Models used in the project (plan Table 12, Section 3.12.1).
+# Hook sites: residual stream after layer l is TransformerLens `blocks.{l}.hook_resid_post`;
+# h^(0) (before any layer) is `blocks.0.hook_resid_pre`.
+#
+# SAE release / id patterns are SAELens names for Gemma Scope, checked against the SAELens
+# 6.54.14 registry on 2026-11-11 (`verify: false`): 2B 65k exists at layers 0-25; 9B pt 131k at
+# 0-41; 9B it 131k at 9, 20, 31.
+
+models:
+  gemma-2-2b-it:
+    role: pilot            # debugging every pipeline before any 9B run
+    hf_id: google/gemma-2-2b-it
+    tl_name: gemma-2-2b-it
+    n_layers: 26
+    d_model: 2304
+    dtype: float32         # preliminary run used float32 on one L4 (Table 5)
+    gated: true            # accept the Gemma licence on HuggingFace and set HF_TOKEN
+    sae:
+      release: gemma-scope-2b-pt-res-canonical
+      id_pattern: "layer_{layer}/width_65k/canonical"
+      width: 65536
+      source: pretrained   # no IT SAEs for 2B
+      verify: false
+
+  gemma-2-9b-it:
+    role: primary
+    hf_id: google/gemma-2-9b-it
+    tl_name: gemma-2-9b-it
+    n_layers: 42
+    d_model: 3584
+    dtype: bfloat16        # fixed per model in the pre-registration (Table 25); bf16 needs ~18 GB for weights
+    gated: true
+    sae:
+      # Instruction-tuned SAEs where available (only a few layers), pre-trained elsewhere.
+      it_release: gemma-scope-9b-it-res-canonical
+      it_id_pattern: "layer_{layer}/width_131k/canonical"
+      it_layers: [9, 20, 31]
+      release: gemma-scope-9b-pt-res-canonical
+      id_pattern: "layer_{layer}/width_131k/canonical"
+      width: 131072
+      source: mixed
+      verify: false
+
+  qwen2.5-7b-instruct:
+    role: cross_family     # failure sets and variable extraction only; no SAE readout
+    hf_id: Qwen/Qwen2.5-7B-Instruct
+    tl_name: Qwen/Qwen2.5-7B-Instruct
+    n_layers: 28
+    d_model: 3584
+    dtype: bfloat16
+    gated: false
+    sae: null
+    notes: >
+      Qwen's default generation_config sets repetition_penalty; the harness overrides it
+      (preliminary run: removing it raised token reproduction from 94.1% to 99.93%).
+
+  qwen2.5-0.5b-instruct:
+    role: smoke_test       # NOT a study model: small enough to test the harness on a laptop CPU/MPS
+    hf_id: Qwen/Qwen2.5-0.5B-Instruct
+    tl_name: Qwen/Qwen2.5-0.5B-Instruct
+    n_layers: 24
+    d_model: 896
+    dtype: float32
+    gated: false
+    sae: null

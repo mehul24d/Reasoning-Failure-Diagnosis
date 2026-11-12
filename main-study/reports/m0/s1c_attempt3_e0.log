@@ -1,0 +1,142 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [00:01<00:01,  1.51s/it]Fetching 2 files: 100%|██████████| 2/2 [00:17<00:00,  8.97s/it]Fetching 2 files: 100%|██████████| 2/2 [00:17<00:00,  8.97s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:04<00:04,  4.27s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  1.90s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.26s/it]
+Loaded pretrained model gemma-2-2b-it into HookedTransformer
+wrote 1347714 token rows for layers [0, 4, 8, 9, 14, 17, 18, 21, 24]
+{
+ "early": {
+  "n_tokens": 449238,
+  "layers": [
+   0,
+   4,
+   8
+  ],
+  "n_matched_tokens": 385462,
+  "delta_L0": {
+   "estimate": -0.1293376261323307,
+   "ci_low": -0.3108890842027075,
+   "ci_high": 0.06123275511573577,
+   "p": 0.1858,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.3716
+  },
+  "d_L0": {
+   "estimate": -0.003632979550320301,
+   "ci_low": -0.008864457449588562,
+   "ci_high": 0.0017542242194777363,
+   "p": 0.1858,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.3716
+  },
+  "delta_H": {
+   "estimate": -0.0016373473184644184,
+   "ci_low": -0.004333475131980035,
+   "ci_high": 0.0010065431725537971,
+   "p": 0.211,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.422
+  },
+  "d_H": {
+   "estimate": -0.003091876969076616,
+   "ci_low": -0.008204750751248206,
+   "ci_high": 0.0019066473961638958,
+   "p": 0.211,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.422
+  }
+ },
+ "middle": {
+  "n_tokens": 449238,
+  "layers": [
+   9,
+   14,
+   17
+  ],
+  "n_matched_tokens": 371759,
+  "delta_L0": {
+   "estimate": -0.2307298007904502,
+   "ci_low": -0.6294675059680893,
+   "ci_high": 0.16071902447069686,
+   "p": 0.2476,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.3716
+  },
+  "d_L0": {
+   "estimate": -0.005737833970629972,
+   "ci_low": -0.015750015723003462,
+   "ci_high": 0.003996863552795231,
+   "p": 0.2476,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.3716
+  },
+  "delta_H": {
+   "estimate": -0.0008117635800335989,
+   "ci_low": -0.005145189944580083,
+   "ci_high": 0.0034723565660502334,
+   "p": 0.7422,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.7422
+  },
+  "d_H": {
+   "estimate": -0.0020516569864566275,
+   "ci_low": -0.01297583249442529,
+   "ci_high": 0.00879412990520749,
+   "p": 0.7422,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.7422
+  }
+ },
+ "late": {
+  "n_tokens": 449238,
+  "layers": [
+   18,
+   21,
+   24
+  ],
+  "n_matched_tokens": 364853,
+  "delta_L0": {
+   "estimate": -1.9240684660870282,
+   "ci_low": -2.6084432591283897,
+   "ci_high": -1.3213731713317705,
+   "p": 0.0,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.0
+  },
+  "d_L0": {
+   "estimate": -0.032181536606397755,
+   "ci_low": -0.043803234960658445,
+   "ci_high": -0.021805888196704953,
+   "p": 0.0,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.0
+  },
+  "delta_H": {
+   "estimate": -0.01068742535599532,
+   "ci_low": -0.016603488086672603,
+   "ci_high": -0.005609142292450836,
+   "p": 0.0,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.0
+  },
+  "d_H": {
+   "estimate": -0.028345627382702052,
+   "ci_low": -0.04395122400188004,
+   "ci_high": -0.014753452586480217,
+   "p": 0.0,
+   "n_clusters": 500,
+   "n_valid_resamples": 10000,
+   "p_holm": 0.0
+  }
+ }
+}
