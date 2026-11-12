@@ -43,22 +43,31 @@ def rel_err(a: torch.Tensor, b: torch.Tensor) -> float:
 
 
 @torch.no_grad()
-def hf_reference(hf, ids_list):
+def hf_reference(hf, ids_list: list[list[int]]) -> list[dict]:
+    """HF hidden states and logits for each prompt, moved to CPU (float32).
+
+    Computed first, so the HF copy can leave the GPU before the TL copy is loaded: two float32
+    copies of Gemma-2-2B (~13 GB each in TL, whose unembedding is untied) never share a 15 GB T4.
+    """
     device = next(hf.parameters()).device
     refs = []
     for ids in ids_list:
         out = hf(torch.tensor([ids], device=device), output_hidden_states=True)
-        refs.append({"hidden": [h[0].float().cpu() for h in out.hidden_states], "logits": out.logits[0].float().cpu()})
+        refs.append({"hidden": [h[0].float().cpu() for h in out.hidden_states],
+                     "logits": out.logits[0].float().cpu()})
     return refs
 
 
 @torch.no_grad()
-def compare_with_tl(tl, ids_list, refs):
+def compare_with_tl(tl, ids_list: list[list[int]], refs: list[dict]) -> tuple[dict, dict]:
+    """HF hidden_states[0] is the (scaled) embedding = TL blocks.0.hook_resid_pre;
+    HF hidden_states[l+1] = TL blocks.l.hook_resid_post for l < L-1. HF's last entry is
+    taken AFTER the final norm, so the final layer is compared via TL resid_post through ln_final."""
     n_layers = tl.cfg.n_layers
     worst = {}
     agree = total = 0
     for ids, ref in zip(ids_list, refs):
-        tl_logits, cache = tl.run_with_cache(torch.tensor([ids]))
+        tl_logits, cache = tl.run_with_cache(torch.tensor([ids]))  # TL moves tokens to its device
         hs = ref["hidden"]
         assert len(hs) == n_layers + 1, (len(hs), n_layers)
         errs = {"embed": rel_err(cache["blocks.0.hook_resid_pre"][0], hs[0])}
@@ -74,10 +83,14 @@ def compare_with_tl(tl, ids_list, refs):
         del cache
     layer_errs = {k: v for k, v in worst.items() if k != "logits"}
     worst_layer = max(layer_errs, key=layer_errs.get)
-    return ({"worst_layer": worst_layer, "worst_rel_err": layer_errs[worst_layer], "logits_rel_err": worst["logits"], "per_layer": layer_errs}, {"top1_agreement": agree / total, "tokens": total})
+    return (
+        {"worst_layer": worst_layer, "worst_rel_err": layer_errs[worst_layer],
+         "logits_rel_err": worst["logits"], "per_layer": layer_errs},
+        {"top1_agreement": agree / total, "tokens": total},
+    )
 
 
-def check_residuals_and_logits(hf, tl, ids_list):
+def check_residuals_and_logits(hf, tl, ids_list: list[list[int]]) -> tuple[dict, dict]:
     return compare_with_tl(tl, ids_list, hf_reference(hf, ids_list))
 
 
@@ -117,6 +130,12 @@ def check_teacher_forcing(hf, tokenizer, ids_list: list[list[int]], max_new_toke
 
 def run(model_key: str, out: str, device: str | None = None, dtype: str | None = None,
         max_new_tokens: int = 256, tl_n_devices: int = 1) -> dict:
+    """Sequential, so only one model copy is on the GPU at a time:
+      1. HF on `device`: reference states/logits, padding check, teacher forcing (all on GPU);
+      2. HF moved to CPU;
+      3. TL built from those weights on `device`, split over `tl_n_devices` GPUs if > 1
+         (Kaggle 2 x T4: Gemma-2-2B float32 in TL is too big for one 15 GB card).
+    """
     thr = experiment_config()["equivalence_checks"]
     cfg = model_config(model_key)
     device = pick_device(device)
@@ -124,17 +143,20 @@ def run(model_key: str, out: str, device: str | None = None, dtype: str | None =
     spec = PromptSpec("marked", 0)
     ids_list = [encode_chat(tok, p, spec) for p in CHECK_PROBLEMS]
     bos_counts = [count_bos(tok, ids) for ids in ids_list]
+
     hf = load_hf(cfg, device=device, dtype=dtype)
     refs = hf_reference(hf, ids_list)
     padded = check_padding(hf, tok, ids_list)
     tf = check_teacher_forcing(hf, tok, ids_list, max_new_tokens)
+
     hf.to("cpu")
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     tl = load_tl(cfg, hf_model=hf, tokenizer=tok, device=device, dtype=dtype, n_devices=tl_n_devices)
     del hf
     resid, top1 = compare_with_tl(tl, ids_list, refs)
-    soft_caps = {"output_logits_soft_cap": getattr(tl.cfg, "output_logits_soft_cap", None), "attn_scores_soft_cap": getattr(tl.cfg, "attn_scores_soft_cap", None)}
+    soft_caps = {"output_logits_soft_cap": getattr(tl.cfg, "output_logits_soft_cap", None),
+                 "attn_scores_soft_cap": getattr(tl.cfg, "attn_scores_soft_cap", None)}
 
     uses_bos = tok.bos_token_id is not None and any(c > 0 for c in bos_counts)
     checks = {
@@ -155,7 +177,8 @@ def run(model_key: str, out: str, device: str | None = None, dtype: str | None =
                                         else all(c == 0 for c in bos_counts))},
     }
     report = {
-        "model": model_key, "hf_id": cfg.hf_id, "device": device, "tl_n_devices": tl_n_devices, "tl_soft_caps": soft_caps,
+        "model": model_key, "hf_id": cfg.hf_id, "device": device, "tl_n_devices": tl_n_devices,
+        "tl_soft_caps": soft_caps,
         "dtype": dtype or cfg.dtype, "torch": torch.__version__,
         "all_pass": all(c["pass"] for c in checks.values()),
         "checks": checks, "per_layer_rel_err": resid["per_layer"],
@@ -172,7 +195,8 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--device", default=None)
     ap.add_argument("--dtype", default=None)
-    ap.add_argument("--tl-n-devices", type=int, default=1, help="split the TL copy over this many GPUs")
+    ap.add_argument("--tl-n-devices", type=int, default=1,
+                    help="split the TL copy over this many GPUs (Kaggle 2 x T4: 2)")
     ap.add_argument("--max-new-tokens", type=int, default=256)
     a = ap.parse_args()
     r = run(a.model, a.out, a.device, a.dtype, a.max_new_tokens, a.tl_n_devices)

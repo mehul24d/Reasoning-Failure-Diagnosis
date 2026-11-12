@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # S1 (M0): the six TL-HF equivalence checks of plan Table 5 for one model.
-# Usage: bash scripts/s1_equivalence.sh gemma-2-2b-it [device] [tl_n_devices]   (Kaggle 2xT4: gemma-2-2b-it cuda 2)
+# Usage: bash scripts/s1_equivalence.sh gemma-2-2b-it [device] [tl_n_devices]
+#   Kaggle 2 x T4:  bash scripts/s1_equivalence.sh gemma-2-2b-it cuda 2
 set -euo pipefail
 cd "$(dirname "$0")/.."
 MODEL="${1:?model key from configs/models.yaml}"

@@ -135,3 +135,31 @@ def test_matching_recovers_true_effect():
     # SD ~ sqrt(5^2 + 30^2 * 0.8 * 0.2) ~ 13.0, so d ~ 6 / 13.0 ~ 0.46
     assert res["early"]["d_L0"]["estimate"] == pytest.approx(0.46, abs=0.08)
     assert "p_holm" in est and res["middle"]["n_tokens"] == 0
+
+
+def test_drop_sae_download(tmp_path, monkeypatch):
+    from huggingface_hub import constants
+    monkeypatch.setattr(constants, "HF_HUB_CACHE", str(tmp_path))
+    repo = tmp_path / "models--google--gemma-scope-9b-pt-res"
+    other = tmp_path / "models--google--gemma-2-9b-it"
+    (repo / "blobs").mkdir(parents=True); other.mkdir()
+    monkeypatch.delenv("BTP_DROP_SAE_CACHE", raising=False)
+    sv.drop_sae_download("gemma-scope-9b-pt-res-canonical")
+    assert repo.exists()                       # off by default
+    monkeypatch.setenv("BTP_DROP_SAE_CACHE", "1")
+    sv.drop_sae_download("gemma-scope-9b-pt-res-canonical")
+    assert not repo.exists() and other.exists()   # only the SAE repo, never the model
+
+
+def test_sae_validation_resumes_finished_layers(tmp_path):
+    """Layers in the .partial.jsonl are reused only for the same trace file and count."""
+    import json as _json
+    out = str(tmp_path / "v.json")
+    row = {"layer": 3, "fvu": 0.1, "delta_ce": 0.01, "pass": True}
+    with sv._partial_path(out).open("w") as f:
+        f.write(_json.dumps({"traces": "t.jsonl", "n_traces": 200, "row": row}) + "\n")
+        f.write(_json.dumps({"traces": "other.jsonl", "n_traces": 200,
+                             "row": {**row, "layer": 4}}) + "\n")
+    assert sv.finished_layers(out, "t.jsonl", 200) == {3: row}
+    assert sv.finished_layers(out, "t.jsonl", 100) == {}
+    assert sv.finished_layers(str(tmp_path / "none.json"), "t.jsonl", 200) == {}

@@ -49,7 +49,8 @@ def depth_band(layer: int, n_layers: int) -> str:
 
 # --------------------------------------------------------------------------- collect (GPU)
 @torch.no_grad()
-def collect(model, load_sae, layers: list[int], records: list[dict]) -> pd.DataFrame:
+def collect(model, load_sae, layers: list[int], records: list[dict],
+            after_layer=None) -> pd.DataFrame:
     """One SAE in memory at a time (a 9B 131k SAE is ~3.7 GB in float32).
 
     `load_sae(layer)` returns an object with encode/decode. The forward pass is repeated per
@@ -87,6 +88,8 @@ def collect(model, load_sae, layers: list[int], records: list[dict]) -> pd.DataF
                 "l0": l0.cpu().numpy(), "entropy": ent.cpu().numpy(),
             }))
         del sae
+        if after_layer is not None:
+            after_layer(layer)
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
     return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
@@ -137,6 +140,8 @@ def matched_effect(df: pd.DataFrame, metric: str):
     fail = (~m["correct"].to_numpy(bool)).astype(int)
     n_s = len(strata)
     cell = st_idx * 2 + fail                                  # (stratum, group) cell id
+    # Pre-aggregate rows to (cluster, cell) units: every bootstrap resample re-weights whole
+    # clusters, so sums within a (cluster, cell) unit are all it needs. Same estimates, faster.
     unit, unit_idx = np.unique(cl_idx.astype(np.int64) * (2 * n_s) + cell, return_inverse=True)
     u_cl = unit // (2 * n_s)
     u_cell = unit % (2 * n_s)
@@ -224,18 +229,19 @@ def main() -> None:
         from harness.config import model_config
         from harness.generate import read_jsonl
         from harness.models import load_hf, load_tl, load_tokenizer, pick_device
-        from .sae_validation import sae_ids_for
+        from .sae_validation import drop_sae_download, sae_ids_for
 
         cfg = model_config(a.model)
         device = pick_device(a.device)
         passing = json.loads(Path(a.sae_report).read_text())["passing_layers"]
         layers = pick_layers(passing, cfg.n_layers, a.layers_per_band)
         tok = load_tokenizer(cfg)
+        # HF on CPU, only the TL copy on the GPU (see analysis/sae_validation.py)
         model = load_tl(cfg, hf_model=load_hf(cfg, device="cpu"), tokenizer=tok, device=device,
                         n_devices=a.n_devices)
         recs = read_jsonl(a.traces)[: a.max_traces]
         df = collect(model, lambda l: SAE.from_pretrained(*sae_ids_for(cfg, l), device=device),
-                     layers, recs)
+                     layers, recs, after_layer=lambda l: drop_sae_download(sae_ids_for(cfg, l)[0]))
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(a.out, index=False, compression="gzip")
         print(f"wrote {len(df)} token rows for layers {layers}")

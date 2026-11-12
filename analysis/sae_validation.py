@@ -20,6 +20,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -126,6 +128,37 @@ def sae_ids_for(model_cfg, layer: int) -> tuple[str, str]:
     return s["release"], s["id_pattern"].format(layer=layer)
 
 
+def drop_sae_download(release: str) -> None:
+    """With BTP_DROP_SAE_CACHE=1, delete the downloaded Gemma Scope repo from the HF cache.
+
+    Disk only: a 9B 131k SAE is about 3.7 GB, and 42 of them do not fit on a Colab disk. Called
+    after each layer, when that layer's SAE is no longer needed; the next layer downloads its own.
+    """
+    if os.environ.get("BTP_DROP_SAE_CACHE") != "1":
+        return
+    from huggingface_hub import constants
+
+    repo = "google/" + release.removesuffix("-canonical")
+    shutil.rmtree(Path(constants.HF_HUB_CACHE) / ("models--" + repo.replace("/", "--")),
+                  ignore_errors=True)
+
+
+def _partial_path(out: str) -> Path:
+    return Path(str(out) + ".partial.jsonl")
+
+
+def finished_layers(out: str, traces: str, n_traces: int) -> dict:
+    """Rows of layers finished in an earlier, interrupted run on the same traces."""
+    part, done = _partial_path(out), {}
+    if part.exists():
+        for line in part.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                if r.get("traces") == traces and r.get("n_traces") == n_traces:
+                    done[r["row"]["layer"]] = r["row"]
+    return done
+
+
 def run(model_key: str, traces: str, out: str, layers: list[int] | None = None,
         device: str | None = None, max_traces: int | None = None, n_devices: int = 1) -> dict:
     from sae_lens import SAE
@@ -140,13 +173,22 @@ def run(model_key: str, traces: str, out: str, layers: list[int] | None = None,
     thr = experiment_config()["thresholds"]
     device = pick_device(device)
     tok = load_tokenizer(cfg)
-    hf = load_hf(cfg, device="cpu")  # only the TL copy goes on the GPU
+    # HF weights are loaded on CPU and only the TL copy goes to the GPU, so one 15 GB T4 is
+    # enough for Gemma-2-2B in float32 (needs ~2x model size of system RAM while loading).
+    hf = load_hf(cfg, device="cpu")
     model = load_tl(cfg, hf_model=hf, tokenizer=tok, device=device, n_devices=n_devices)
     del hf
     records = read_jsonl(traces)[:max_traces]
     layers = layers if layers is not None else list(range(cfg.n_layers))
+    # resume: layers finished before a disconnect are kept (one JSON row per line, same traces)
+    part = _partial_path(out)
+    done = finished_layers(out, traces, len(records))
     rows = []
     for layer in layers:
+        if layer in done:
+            rows.append(done[layer])
+            print(f"layer {layer:2d}  (resumed)", flush=True)
+            continue
         release, sae_id = sae_ids_for(cfg, layer)
         sae = SAE.from_pretrained(release, sae_id, device=device)
         row = validate_layer(model, sae, records, layer, tok.bos_token_id)
@@ -154,7 +196,11 @@ def run(model_key: str, traces: str, out: str, layers: list[int] | None = None,
         rows.append(judge(row, thr["sae_fvu_max"], thr["sae_delta_ce_max"]))
         print(f"layer {layer:2d}  FVU {row['fvu']:.3f}  dCE {row['delta_ce']:.3f}  "
               f"{'PASS' if rows[-1]['pass'] else 'FAIL'}", flush=True)
+        part.parent.mkdir(parents=True, exist_ok=True)
+        with part.open("a") as f:
+            f.write(json.dumps({"traces": traces, "n_traces": len(records), "row": rows[-1]}) + "\n")
         del sae
+        drop_sae_download(release)
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
     report = {"model": model_key, "traces": traces, "n_traces": len(records),

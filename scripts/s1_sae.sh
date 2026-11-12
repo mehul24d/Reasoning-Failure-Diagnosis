@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # S1c (M0): SAE validation (Section 3.12.2) and the E0 sparsity check (Appendix A) for one model.
-# Commit prereg/E0.md BEFORE running this. Usage: bash scripts/s1_sae.sh gemma-2-2b-it [n_devices]   (Kaggle 2xT4: 2)
+# Commit prereg/E0.md BEFORE running this.
+# Usage: bash scripts/s1_sae.sh gemma-2-2b-it [n_gpus_for_TL]     (Kaggle 2 x T4: ... gemma-2-2b-it 2)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 MODEL="${1:?gemma-2-2b-it or gemma-2-9b-it}"
