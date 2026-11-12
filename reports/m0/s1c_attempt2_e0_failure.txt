@@ -1,0 +1,58 @@
+S1c attempt 2 (Kaggle notebook16b0352a71 version 3, scriptVersionId 368626309, code commit fd813fd / btp-code v3,
+traces from btp-s1c-traces, GPU T4 x2): SAE validation (CUDA_LAUNCH_BLOCKING=1) completed all 26 layers; the following
+E0 collect step (s1_sae.sh step 3 arguments, --n-devices 2, WITHOUT CUDA_LAUNCH_BLOCKING) then failed on its first
+forward pass. Verbatim content of /kaggle/working/s1c_e0.log (3782 bytes):
+
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:07<00:07,  8.00s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:08<00:00,  3.84s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:08<00:00,  4.46s/it]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/kaggle/working/Reasoning-Failure-Diagnosis/analysis/sparsity_e0.py", line 251, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/working/Reasoning-Failure-Diagnosis/analysis/sparsity_e0.py", line 237, in main
+    df = collect(model, lambda l: SAE.from_pretrained(*sae_ids_for(cfg, l), device=device),
+                 layers, recs)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/utils/_contextlib.py", line 158, in no_grad
+    return func(*args, **kwargs)
+  File "/kaggle/working/Reasoning-Failure-Diagnosis/analysis/sparsity_e0.py", line 72, in collect
+    _, cache = model.run_with_cache(toks, names_filter=name)
+               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/HookedTransformer.py", line 702, in run_with_cache
+    out, cache_dict = super().run_with_cache(
+                      ~~~~~~~~~~~~~~~~~~~~~~^
+        *model_args, remove_batch_dim=remove_batch_dim, **kwargs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/hook_points.py", line 563, in run_with_cache
+    model_out = self(*model_args, **model_kwargs)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1787, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1798, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/HookedTransformer.py", line 638, in forward
+    logits = self.unembed(residual)  # [batch, pos, d_vocab]
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1787, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/kaggle/working/venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1798, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/components/unembed.py", line 31, in forward
+    return batch_addmm(self.b_U, self.W_U, residual)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/utilities/addmm.py", line 34, in batch_addmm
+    x = vanilla_addmm(bias, x.view(-1, x.size(-1)), weight)
+  File "/kaggle/working/venv/lib/python3.13/site-packages/transformer_lens/utilities/addmm.py", line 19, in vanilla_addmm
+    return torch.addmm(input, mat1, mat2)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+torch.AcceleratorError: CUDA error: unspecified launch failure
+Search for `cudaErrorLaunchFailure' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+The CUDA driver logged these messages, which may provide useful details:
+Returning 719 (CUDA_ERROR_LAUNCH_FAILED) from cuMemFree_v2
+
+
+Loaded pretrained model gemma-2-2b-it into HookedTransformer

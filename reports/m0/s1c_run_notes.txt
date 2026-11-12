@@ -1,0 +1,17 @@
+S1c run notes (gemma-2-2b-it, Kaggle 2 x Tesla T4, TransformerLens float32 split over both GPUs with n_devices=2)
+
+CUDA error 719 (CUDA_ERROR_LAUNCH_FAILED, "unspecified launch failure", reported from cuMemFree_v2):
+* Attempt 1 (v1, no CUDA_LAUNCH_BLOCKING): analysis.sae_validation crashed on the first forward pass of layer 0
+  (reports/m0/s1c_attempt1_failure.txt). A 2-problem smoke test of the same code path had passed earlier in that run.
+* Attempt 2 (v3): diagnostic preflight with CUDA_LAUNCH_BLOCKING=1 passed (record 0, 190 tokens: peak allocated
+  7235 / 7752 MiB on cuda:0 / cuda:1; longest of the first 200, 589 tokens: 7295 / 9112 MiB; logits finite).
+  analysis.sae_validation with CUDA_LAUNCH_BLOCKING=1 then ran all 26 layers x 200 traces (2 forward passes per trace
+  per layer) without error, about 196 s per layer.
+* Attempt 2, next step: analysis.sparsity_e0 collect WITHOUT CUDA_LAUNCH_BLOCKING crashed with error 719 on its first
+  forward pass, inside TransformerLens unembed (torch.addmm) (reports/m0/s1c_attempt2_e0_failure.txt).
+* Reading (hypothesis, not proven): the failure is tied to asynchronous kernel execution across the two GPUs in the
+  split model, not to the analysis code or the data; with synchronous launches the identical code ran cleanly.
+
+CUDA_LAUNCH_BLOCKING=1 only makes each CUDA kernel launch synchronous (the host waits for the kernel to finish). It does
+not change which kernels run, their inputs, or their arithmetic, so it does not change any result; it only makes the run
+slower. The remaining E0 step is therefore run with CUDA_LAUNCH_BLOCKING=1, with no code change.

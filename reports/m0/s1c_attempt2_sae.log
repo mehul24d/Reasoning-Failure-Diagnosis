@@ -1,0 +1,29 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:07<00:07,  7.62s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:07<00:00,  3.28s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:07<00:00,  3.93s/it]
+Loaded pretrained model gemma-2-2b-it into HookedTransformer
+layer  0  FVU 0.096  dCE 0.011  PASS
+layer  1  FVU 0.155  dCE 0.031  PASS
+layer  2  FVU 0.175  dCE 0.037  PASS
+layer  3  FVU 0.148  dCE 0.026  PASS
+layer  4  FVU 0.153  dCE 0.029  PASS
+layer  5  FVU 0.178  dCE 0.047  PASS
+layer  6  FVU 0.170  dCE 0.036  PASS
+layer  7  FVU 0.185  dCE 0.063  PASS
+layer  8  FVU 0.184  dCE 0.059  PASS
+layer  9  FVU 0.232  dCE 0.094  PASS
+layer 10  FVU 0.218  dCE 0.097  PASS
+layer 11  FVU 0.350  dCE 0.234  FAIL
+layer 12  FVU 0.304  dCE 0.112  PASS
+layer 13  FVU 0.312  dCE 0.160  PASS
+layer 14  FVU 0.339  dCE 0.163  PASS
+layer 15  FVU 0.249  dCE 0.103  PASS
+layer 16  FVU 0.272  dCE 0.087  PASS
+layer 17  FVU 0.259  dCE 0.071  PASS
+layer 18  FVU 0.277  dCE 0.072  PASS
+layer 19  FVU 0.266  dCE 0.067  PASS
+layer 20  FVU 0.279  dCE 0.056  PASS
+layer 21  FVU 0.281  dCE 0.061  PASS
+layer 22  FVU 0.277  dCE 0.042  PASS
+layer 23  FVU 0.306  dCE 0.067  PASS
+layer 24  FVU 0.296  dCE 0.084  PASS
+layer 25  FVU 0.271  dCE 0.233  FAIL
