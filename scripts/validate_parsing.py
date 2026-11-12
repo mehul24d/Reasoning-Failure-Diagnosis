@@ -60,6 +60,7 @@ def main() -> None:
     ap.add_argument("--traces", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--sample-out", required=True)
+    ap.add_argument("--seed", type=int, default=0, help="seed of the hand-check sample")
     a = ap.parse_args()
 
     gsm = load_dataset("openai/gsm8k", "main", split="train")
@@ -94,6 +95,11 @@ def main() -> None:
         s["ambiguous"] += sum(st.ambiguous for st in p.steps)
         s["no_computational_steps"] += not p.computational
         s["has_error_step"] += p.first_error is not None
+        s["has_error_step_strict"] += p.first_error_strict is not None
+        s["extra_valid"] += sum(st.extra_valid for st in p.steps)
+        for st in p.steps:
+            if st.tier is not None:
+                s[f"tier_{st.tier}"] += 1
         s["gold_steps"] += len(prog.steps)
         s["gold_unmatched"] += p.n_unmatched_gold
         for st in p.steps:
@@ -114,6 +120,7 @@ def main() -> None:
             "aligned_share_of_computational": s["aligned"] / max(s["computational"], 1),
             "gold_steps_matched_share": 1 - s["gold_unmatched"] / max(s["gold_steps"], 1),
             "trace_has_error_step": s["has_error_step"] / n,
+            "trace_has_error_step_strict": s["has_error_step_strict"] / n,
             "error_type_shares": {k[4:]: v / max(typed, 1) for k, v in s.items()
                                   if k.startswith("err_")},
         }
@@ -121,7 +128,7 @@ def main() -> None:
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(report, indent=2, default=str))
 
-    rng = random.Random(0)
+    rng = random.Random(a.seed)
     lines = ["# Random parsed steps (S1c traces) for manual checking", ""]
     for pid, prompt, ok, st, prog in rng.sample(sample_pool, min(40, len(sample_pool))):
         g = prog.steps[st.gold] if st.gold is not None else None
@@ -130,9 +137,11 @@ def main() -> None:
                   f"* parsed: op={st.op} a={st.a} b={st.b} result={st.result} "
                   f"a_ref={st.a_ref} b_ref={st.b_ref} compound={st.compound} "
                   f"ambiguous={st.ambiguous}",
-                  f"* aligned gold step: {st.gold} "
+                  f"* aligned gold step: {st.gold} (tier {st.tier}) "
                   + (f"({g.op}, {g.a_ref}, {g.b_ref}, {g.result})" if g else ""),
-                  f"* error type: {st.error}",
+                  f"* error type: {st.error}  extra_valid={st.extra_valid}",
+                  "* gold program: " + "; ".join(f"{k}: {x.a} {x.op} {x.b} = {x.result}"
+                                                 for k, x in enumerate(prog.steps)),
                   "* manual check: [ ] correct  [ ] wrong (note):", ""]
     Path(a.sample_out).write_text("\n".join(lines))
     print(json.dumps(report, indent=2, default=str))

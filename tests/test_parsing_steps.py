@@ -29,14 +29,14 @@ def test_parse_expression(expr, ops, value):
     assert [s.op for s in steps] == ops and steps[-1].result == value
 
 
-@pytest.mark.parametrize("expr", ["12", "20% * 50", "3 hours * 4", "", "4 *", "5 / 0"])
+@pytest.mark.parametrize("expr", ["12", "", "4 *", "5 / 0", "2m - 1", "12 dogs and 3 cats"])
 def test_unparseable(expr):
     assert parse_expression(expr) is None
 
 
 def test_find_equations_chain_latex_and_lists():
     eqs, skipped = find_equations(r"So 4 \times 12 = 48 - 9 = 39. Items: 3, 4 + 5 = 9")
-    assert [(e.lhs, e.rhs) for e in eqs] == [("4 * 12", 48), ("48 - 9", 39), ("4 + 5", 9)]
+    assert [(e.lhs, e.rhs) for e in eqs] == [(r"4 \times 12", 48), ("48 - 9", 39), ("4 + 5", 9)]
     assert skipped == 0
     eqs, _ = find_equations("Step 1. 4 * 12 = 48\nStep 2) 48 - 9 = 39. He has 3. 2 + 2 = 4")
     assert [(e.lhs, e.rhs) for e in eqs] == [("4 * 12", 48), ("48 - 9", 39), ("2 + 2", 4)]
@@ -123,6 +123,7 @@ def test_extra_step_and_non_computational():
                "Step 4: 39 + 5 = 44\nAnswer: 44")
     assert [s.computational for s in p.steps] == [False, True, True, True]
     assert [s.error for s in p.steps] == [None, "none", "none", "planning"]
+    assert not p.steps[3].extra_valid and p.first_error == 3     # 44 is not a gold quantity
 
 
 def test_compound_step_is_flagged_but_feeds_later_steps():
@@ -140,3 +141,83 @@ def test_split_templates_deterministic_and_disjoint():
     assert not set(a["train"]) & set(a["test"])
     with pytest.raises(ValueError):
         split_templates(ids[:50])
+
+
+# ----------------------------------------------------------------------------- real-trace cases
+# (failures found in the manual check of 40 parsed S1c steps, reports/m0/parsing_manual_check.md)
+@pytest.mark.parametrize("text,ops,rhs", [
+    ("10 baskets * $9/basket = $90", ["*"], 90),
+    ("2 pairs * $9.50/pair = $19.00", ["*"], 19),
+    ("100 horses + 29 sheep + 9 chickens = 138", ["+", "+"], 138),
+    ("200 seats * (3/4) = 150", ["*"], 150),
+    ("60*20/100 = 12", ["*"], 12),               # 20/100 is a literal: 60 * 1/5
+    ("60 * 20% = 12", ["*"], 12),
+    ("21/4÷3/4 = 7", ["/"], 7),
+    ("11 1/4 + 3 = 14 1/4", ["+"], F(57, 4)),
+    ("2(38+30) = 136", ["+", "*"], 136),
+    ("¥20 * 3 = ¥60", ["*"], 60),
+    ("3/4 = 75%", ["/"], F(3, 4)),
+    ("He has 3 dogs and 10 * 9 = 90", ["*"], 90),
+    ("-5 + 3 = -2", ["+"], -2),
+])
+def test_real_trace_equations(text, ops, rhs):
+    eqs, _ = find_equations(text)
+    assert len(eqs) == 1
+    assert [s.op for s in eqs[0].steps] == ops and eqs[0].rhs == rhs and eqs[0].consistent
+
+
+def test_algebra_is_rejected_not_misread():
+    eqs, skipped = find_equations("2m - 1 + 1 = 2m")
+    assert eqs == [] and skipped == 1
+
+
+def test_spans_point_into_original_text():
+    t = r"So **4 \times 12 = 48** pens"
+    eq = find_equations(t)[0][0]
+    assert t[eq.start:eq.end] == r"4 \times 12 = 48"
+
+
+def test_gsm8k_gold_uses_unannotated_inline_equations():
+    q = "Ann has 20 apples. She buys 2 bags of 20 apples and 4 more. How many apples now?"
+    sol = "She buys 2*20 = 40 apples.\nThen 40+4 = 44.\nTotal 44+20=<<44+20=64>>64\n#### 64"
+    prog, _ = gold_program(q, sol, 64, "gsm8k")
+    assert prog.ok and [g.result for g in prog.steps] == [40, 44, 64]
+
+
+def test_percent_slot_matches_fraction_operand():
+    q = "A shirt costs $60. It is 20% off. How much is the discount?"
+    prog, sl = gold_program(q, "60*20/100=<<60*20/100=12>>12\n#### 12", 12, "gsm8k")
+    assert prog.ok and prog.steps[0].b_ref == ("slot", 1)
+    p = parse_trace("Step 1: 60 * 0.20 = 12\nAnswer: 12", "marked", sl, prog)
+    assert p.steps[0].error == "none"
+
+
+def test_alignment_prefers_exact_step_over_shared_operand():
+    # gold: 183*26 = 4758 ; 26/2 = 13 ; 28*13 = 364 (three independent pieces)
+    q = "A has 183 rows of 26 seats. Half of 26 is used by 28 classes. How many?"
+    sol = "183*26=4758\n26/2=13\n28*13=364\n4758-364=4394\n#### 4394"
+    prog, sl = gold_program(q, sol, 4394, "gsm_symbolic")
+    assert prog.ok
+    p = parse_trace("Step 1: 26/2 = 13\nStep 2: 28 * 13 = 364\nStep 3: 183 * 26 = 4758\n"
+                    "Step 4: 4758 - 364 = 4394\nAnswer: 4394", "marked", sl, prog)
+    assert [(s.gold, s.error) for s in p.steps] == [(1, "none"), (2, "none"), (0, "none"),
+                                                    (3, "none")]
+
+
+def test_compound_result_feeds_later_step():
+    p = _parse("Step 1: 4 * 12 - 9 = 39\nStep 2: 39 + 0 = 39\nAnswer: 39")
+    assert p.steps[0].compound and p.steps[0].gold == 1
+    assert p.steps[1].a_ref == ("res", 1)
+
+
+def test_redundant_valid_step_is_extra_valid():
+    p = _parse("Step 1: 4 * 12 = 48\nStep 2: 48 - 9 = 39\nStep 3: 48 - 9 = 39\nAnswer: 39")
+    s3 = p.steps[2]
+    assert s3.error == "planning" and s3.extra_valid
+    assert p.first_error is None and p.first_error_strict == 2
+
+
+def test_terse_line_with_two_equations_and_markdown():
+    t = "**4 * 12 = 48** and **48 - 9 = 39**\nAnswer: 39"
+    p = _parse(t, style="terse")
+    assert [(s.gold, s.error) for s in p.steps] == [(0, "none"), (1, "none")]

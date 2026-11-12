@@ -26,7 +26,9 @@ from fractions import Fraction
 
 from .expr import NUM, Equation, find_equations, parse_expression, to_fraction
 
-_SLOT = re.compile(rf"(?<![\w.]){NUM}(?![\w])")
+# a slot: a mixed number "11 1/4", a fraction "3/4", or a number (optionally with "%")
+_SLOT = re.compile(rf"(?<![\w.])(?:(?P<whole>\d+)\s+(?P<mn>\d+)/(?P<md>\d+)|(?P<fn>\d+)/(?P<fd>\d+)"
+                   rf"|(?P<num>{NUM})(?P<pct>%)?)(?![\w])")
 _ANNOT = re.compile(r"<<([^<>=]*)=([^<>]*)>>")
 
 
@@ -37,6 +39,10 @@ class Slot:
     start: int
     end: int
     distractor: bool = False
+    percent: bool = False          # written "n%": also matches the operand value n/100
+
+    def matches(self, value: Fraction) -> bool:
+        return value == self.value or (self.percent and value == self.value / 100)
 
 
 def slots(question: str, distractor_span: tuple[int, int] | None = None) -> list[Slot]:
@@ -44,12 +50,28 @@ def slots(question: str, distractor_span: tuple[int, int] | None = None) -> list
     clause, when the variant has one) is the distractor quantity q_delta."""
     out = []
     for m in _SLOT.finditer(question):
-        s = m.group(0)
-        if s.endswith("."):
-            s = s[:-1]
-        d = distractor_span is not None and distractor_span[0] <= m.start() < distractor_span[1]
-        out.append(Slot(len(out), to_fraction(s), m.start(), m.end(), d))
+        if m.group("whole") is not None:
+            a, b = int(m.group("mn")), int(m.group("md"))
+            if b == 0 or a >= b:            # "3 4/2" is not a mixed number: two plain slots
+                for g in ("whole", "mn", "md"):
+                    out.append(_slot(len(out), Fraction(int(m.group(g))), m.start(g), m.end(g),
+                                     distractor_span))
+                continue
+            v = int(m.group("whole")) + Fraction(a, b)
+        elif m.group("fn") is not None:
+            if int(m.group("fd")) == 0:
+                continue
+            v = Fraction(int(m.group("fn")), int(m.group("fd")))
+        else:
+            v = to_fraction(m.group("num"))
+        out.append(_slot(len(out), v, m.start(), m.end(), distractor_span,
+                         bool(m.group("pct"))))
     return out
+
+
+def _slot(i, v, st, en, span, pct=False) -> Slot:
+    d = span is not None and span[0] <= st < span[1]
+    return Slot(i, v, st, en, d, pct)
 
 
 Ref = tuple  # ("slot", i) | ("res", k) | ("const", Fraction)
@@ -86,7 +108,7 @@ def resolve(value: Fraction, slot_list: list[Slot], results: list[Fraction],
     (a character position in the question) wins, else the first. Any remaining choice is
     flagged ambiguous."""
     res = [k for k, r in enumerate(results) if r == value]
-    sl = [s for s in slot_list if s.value == value]
+    sl = [s for s in slot_list if s.matches(value)]
     if res:
         return ("res", res[-1]), bool(sl) or len(res) > 1
     if sl:
@@ -150,18 +172,28 @@ def gsm8k_equations(solution: str) -> tuple[list[Equation], int]:
 def gold_program(question: str, solution: str, final_answer, source: str,
                  distractor_span: tuple[int, int] | None = None) -> tuple[GoldProgram, list[Slot]]:
     """Gold program and slots for one problem. `source` is "gsm8k" or "gsm_symbolic"."""
+    if source not in ("gsm8k", "gsm_symbolic"):
+        raise ValueError(source)
     sl = slots(question, distractor_span)
     body = solution.split("####")[0]
-    if source == "gsm8k":
-        eqs, bad = gsm8k_equations(body)
-    elif source == "gsm_symbolic":
-        eqs, bad = find_equations(re.sub(r"<<[^<>]*>>", "", body))
-    else:
-        raise ValueError(source)
     fa = None if final_answer is None else (
         final_answer if isinstance(final_answer, Fraction) else to_fraction(str(final_answer)))
+    # the written-out equations (GSM8K calculator annotations removed: they repeat the inline
+    # equation, and some inline equations have no annotation at all)
+    prog = _with_unparsed(*find_equations(re.sub(r"<<[^<>]*>>", "", body)), sl, fa)
+    if source == "gsm8k" and not prog.ok:
+        # fall back to the annotations alone when the inline text cannot be read
+        alt = _with_unparsed(*gsm8k_equations(body), sl, fa)
+        if alt.ok:
+            alt.issues.append("from annotations")      # informational; program is ok
+            alt.ok = True
+            return alt, sl
+    return prog, sl
+
+
+def _with_unparsed(eqs, bad, sl, fa) -> GoldProgram:
     prog = _program_from_equations(eqs, sl, fa)
     if bad:
         prog.issues.append(f"{bad} unparsed equation(s)")
         prog.ok = False
-    return prog, sl
+    return prog
