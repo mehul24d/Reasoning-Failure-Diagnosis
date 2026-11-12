@@ -6,6 +6,7 @@
 4. Teacher-forced argmax reproduces the greedy output >= 0.99 of tokens
 5. Generation config is pure greedy (no penalty, temperature, top-p or top-k)
 6. Exactly one BOS token per prompt (models that use BOS)
+(+) A second greedy run reproduces the first exactly (added for the Kaggle re-run, amendment A12)
 
 Usage (GPU server):
     python -m harness.equivalence --model gemma-2-2b-it --out reports/m0/equivalence_gemma-2-2b-it.json
@@ -117,15 +118,20 @@ def check_teacher_forcing(hf, tokenizer, ids_list: list[list[int]], max_new_toke
     device = next(hf.parameters()).device
     gen_cfg = greedy_generation_config(tokenizer, max_new_tokens)
     match = total = 0
+    outputs = []
     for ids in ids_list:
         g = generate_one(hf, tokenizer, ids, gen_cfg)
+        outputs.append(g["output_ids"])
         full = torch.tensor([ids + g["output_ids"]], device=device)
         logits = hf(full).logits[0]
         pred = logits[len(ids) - 1: len(ids) - 1 + len(g["output_ids"])].argmax(-1).tolist()
         match += sum(int(p == t) for p, t in zip(pred, g["output_ids"]))
         total += len(g["output_ids"])
+    # greedy reproducibility (amendment A12): a second greedy run gives the same tokens
+    repeat = [generate_one(hf, tokenizer, ids, gen_cfg)["output_ids"] for ids in ids_list]
     return {"reproduction": match / max(total, 1), "tokens": total,
-            "pure_greedy": is_pure_greedy(gen_cfg)}
+            "pure_greedy": is_pure_greedy(gen_cfg),
+            "repeat_identical": [a == b for a, b in zip(outputs, repeat)]}
 
 
 def run(model_key: str, out: str, device: str | None = None, dtype: str | None = None,
@@ -172,6 +178,9 @@ def run(model_key: str, out: str, device: str | None = None, dtype: str | None =
                                         "threshold": f">= {thr['teacher_forced_reproduction_min']}",
                                         "pass": tf["reproduction"] >= thr["teacher_forced_reproduction_min"]},
         "pure_greedy_config": {"value": tf["pure_greedy"], "pass": tf["pure_greedy"]},
+        "greedy_repeat_identical": {"value": tf["repeat_identical"], "threshold": "all identical",
+                                    "note": "added on the Kaggle re-run (A12); not a Table 5 check",
+                                    "pass": all(tf["repeat_identical"])},
         "one_bos_per_prompt": {"value": bos_counts, "uses_bos": uses_bos,
                                "pass": (all(c == 1 for c in bos_counts) if uses_bos
                                         else all(c == 0 for c in bos_counts))},

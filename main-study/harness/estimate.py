@@ -5,7 +5,8 @@ The smoke test runs the REAL pipeline code (harness.pipeline) on 64 GSM8K *train
 scoring and positions, the TL verification + residual cache, the sampled runs, and a few traces
 with the TL fallback engine. From the measured throughputs it projects GPU-hours per stage and
 the disk use for the pre-registered sizes (configs/experiment.yaml), and compares the total with
-the budget (`budget.max_t4_gpu_hours`). Smoke outputs are never reported as results.
+the budget (`budget.max_t4_gpu_hours`). Over budget, the pre-registered rule of amendment A13 is
+applied automatically (`apply_budget_rule`). Smoke outputs are never reported as results.
 
     python -m harness.estimate --model gemma-2-2b-it            # on Kaggle, GPU T4 x2
     python -m harness.estimate --allow-any-gpu                  # elsewhere (numbers not for the plan)
@@ -72,14 +73,22 @@ def _verify_load(stage_status: dict, vrecs: list[dict], in_sample: bool) -> floa
     return max(0.0, stage_status.get("seconds", 0) - max(per_worker.values(), default=0.0))
 
 
-def project(meas: dict, n_gpu: int) -> dict:
+def sampled_failure_rate(pw: dict) -> float:
+    """Failure rate used to size the sampled runs: the higher of the planning value (M0, GSM8K)
+    and the pilot (GSM-Symbolic main), so the compute projection errs on the high side."""
+    return max(1 - pw["planning_accuracy"], 1 - pw.get("pilot_accuracy", pw["planning_accuracy"]))
+
+
+def project(meas: dict, n_gpu: int, instances: int | None = None, sampled: bool = True) -> dict:
     exp = experiment_config()
     d, pw = exp["data"], exp["data"]["power"]
     mc = model_config(meas["model"])
+    inst = instances or d["instances_per_template"]
     n_prompts = 2 * exp["generation"]["paraphrases_per_style"]
-    n_greedy = d["n_templates"] * d["instances_per_template"] * n_prompts
-    n_test = d["min_test_templates"] * d["instances_per_template"] * n_prompts
-    n_sampled = math.ceil(n_test * (1 - pw["planning_accuracy"])) * exp["generation"]["sampled_subset"]["k"]
+    n_greedy = d["n_templates"] * inst * n_prompts
+    n_test = d["min_test_templates"] * inst * n_prompts
+    n_sampled = (math.ceil(n_test * sampled_failure_rate(pw)) * exp["generation"]["sampled_subset"]["k"]
+                 if sampled else 0)
     g, v, s, f = meas["greedy"], meas["verify"], meas["sampled"], meas["tl_fallback"]
     load = meas["load_seconds_per_stage"]
     hours = {
@@ -107,8 +116,8 @@ def project(meas: dict, n_gpu: int) -> dict:
     fallback_gen = n_greedy * g["mean_new_tokens"] / f["tokens_per_gpu_second"] / 3600 if f else None
     return {
         "sizes": {"greedy_traces": n_greedy, "test_traces": n_test, "sampled_runs": n_sampled,
-                  "templates": d["n_templates"], "instances_per_template": d["instances_per_template"],
-                  "prompts": n_prompts},
+                  "templates": d["n_templates"], "instances_per_template": inst,
+                  "prompts": n_prompts, "sampled_runs_included": sampled},
         "t4_gpu_hours": {k: round(x, 3) for k, x in gpu_hours.items()},
         "t4_gpu_hours_total": round(total, 3),
         "t4_gpu_hours_total_with_safety": round(total * sf, 3),
@@ -123,6 +132,47 @@ def project(meas: dict, n_gpu: int) -> dict:
         "total_if_fallback_t4_gpu_hours": None if fallback_gen is None else
             round(total - gpu_hours["generation"] + fallback_gen + loads["generation"], 3),
     }
+
+
+def apply_budget_rule(meas: dict, n_gpu: int) -> dict:
+    """The over-budget rule of amendment A13 (DECISIONS D33), fixed before any measurement and
+    applied automatically, in this order:
+      1. reduce instances per template, never below the power floor: the fewest instances whose
+         expected test failures with s0 (planning accuracy, the conservative side) reach N*
+         after the design effect, from the 40 test templates;
+      2. if still over, drop the sampled runs (the stable/borderline split is reported as not
+         done).
+    Returns the first projection, the steps taken and the final projection."""
+    from .power import min_instances_for
+
+    exp = experiment_config()
+    d, pw = exp["data"], exp["data"]["power"]
+    n_prompts = 2 * exp["generation"]["paraphrases_per_style"]
+    cur = d["instances_per_template"]
+    need = (pw.get("deff") or {}).get("required_test_failures_with_s0", pw["min_test_failures"])
+    floor = min_instances_for(need, d["template_split"]["test"], n_prompts,
+                              1 - pw["planning_accuracy"], pw["planning_s0_rate"])
+    first = project(meas, n_gpu)
+    final, steps = first, []
+    if first["exceeds_budget"]:
+        if floor is not None and floor < cur:
+            final = project(meas, n_gpu, instances=floor)
+            steps.append({"step": "reduce_instances_to_power_floor", "applied": True,
+                          "instances_per_template": floor, "from": cur, "power_floor_failures": need})
+        else:
+            steps.append({"step": "reduce_instances_to_power_floor", "applied": False,
+                          "power_floor_failures": need, "floor_instances": floor,
+                          "reason": "the power floor needs at least the planned instances"
+                                    if floor is not None else
+                                    "the power floor is above what any instance count reaches"})
+        if final["exceeds_budget"]:
+            final = project(meas, n_gpu, instances=final["sizes"]["instances_per_template"],
+                            sampled=False)
+            steps.append({"step": "drop_sampled_runs", "applied": True,
+                          "consequence": "stable vs borderline split reported as not done"})
+    return {"rule": exp["budget"]["over_budget_rule"], "power_floor_failures": need,
+            "power_floor_instances": floor, "first": first, "steps": steps, "final": final,
+            "still_over_budget": final["exceeds_budget"]}
 
 
 def markdown(rep: dict) -> str:
@@ -162,8 +212,21 @@ def markdown(rep: dict) -> str:
         "",
         ("**Over budget** (" if p["exceeds_budget"] else "Within budget (")
         + f"{p['budget_t4_gpu_hours']} T4 GPU-hours, safety factor included)."
-        + (" Do not start the full run: propose the next cut to the group first." if p["exceeds_budget"] else ""),
+        + (" The pre-registered budget rule (A13) applies; see below." if p["exceeds_budget"] else ""),
     ]
+    br = rep.get("budget_rule")
+    if br and br["steps"]:
+        f = br["final"]
+        lines += ["", "**Budget rule (A13), applied automatically:**"]
+        for st in br["steps"]:
+            lines.append(f"* {st['step']}: " + ("applied" if st["applied"] else "not possible")
+                         + "".join(f", {k} = {v}" for k, v in st.items() if k not in ("step", "applied")))
+        lines.append(f"* Final plan: {f['sizes']['instances_per_template']} instances per template, "
+                     f"sampled runs {'kept' if f['sizes']['sampled_runs_included'] else 'dropped'}: "
+                     f"{f['t4_gpu_hours_total']:.2f} T4 GPU-hours (x{f['safety_factor']} = "
+                     f"{f['t4_gpu_hours_total_with_safety']:.2f}), "
+                     + ("**still over budget: the run does not start; the group decides.**"
+                        if br["still_over_budget"] else "within budget."))
     return "\n".join(lines) + "\n"
 
 
@@ -244,7 +307,8 @@ def main() -> None:
     rep = {"model": a.model, "date": time.strftime("%Y-%m-%d"), "gpus": gpus,
            "commit": __import__("harness.pipeline", fromlist=["git_commit"]).git_commit(),
            "batch_size": exp["generation"]["batched"]["batch_size"],
-           "measured": meas, "projection": project(meas, n_gpu)}
+           "measured": meas, "projection": project(meas, n_gpu),
+           "budget_rule": apply_budget_rule(meas, n_gpu)}
     run.reports.mkdir(parents=True, exist_ok=True)
     out = run.reports / f"estimate_{a.model}.json"
     out.write_text(json.dumps(rep, indent=2, default=str))
@@ -252,7 +316,7 @@ def main() -> None:
     (run.reports / f"estimate_{a.model}.md").write_text(md)
     print(md)
     print(f"wrote {out}")
-    raise SystemExit(2 if rep["projection"]["exceeds_budget"] else 0)
+    raise SystemExit(2 if rep["budget_rule"]["still_over_budget"] else 0)
 
 
 if __name__ == "__main__":

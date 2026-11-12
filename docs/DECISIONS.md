@@ -842,3 +842,129 @@ failures or for solved problems would cost GPU time and feed no analysis.
   in the HF cache and read offline, when no `HF_TOKEN` secret is attached. The smoke test used
   that route; the study run can use either.
 - **Guard.** The pipeline refuses to produce study data while `prereg/S2.md` is a draft.
+
+## D28–D33 (2026-11-13) Group decisions for the minor project, recorded before any study data
+
+The group (via the user) took six decisions on 2026-11-13, after the Gemma licence was accepted
+on Kaggle. **All of them are recorded here and in `main-study/prereg/S2.md` (amendments A8–A13)
+before any S2, S3 or S4 data exist.** No threshold, random-direction count or CI procedure
+changes, and there is no quantised and no float16 compute for Gemma.
+
+## D28 (2026-11-13) The whole study uses the 89 templates with a gold program
+
+- **Train, dev and test** come only from the **89** GSM-Symbolic `main` templates for which the
+  frozen parser v4 (`main-study/parsing/gold.py`) extracts a gold program. The 40 test templates
+  are drawn from these 89 (seed 0, `data/splits/gsm_symbolic_main_seed0.json`: 33 / 16 / 40).
+- **How 97 becomes 89.** The baseline's 97 (D2: all templates but 11, 50 and 85) lose 9 and gain 1.
+  The net change is −8.
+
+  | Template | In baseline 97? | Why it has no gold program under parser v4 |
+  |---|---|---|
+  | 0, 2, 15, 66 | yes | the solution computes a ratio and states it as a percentage ("… × 100% = 20%"), so the program's last result (1/5) is not the answer (20) |
+  | 9 | yes | the solution solves for an unknown ("Let T be …, 145 + T = 204"); 2 equations cannot be parsed |
+  | 10, 17, 25 | yes | parser v4 reads an equation with a different grouping or an extra operand, and the result then disagrees with the stated one ("86-minute call would cost 18 + 33 = 51" takes in the 86; "12÷2/5 = 30" reads as (12÷2)/5; "members/dancers so 7+7 = 14" takes in the "/") |
+  | 76 | yes | a malformed equation in the solution text ("2 * 32.0 = =64.0") |
+  | 11 | no | equations in words only ("8 times 12 equals 96") |
+  | 85 | no | a system of two equations in x and y |
+  | **50** | **no, but added** | the baseline extractor (D2) rejected it, but parser v4 parses all 50 instances |
+
+- Template 98 stays: 6 of its first 8 instances have a gold program. In the other 2 the dataset
+  solution skips a day (153 + 306 = 1377). As S2 already says, those 2 problems are excluded
+  from step-level analyses and counted.
+- **Cost:** 89 × 8 × 6 = 4,272 greedy traces instead of 4,656. The test split keeps 40 templates.
+  The equivalence sample is 3 × 89 = 267 traces, still ≥ 200.
+
+## D29 (2026-11-13) S2 sign-off: population and prompt paraphrases frozen as drafted
+
+- **Population:** as drafted. The Qu & Gomes no-op data are still not public, so S2 uses the
+  fallback: GSM-Symbolic `main`, natural failures. Every greedy failure is in the failure set,
+  and each failure keeps the solved instances of its template as its reference set.
+  **No distractor clause is inserted in S2** (see D34).
+- **Prompts:** paraphrases 1 and 2 of both styles in `main-study/harness/prompts.py` are frozen
+  as drafted. A test pins their sha256 (`tests/test_power.py`).
+- **Binding date:** the "Date committed (binding)" line of `prereg/S2.md` is filled in by the
+  commit made immediately before the first study data. `harness/pipeline.py` refuses study
+  stages until it is filled. Until then S2 can still be amended.
+
+## D30 (2026-11-13) Activation positions confirmed
+
+The three cached positions are as drafted in the proposal: **step first token (primary)**,
+step last token, and the final-answer token (`main-study/cache/positions.py`).
+
+## D31 (2026-11-13) Design effect: Kish, from the pilot
+
+- **Formula:** deff = 1 + (m̄ (1 + CV²) − 1) × ICC.
+  - ICC is the one-way ANOVA intraclass correlation of the failure indicator across templates,
+    using the ANOVA estimator's n₀ for unequal group sizes.
+  - m̄ and CV are the mean and coefficient of variation of the cluster sizes. m̄ (1 + CV²) is
+    Kish's unequal-cluster-size adjustment, = Σm²/Σm.
+  - The cluster sizes m_i are the expected test failures with s0 per template at the planned
+    sizing: 8 instances × 6 prompts × 0.81 × the template's pilot failure rate.
+- **Pilot:** the baseline's Gemma-2-2B-IT traces on GSM-Symbolic `main` (`results/traces/traces.jsonl.gz`,
+  `main` variant, the 88 study templates it covers × 4 instances = 352 traces; template 50 is
+  not in it). Computed by `main-study/scripts/pilot_design_effect.py` →
+  `main-study/reports/m1/pilot_design_effect.json`.
+- **Computed values:**
+  - Pilot accuracy 0.483, and 26 of 88 templates had no failure.
+  - **ICC = 0.586**, m̄ = 28.5, CV = 0.396, m̄ (1 + CV²) = 33.0.
+  - **deff = 19.76**; without the unequal-size adjustment it would be 17.14.
+  - Sensitivity check on the no-op variant: ICC 0.454, deff 15.6.
+- **Target raised, as the proposal says:** N* = max(320, ⌈213 × 19.76⌉) = **4,209** test failures
+  with s0. It is fixed now. The same quantities are recomputed on the S2 train/dev traces and
+  reported, but they decide nothing.
+- **Consequence (needs the group).** At 8 instances the expected count is about 804 at the pilot
+  failure rate, or 451 at the planning accuracy of 0.71. The proposal's top-up to instances
+  9–16 cannot close the gap.
+  - Under Kish, n/deff approaches n_templates/ICC = 40/0.586 ≈ 68 effective failures as
+    instances grow, below the 213 that the power analysis needs.
+  - Even at the 50 instances GSM-Symbolic has, the target is out of reach. Reaching it would
+    need about 125 test templates, and there are 89.
+  - So with this deff, the M1 power criterion ends in the "documented shortfall" branch of the
+    work plan. Instances do not fix it. No change is made here; this is reported to the group.
+
+## D32 (2026-11-13) Weights: Kaggle's copy of Gemma-2-2B-IT, with Phase 0 re-run on it
+
+- **Source:** Kaggle Models `google/gemma-2/transformers/gemma-2-2b-it`, version 2, read offline
+  through the Hugging Face cache (`notebooks/run_on_kaggle.ipynb`). No `HF_TOKEN` is used.
+- **Phase 0 is re-run on these files** before anything else, through the same
+  `harness.equivalence` as S1b:
+  - the six Table 5 checks: TL vs HF residuals and logits (top-1), padding, teacher-forced
+    greedy reproduction, pure-greedy config, one BOS;
+  - plus a check that a second greedy run reproduces the first.
+
+  If any check fails, nothing else runs.
+- **Provenance:** the Kaggle handle and version, the sha256 of every file, and a comparison
+  with the published Hugging Face hashes (`reports/m1/hf_hub_files_gemma-2-2b-it.json`).
+  Written by `harness.weights_provenance` to `reports/m1/weights_gemma-2-2b-it.json`.
+
+## D33 (2026-11-13) Over-budget rule, fixed before measuring
+
+This replaces "propose the next cut to the group" (D27, A7). If the projection from
+`make estimate` (× 1.25 safety factor) exceeds **25 T4 GPU-hours**, `harness.estimate`
+applies these steps automatically, in this order, and records them:
+
+1. Reduce instances per template, but **never below the power floor**: the fewest instances
+   whose expected test failures with s0 reach N* (after deff), from the 40 test templates. The
+   floor uses the planning accuracy, which gives the fewest failures and so errs toward more
+   instances.
+2. If still over, **drop the sampled runs**. The stable vs borderline split is then reported as
+   not done.
+
+If the projection is still over after both steps, the run does not start and the group decides.
+With N* = 4,209 (D31), step 1 can never reduce the instances, because the floor is above what
+any instance count reaches.
+
+## D34 (2026-11-13) Distractor clauses: automated checks and a human-review sheet
+
+The 97 no-op clauses of the baseline (D6) were written by the AI assistant and have never been
+reviewed by a human. Before any study generation, every clause gets automated checks, run on
+the study's 8 instances of each of the 89 templates (`main-study/scripts/distractor_review.py`):
+- the rendered clause contains a number;
+- inserting it changes neither the gold answer nor the gold program, and its number collides
+  with no question number or gold value;
+- it is inserted at a sentence boundary, as one well-formed sentence, before a final question.
+
+The checks are written to `docs/review/distractor_clauses.csv`, with empty columns for two human
+reviewers. **Study generation waits until the group confirms that this review is done.** Under
+D29 the S2 population inserts no clause, so the review matters for any later distractor
+population: the preferred primary population of the plan, if it is rebuilt from these clauses.

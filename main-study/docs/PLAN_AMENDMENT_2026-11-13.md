@@ -2,8 +2,9 @@
 
 **Amends:** the Detailed Research Plan (`report (1).pdf`), Sections 4, 6.1, 10, 12 and 14, and
 the main-study README. **Made before any S2, S3 or S4 data exist.** Pre-registration amendments
-are `prereg/S2.md` A1–A7 and the dated deviation in `prereg/E0.md`; decisions are
-`docs/DECISIONS.md` (repository root) D21–D27.
+are `prereg/S2.md` A1–A13 and the dated deviation in `prereg/E0.md`; decisions are
+`docs/DECISIONS.md` (repository root) D21–D34. A8–A13 (D28–D34) are the group's decisions of
+the same day, taken once the Gemma licence had been accepted on Kaggle.
 
 **Why.** The college cannot provide the ~70 GPU-hours the original minor-project scope needed.
 The target is zero cost: free Kaggle T4s (2 × 16 GB per session, about 30 GPU-hours a week).
@@ -38,10 +39,15 @@ section by section. Copy it into the next version of the plan.
   25 are excluded. SAE activations are computed on CPU from the stored float32-computed
   residuals (stored in float16; the effect of float16 storage on SAE features is measured and
   reported).
-- **Datasets and failure sets.** Unchanged. All 97 GSM-Symbolic templates are kept, with 8
-  instances per template. That is sized from the power analysis: N* = max(320, ⌈213 × DEFF⌉)
-  held-out test failures with a first-error step, from at least 40 test templates. The template
-  split is 38/19/40 by template, seed 0.
+- **Datasets and failure sets.** Population as before: GSM-Symbolic `main` with natural
+  failures, because the no-op data of Qu and Gomes are not public.
+  - **The 89 templates with a gold program** under parser v4 are used, for train, dev and test
+    (A8). The 11 without one are listed with reasons in DECISIONS D28.
+  - 8 instances per template, split 33/16/40 by template with seed 0.
+  - Target: N* = max(320, ⌈213 × deff⌉) held-out test failures with a first-error step, from at
+    least 40 test templates. The Kish deff, 1 + (m̄ (1 + CV²) − 1) × ICC, is estimated on the
+    pilot traces: ICC 0.586, deff 19.76, **N* = 4,209** (A11). The expected yield is far below
+    it (about 800), and adding instances cannot close the gap (see Section 12).
 - **Generation.** Greedy decoding (T = 0), fixed templates. Two prompt styles and three
   paraphrases, as before.
   - **Batched** Hugging Face generation: KV cache, float32, eager attention, left padding,
@@ -62,6 +68,9 @@ section by section. Copy it into the next version of the plan.
     maximum float16-vs-float32 error is reported.
 - **Hardware.** Minor project: free Kaggle T4s (2 × 16 GB, about 30 GPU-hours a week), with a
   25 T4 GPU-hour budget for S2–S4 that is checked by a timed smoke test (`make estimate`).
+  Over budget, a rule fixed beforehand applies automatically: first fewer instances, down to
+  the power floor, then no sampled runs (A13). Weights: Kaggle's copy of Gemma-2-2B-IT
+  (version 2), with Phase 0 re-run on it and the file hashes recorded (A12).
   Major project: a larger GPU (≥ 40 GB) for 9B and Qwen-7B.
 
 ## Section 10: Work Plan (replacement table)
@@ -69,7 +78,7 @@ section by section. Copy it into the next version of the plan.
 | Milestone | Deliverables | Gate / check |
 |---|---|---|
 | M0 (Sem. 7, week 1) | Harness; TransformerLens–HuggingFace equivalence; SAE validation; Appendix A check, **on 2B** | Done: 6/6 equivalence checks, 24/26 SAE layers |
-| M1 (weeks 2–3) | `make estimate` on Kaggle T4s; failure sets and gold variable extraction **on 2B**; batched-generation equivalence gate; residual cache | Equivalence gate ≥ 0.99 on ≥ 200 traces; ≥ 320 test failures from ≥ 40 templates (or N* under the design-effect rule), or documented shortfall |
+| M1 (weeks 2–3) | Phase 0 on the Kaggle weights; `make estimate` on Kaggle T4s; human review of the distractor clauses; failure sets and gold variable extraction **on 2B**; batched-generation equivalence gate; residual cache | Phase 0 6/6 (+ repeat-greedy); equivalence gate ≥ 0.99 on ≥ 200 traces; N* = 4,209 test failures with s0 from ≥ 40 templates, or documented shortfall (expected, D31) |
 | M2 (weeks 4–6) | Direction construction (E1) and readout map (E2), on 2B | RQ1 and RQ2 criteria |
 | M3 (weeks 7–10) | Self-sourced feasibility (E3), on 2B | RQ3 criterion on 2B; provisionally decides inclusion of RQ7 |
 | M4 (weeks 11–13) | Content attribution and typology (E4); minor report including negative results, with its claims restricted to 2B | RQ4 criterion |
@@ -87,6 +96,11 @@ section by section. Copy it into the next version of the plan.
   in TransformerLens. Outputs end at the answer line, with a 512-token cap. A small sampled
   subset of test failures gives stability estimates. Conclusions about sampled generation are
   not claimed.
+- **Statistical power.** With the pilot's design effect (19.76), 40 test templates give at most
+  about 68 effective test failures for any number of instances. The power analysis needs 213.
+  The pre-registered comparisons are therefore underpowered in the minor project, and this is
+  stated with every result. The template-clustered bootstrap CIs, unchanged, carry the
+  clustering into every interval.
 - **Storage precision.** Residuals are computed in float32 and stored in float16. The measured
   maximum error is reported. Analyses that need full precision recompute from the traces.
 - Task domain, variables, edit family and mechanism evidence: unchanged.
@@ -95,7 +109,8 @@ section by section. Copy it into the next version of the plan.
 
 | Risk | Mitigation |
 |---|---|
-| Not enough GPU time (college cannot provide ~70 GPU-hours) | Minor project on 2B only, on free Kaggle T4s. Batched generation, stop at the answer line, one TL pass per trace for verification and caching, and sampled runs on test failures only. `make estimate` projects GPU-hours before any full run. Above 25 T4-hours, the next cut is proposed to the group, not applied silently. |
+| Not enough GPU time (college cannot provide ~70 GPU-hours) | Minor project on 2B only, on free Kaggle T4s. Batched generation, stop at the answer line, one TL pass per trace for verification and caching, and sampled runs on test failures only. `make estimate` projects GPU-hours before any full run. Above 25 T4-hours, the rule fixed beforehand applies: fewer instances down to the power floor, then no sampled runs; it is recorded, and anything beyond it goes to the group. |
+| Failures cluster strongly by template (pilot ICC 0.59) | N* raised to 4,209 (A11). The shortfall is documented. Template-clustered CIs throughout. Whether to spend GPU-hours on the instance top-up, which barely changes the effective n, is put to the group before S2. |
 | Batched Hugging Face generation differs from TransformerLens | Pre-registered equivalence gate on ≥ 200 traces stratified by template, at the Phase 0 threshold, with a max logit difference report. If it fails: TransformerLens generation, reported. |
 | Kaggle sessions end (12 h limit, preemption) | Every stage is resumable per trace or shard and is run as Save & Run All commits. Each session restores the previous output and stops cleanly before its deadline. |
 | Results do not transfer from 2B to 9B (replaces "from 9B to 2B") | The minor-project report claims 2B only. The RQ3 gate is re-checked on 9B at the start of Semester 8, and RQ8 reports effect sizes per model. |

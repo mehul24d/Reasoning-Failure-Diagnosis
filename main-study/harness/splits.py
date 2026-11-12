@@ -21,7 +21,7 @@ def split_templates(template_ids, n_train: int = 40, n_dev: int = 20, n_test: in
         n_dev = round(len(ids) * n_dev / total)
         n_test = len(ids) - n_train - n_dev
     elif len(ids) < total:
-        # Fewer templates than the nominal split (97 study templates, amendment A6): the test
+        # Fewer templates than the nominal split (89 study templates, amendments A6, A8): the test
         # split keeps its size (>= min_test), and train and dev share the rest in their ratio.
         rest = len(ids) - n_test
         if rest < (n_train + n_dev) / 2:
@@ -41,17 +41,25 @@ def main() -> None:
     from harness.generate import read_jsonl
 
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--problems", required=True)
+    ap.add_argument("--problems", help="problems JSONL whose template ids are split")
+    ap.add_argument("--study-templates", action="store_true",
+                    help="split the configured study templates (data.study_templates, amendment A8)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     c = experiment_config()["data"]
     t = c["template_split"]
-    rows = read_jsonl(a.problems)
-    sp = split_templates([r["template_id"] for r in rows], t["train"], t["dev"], t["test"],
-                         a.seed, c["min_test_templates"])
+    if a.study_templates:
+        ids = [f"gsms-{i}" for i in c["study_templates"]]
+        extra = {"source": f"apple/GSM-Symbolic main, the {len(ids)} templates of prereg/S2.md A8",
+                 "excluded_templates": c["excluded_templates"]}
+    elif a.problems:
+        ids, extra = [r["template_id"] for r in read_jsonl(a.problems)], {}
+    else:
+        ap.error("give --problems or --study-templates")
+    sp = split_templates(ids, t["train"], t["dev"], t["test"], a.seed, c["min_test_templates"])
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(a.out).write_text(json.dumps({"seed": a.seed, **sp}, indent=2))
+    Path(a.out).write_text(json.dumps({"seed": a.seed, **extra, **sp}, indent=2))
     print({k: len(v) for k, v in sp.items()})
 
 

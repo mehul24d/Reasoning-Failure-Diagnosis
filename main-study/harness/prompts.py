@@ -1,8 +1,8 @@
 """Prompt templates (plan Appendix G) and chat-template wrapping.
 
 Two styles, three paraphrases each. Paraphrase 0 of each style is the wording printed in the
-plan; paraphrases 1 and 2 are DRAFTS and must be reviewed by the group before they are frozen
-at M0 (the plan fixes the final templates in the repository at M0).
+plan; paraphrases 1 and 2 were drafted for M0 and are FROZEN as drafted by the S2 sign-off of
+2026-11-13 (prereg/S2.md amendment A9, DECISIONS D29). Do not edit them.
 
 Tokenisation rule: the chat template already inserts the BOS token for Gemma, so the rendered
 string is tokenised with add_special_tokens=False. Tokenising it with special tokens added
@@ -16,11 +16,11 @@ MARKED = (
     'Solve the following problem step by step. Write each step on a new line in the form '
     '"Step k: <calculation> = <result>". End with "Answer: <number>".\n'
     "Problem: {problem}",
-    # DRAFT paraphrase 1
+    # paraphrase 1 (frozen 2026-11-13, A9)
     'Work through the problem below one step at a time. Put each step on its own line as '
     '"Step k: <calculation> = <result>". Finish with "Answer: <number>".\n'
     "Problem: {problem}",
-    # DRAFT paraphrase 2
+    # paraphrase 2 (frozen 2026-11-13, A9)
     'Solve this problem in numbered steps. Each line should read "Step k: <calculation> = '
     '<result>". On the last line write "Answer: <number>".\n'
     "Problem: {problem}",
@@ -29,10 +29,10 @@ MARKED = (
 TERSE = (
     'Solve the problem. Show brief working, then give the final answer after "Answer:".\n'
     "Problem: {problem}",
-    # DRAFT paraphrase 1
+    # paraphrase 1 (frozen 2026-11-13, A9)
     'Solve the problem below. Keep your working short and give the final answer after "Answer:".\n'
     "Problem: {problem}",
-    # DRAFT paraphrase 2
+    # paraphrase 2 (frozen 2026-11-13, A9)
     'Answer the following problem. Briefly show your working, then write "Answer:" followed by '
     "the final answer.\n"
     "Problem: {problem}",

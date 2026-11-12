@@ -1,0 +1,66 @@
+{
+  "pilot_file": "results/traces/traces.jsonl.gz",
+  "pilot_sha256": "e5f38e29573e0144f47d9a886e634521168d46fcf5b3df1e6b9155af539324e8",
+  "study_templates": 89,
+  "study_templates_missing_from_pilot": [
+    50
+  ],
+  "primary": {
+    "variant": "main",
+    "pilot_templates": 88,
+    "pilot_traces": 352,
+    "instances_per_template_in_pilot": [
+      4
+    ],
+    "pilot_failure_rate": 0.5170454545454546,
+    "pilot_accuracy": 0.4829545454545454,
+    "templates_without_failure": 26,
+    "icc_failure": 0.586117418099254,
+    "m_bar": 28.532903225806454,
+    "cv": 0.39590952823410597,
+    "m_eff": 33.005274725274724,
+    "deff": 19.75884898753533,
+    "unadjusted_deff": 17.1375141514863,
+    "required_test_failures_with_s0": 4209,
+    "expected_test_failures_with_s0": 804.1090909090909,
+    "meets_target": false,
+    "instances_needed_at_fixed_deff": 42,
+    "effective_n_ceiling": 68.24571112340897,
+    "n_after_holm": 213,
+    "sizing": {
+      "instances": 8,
+      "prompts": 6,
+      "s0_rate": 0.81,
+      "test_templates": 40
+    }
+  },
+  "sensitivity_noop_variant": {
+    "variant": "noop",
+    "pilot_templates": 88,
+    "pilot_traces": 352,
+    "instances_per_template_in_pilot": [
+      4
+    ],
+    "pilot_failure_rate": 0.6448863636363636,
+    "pilot_accuracy": 0.35511363636363635,
+    "templates_without_failure": 12,
+    "icc_failure": 0.45372140783230647,
+    "m_bar": 29.032105263157895,
+    "cv": 0.37821378029746744,
+    "m_eff": 33.18502202643172,
+    "deff": 15.603033504946392,
+    "unadjusted_deff": 13.718766264503408,
+    "required_test_failures_with_s0": 3324,
+    "expected_test_failures_with_s0": 1002.9272727272728,
+    "meets_target": false,
+    "instances_needed_at_fixed_deff": 27,
+    "effective_n_ceiling": 88.15982519119713,
+    "n_after_holm": 213,
+    "sizing": {
+      "instances": 8,
+      "prompts": 6,
+      "s0_rate": 0.81,
+      "test_templates": 40
+    }
+  }
+}

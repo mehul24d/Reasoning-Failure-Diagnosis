@@ -304,6 +304,7 @@ def test_design_effect_rule():
     assert 0 < d["rho_failure_icc_train_dev"] < 1
     assert d["deff"] == pytest.approx(1 + 9 * d["rho_failure_icc_train_dev"])
     assert d["required_test_failures_with_s0"] >= 320 and d["top_up_needed"]
+    assert d["pilot_deff"] == pytest.approx(19.76)          # N* is fixed by the pilot (A11)
 
 
 def test_estimate_projection_and_budget_flag():
@@ -322,9 +323,9 @@ def test_estimate_projection_and_budget_flag():
         "session_setup_minutes": 15.0,
     }
     p = estimate.project(meas, 2)
-    n = 97 * 8 * 6
-    assert p["sizes"]["greedy_traces"] == n == 4656
-    assert p["sizes"]["sampled_runs"] == math_ceil(40 * 8 * 6 * 0.29) * 5
+    n = 89 * 8 * 6
+    assert p["sizes"]["greedy_traces"] == n == 4272
+    assert p["sizes"]["sampled_runs"] == math_ceil(40 * 8 * 6 * (1 - 0.483)) * 5
     assert p["t4_gpu_hours"]["generation"] == pytest.approx(n * 150 / 200 / 3600 + 2 * 120 / 3600, abs=1e-3)
     assert p["disk_gb"]["activation_store"] == pytest.approx(n * 11 * 27 * 2304 * 2 / 1e9, abs=1e-3)
     assert not p["exceeds_budget"] and p["kaggle_sessions"] == 1
@@ -333,6 +334,35 @@ def test_estimate_projection_and_budget_flag():
     assert "Within budget" in md
     meas["greedy"]["tokens_per_gpu_second"] = 5.0
     assert estimate.project(meas, 2)["exceeds_budget"]
+
+
+def test_budget_rule_order(monkeypatch):
+    """A13: instances first (never below the power floor), then the sampled runs."""
+    from harness import estimate
+
+    calls = []
+
+    def fake_project(meas, n_gpu, instances=None, sampled=True):
+        inst = instances or 8
+        calls.append((inst, sampled))
+        hours = inst * 4.0 + (10.0 if sampled else 0.0)
+        return {"exceeds_budget": hours * 1.25 > 25, "sizes": {"instances_per_template": inst,
+                "sampled_runs_included": sampled}, "t4_gpu_hours_total": hours,
+                "t4_gpu_hours_total_with_safety": hours * 1.25, "safety_factor": 1.25}
+
+    monkeypatch.setattr(estimate, "project", fake_project)
+    cfg = estimate.experiment_config()
+    pw = cfg["data"]["power"]
+    # with the pilot N* (4209) no instance count reaches the floor: step 1 is not possible
+    br = estimate.apply_budget_rule({}, 2)
+    assert br["steps"][0]["step"] == "reduce_instances_to_power_floor" and not br["steps"][0]["applied"]
+    assert br["steps"][1]["step"] == "drop_sampled_runs" and br["final"]["sizes"]["sampled_runs_included"] is False
+    # with a reachable floor (N* = 320 -> 6 instances), step 1 reduces 8 -> 6 first
+    monkeypatch.setitem(pw, "deff", {"required_test_failures_with_s0": 320})
+    monkeypatch.setattr(estimate, "experiment_config", lambda: cfg)
+    br = estimate.apply_budget_rule({}, 2)
+    assert br["steps"][0]["applied"] and br["steps"][0]["instances_per_template"] == 6
+    assert br["power_floor_instances"] == 6
 
 
 def math_ceil(x):

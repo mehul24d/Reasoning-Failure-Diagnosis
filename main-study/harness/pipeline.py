@@ -450,6 +450,11 @@ def stage_problems(run: Run, **_) -> dict:
                                "binding prereg/S2.md (harness.splits), before any S2 data exist.")
     sp = json.loads(run.split.read_text())
     templates = sorted(sp["train"] + sp["dev"] + sp["test"])
+    if run.prefix == "s2":
+        want = {f"gsms-{t}" for t in experiment_config()["data"]["study_templates"]}
+        if set(templates) != want:   # amendment A8: train, dev and test only from the 89
+            raise RuntimeError(f"{run.split} does not cover exactly the {len(want)} study templates "
+                               f"(extra {sorted(set(templates) - want)}, missing {sorted(want - set(templates))})")
     inst = experiment_config()["data"]["instances_per_template"]
     ids = [int(t.split("-")[-1]) for t in templates]
     rows = gsm_symbolic("main", templates=ids, instances=inst)
@@ -592,36 +597,40 @@ def stage_score(run: Run, loader=None, **_) -> dict:
 
 
 def design_effect(scored: list[dict]) -> dict:
-    """Kish design effect of the test failure set, clustered by template (amendment A6).
+    """Kish design effect of the test failure set, clustered by template (amendments A6, A11).
 
-    DEFF = 1 + (m - 1) * rho, m = mean test failures (with s0) per test template and rho the
-    one-way ANOVA intraclass correlation of the failure indicator across ALL non-test traces
-    (train + dev templates, so the test split informs nothing but its own count).
+    deff = 1 + (m_bar * (1 + CV^2) - 1) * rho (harness.power.kish_deff): m_i = test failures with
+    s0 in test template i, rho = the one-way ANOVA ICC of the failure indicator on the train +
+    dev templates (so the test split informs nothing but its own count).
+
+    The pre-registered target N* comes from the PILOT estimate (A11, configs data.power.deff);
+    the value recomputed here on the S2 traces is reported next to it, and decides nothing.
     """
+    from .power import icc_anova, kish_deff, required_failures
+
     groups = defaultdict(list)
     for r in scored:
         if r.get("split") in ("train", "dev"):
             groups[r["template_id"]].append(0 if r["correct"] else 1)
-    k = len(groups)
-    N = sum(len(g) for g in groups.values())
-    rho = None
-    if k > 1 and N > k:
-        grand = sum(sum(g) for g in groups.values()) / N
-        msb = sum(len(g) * (sum(g) / len(g) - grand) ** 2 for g in groups.values()) / (k - 1)
-        msw = sum(sum((x - sum(g) / len(g)) ** 2 for x in g) for g in groups.values()) / (N - k)
-        n0 = (N - sum(len(g) ** 2 for g in groups.values()) / N) / (k - 1)
-        rho = max(0.0, (msb - msw) / (msb + (n0 - 1) * msw)) if (msb + (n0 - 1) * msw) > 0 else 0.0
+    rho = icc_anova(groups)
     test = defaultdict(int)
     for r in scored:
         if r.get("split") == "test" and not r["correct"] and r.get("s0") is not None:
             test[r["template_id"]] += 1
     m = sum(test.values()) / max(len(test), 1)
-    deff = None if rho is None else 1 + (m - 1) * rho
     power = experiment_config()["data"]["power"]
-    need = None if deff is None else max(power["min_test_failures"],
-                                         math.ceil(power["n_after_holm"] * deff))
+    k = None if rho is None else kish_deff(list(test.values()), rho)
+    pilot = power.get("deff") or {}
+    need = pilot.get("required_test_failures_with_s0")
+    s2_need = None if k is None else required_failures(k["deff"], power)
+    if need is None:
+        need = s2_need
     return {"rho_failure_icc_train_dev": rho, "mean_test_failures_per_template": m,
-            "deff": deff, "required_test_failures_with_s0": need,
+            "deff": None if k is None else k["deff"], "m_eff": None if k is None else k["m_eff"],
+            "cv_cluster_size": None if k is None else k["cv"],
+            "required_test_failures_with_s0_s2_estimate": s2_need,
+            "pilot_deff": pilot.get("value"),
+            "required_test_failures_with_s0": need,
             "observed_test_failures_with_s0": sum(test.values()),
             "top_up_needed": None if need is None else sum(test.values()) < need}
 
