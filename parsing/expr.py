@@ -46,6 +46,7 @@ _NORMALISE = [
     (re.compile(r"\*\*"), _same_len(" ")),               # Markdown bold
     (re.compile(r"[\u2212\u2013\u2014]"), _same_len("-")),
     (re.compile(f"[{CURRENCY}]"), _same_len(" ")),
+    (re.compile(r"(?<=[A-Za-z])-(?=[A-Za-z])"), _same_len("'")),   # "time-outs" is one word
 ]
 
 
@@ -147,10 +148,22 @@ def _lex(s: str, base: int) -> list[_Tok]:
     return out
 
 
+_UNIT_LETTERS = set("mgshlLc")     # metres, grams, seconds, hours, litres, cents
+
+
 def _clean(toks: list[_Tok]) -> list[_Tok] | None:
     """Words -> operators or dropped; literals merged. None if the clause holds a variable."""
-    if any(t.kind == "var" for t in toks):
-        return None
+    var = [t for t in toks if t.kind == "var"]
+    if var:
+        # "3m * 2m": one unit letter on every number is a unit, not an algebra variable
+        letters = {t.text[-1] for t in var}
+        if len(letters) == 1 and letters <= _UNIT_LETTERS and \
+                not any(t.kind == "num" for t in toks):
+            toks = [x for t in toks for x in (
+                (_Tok("num", t.text[:-1], t.start, t.end - 1, to_fraction(t.text[:-1])),
+                 _Tok("word", t.text[-1], t.end - 1, t.end)) if t.kind == "var" else (t,))]
+        else:
+            return None
     out: list[_Tok] = []
     i = 0
     while i < len(toks):
@@ -158,10 +171,16 @@ def _clean(toks: list[_Tok]) -> list[_Tok] | None:
         prev = out[-1] if out else None
         nxt = toks[i + 1] if i + 1 < len(toks) else None
         if t.kind == "word":
-            if t.text in ("x", "X") and prev is not None and prev.kind in ("num", "rp") \
+            # the operand before "x" / "times" may carry up to two unit words: "3 mph x 2"
+            back = len(out) - 1
+            while back >= 0 and back >= len(out) - 2 and out[back].kind == "gap" and \
+                    out[back].text[:1].isalpha():
+                back -= 1
+            left = out[back] if back >= 0 else None
+            if t.text in ("x", "X") and left is not None and left.kind in ("num", "rp") \
                     and nxt is not None and nxt.kind in ("num", "lp"):
                 out.append(_Tok("op", "*", t.start, t.end))
-            elif t.text.lower() in ("times",) and prev is not None and prev.kind == "num" \
+            elif t.text.lower() in ("times",) and left is not None and left.kind == "num" \
                     and nxt is not None and nxt.kind == "num":
                 out.append(_Tok("op", "*", t.start, t.end))
             elif prev is not None and prev.kind == "op" and prev.text == "/" and \
@@ -366,7 +385,9 @@ def parse_expression(lhs: str) -> list[BinStep] | None:
     return _parse_full(toks2)
 
 
-_STOP = re.compile(r"[\n:;?!=<>]|\.(?=\s|$)|,\s")
+# a sentence end ('.' before a space), but not the '.' of a title such as "Ms." or "Dr."
+_STOP = re.compile(r"[\n:;?!=<>]|(?<!\bMr)(?<!\bMs)(?<!\bDr)(?<!\bSt)(?<!\bvs)(?<!\bMrs)"
+                   r"\.(?=\s|$)|,\s")
 _RHS = re.compile(rf"[ \t]*(?P<neg>-)?[ \t]*(?P<num>{NUM})"
                   r"(?:(?P<frac>/\d+)|[ \t]+(?P<mixed>\d+/\d+))?"
                   r"(?P<pct>%)?(?P<glue>[A-Za-z]+)?")
@@ -397,15 +418,16 @@ def find_equations(text: str) -> tuple[list[Equation], int]:
     out, skipped = [], 0
     for m in re.finditer(r"(?<![<>!=])=(?!=)", norm):
         j = m.start()
-        # clause start: last stop character before '=' (max 160 chars back)
-        lo = max(0, j - 160)
+        # clause start: last stop character before '=' (max 240 chars back)
+        lo = max(0, j - 240)
         stops = [s.end() for s in _STOP.finditer(norm, lo, j)]
         cs = stops[-1] if stops else lo
         clause = norm[cs:j]
         r = _RHS.match(norm, m.end())
         has_op = bool(re.search(r"\d\s*[A-Za-z%$]*\s*[-+*/×·÷x(]|[)]\s*[-+*/×·÷x(]", clause))
         if r is None or (r.group("glue") and len(r.group("glue")) == 1
-                         and r.group("glue").lower() != "x"):
+                         and r.group("glue").lower() != "x"
+                         and r.group("glue") not in _UNIT_LETTERS):
             skipped += has_op
             continue
         if "^" in clause:                 # powers are outside the step model
@@ -440,6 +462,14 @@ def _mark_chains(eqs: list[Equation]) -> None:
                 and b.rhs == a.value:
             a.rhs = a.value
             a.chained = True
+    # "Time at 3 mph + Time at 1 mph = 2 hours + 4 hours = 6 hours": a left side whose numbers
+    # are labels (a word follows an operator) and whose right side starts a consistent
+    # equation is a description, not a computation (even when the labels happen to add up,
+    # "age in 3 years + age in 3 years + age in 3 years = 9 + 6 + 21 = 36"): drop it
+    drop = {i for i, (a, b) in enumerate(zip(eqs, eqs[1:]))
+            if not a.chained and b.start <= a.end and b.start >= a.eq_pos
+            and b.consistent and re.search(r"[-+*/×÷]\s*[A-Za-z]{2,}", a.lhs)}
+    eqs[:] = [e for i, e in enumerate(eqs) if i not in drop]
 
 
 def first_equation(text: str) -> Equation | None:
