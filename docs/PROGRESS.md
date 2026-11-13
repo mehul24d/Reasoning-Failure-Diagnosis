@@ -1,5 +1,49 @@
 # Progress
 
+## 2026-11-13: Group decisions D35–D39 (S2 A14–A17); S2 still waiting for the clause review
+
+No GPU time used, and none of the 25-hour S2–S4 budget.
+
+**Recorded before any study data:**
+- **Population (D35, A14):** distractor failures are primary (right without the clause, wrong
+  with it), natural failures secondary. Both conditions are generated for every instance:
+  89 × 8 × 6 × 2 = 8,544 greedy traces.
+- **Design effect (D36, A15):** the target uses the deff of the primary paired outcomes,
+  estimated on train and dev templates. The top-up to instances 9–16 is pre-specified and
+  applied once, before any primary analysis. The failure-occurrence deff (19.76) is
+  descriptive. No top-up now.
+- **Clustering (D37, A16):** every result states n, templates, ICC, deff and n_eff.
+- **Weights (D38):** the authenticated Hugging Face comparison is ready but not run, because
+  no HF_TOKEN is available here.
+
+**Re-projection** from the measured throughputs (`main-study/reports/m1/estimate_gemma-2-2b-it_reprojected.md`):
+
+| Stage | T4 GPU-hours |
+|---|---|
+| Generation, 8,544 traces | 4.60 |
+| Verification + cache | 1.03 |
+| Sampled runs, 7,610 | 4.79 |
+| **Total** | **10.43** (× 1.25 = **13.04**) |
+
+- Within budget, so the budget rule does not apply. Disk: 13.2 GB.
+- If the equivalence gate fails, TL generation brings the total to 33.9 even after the rule.
+  The run would then stop for a group decision.
+
+**Pilot, for the primary population:** 66 of 352 pairs are distractor failures (0.1875), with
+ICC 0.432 and a descriptive deff of 9.97. At that rate, 8 instances give about 292 primary test
+failures with s0, against the 320 floor. At the planning rate the figure is about 429.
+
+**Template 50** had no clause, and it is a test template, so a clause was drafted: "The room has
+{d} windows." It passes all automated checks (8/8 instances) and was added to
+`docs/review/distractor_clauses.csv`. The other 88 rows are byte-identical to the version sent
+for review.
+
+**Clause review: not found.** The reviewer columns of `docs/review/distractor_clauses.csv` are
+empty. No other sheet is in `docs/review/`, on `origin/main` or on `origin/neil`. Kappa, the
+rewrites and the S2 binding commit wait for the sheets. `scripts/review_agreement.py` is ready,
+and the `problems` stage refuses to run until it has produced
+`main-study/data/distractor_clauses_reviewed.json`.
+
 ## 2026-11-13: Phase 0 on the Kaggle weights and the measured compute estimate (Gemma-2-2B-IT)
 
 Kaggle kernel `btp-minor-estimate` v3, code `b920121`, 2 × Tesla T4, 0.38 h of session time.

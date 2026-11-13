@@ -292,19 +292,42 @@ def test_study_stages_refuse_while_s2_is_a_draft(tmp_path):
         pipeline.run_stages(run, ["generate"])
 
 
-def test_design_effect_rule():
+def test_populations_and_descriptive_design_effect():
+    """A14: primary = clean right, distractor wrong (same instance and prompt); natural = clean
+    wrong. A15: the failure-occurrence deff is descriptive, per population."""
     rows = []
-    for t in range(10):     # train/dev: failure rate differs by template -> rho > 0
+    for t in range(10):
         for i in range(10):
-            rows.append({"split": "train", "template_id": f"a{t}", "correct": i >= t, "s0": 0})
-    for t in range(4):
-        for i in range(10):
-            rows.append({"split": "test", "template_id": f"b{t}", "correct": False, "s0": 0})
+            sp = "train" if t < 8 else "test"
+            pid = f"p{t}-{i}"
+            clean_ok = i >= t               # failure rate differs by template -> ICC > 0
+            rows.append({"split": sp, "template_id": f"a{t}", "condition": "clean", "pair_id": pid,
+                         "prompt": "marked_p0", "correct": clean_ok, "s0": 0})
+            rows.append({"split": sp, "template_id": f"a{t}", "condition": "distractor", "pair_id": pid,
+                         "prompt": "marked_p0", "correct": clean_ok and i % 2 == 0, "s0": 0})
+    pipeline.label_populations(rows)
+    pr = [r for r in rows if r["population"] == "primary"]
+    assert pr and all(r["condition"] == "distractor" and r["clean_correct"] and not r["correct"] for r in pr)
+    assert all(r["population"] is None for r in rows if r["condition"] == "distractor" and not r["clean_correct"])
+    assert all(r["condition"] == "clean" and not r["correct"] for r in rows if r["population"] == "natural")
+    c = pipeline.population_counts(rows)
+    assert c["primary"]["test_failures"] == sum(r["split"] == "test" for r in pr)
     d = pipeline.design_effect(rows)
-    assert 0 < d["rho_failure_icc_train_dev"] < 1
-    assert d["deff"] == pytest.approx(1 + 9 * d["rho_failure_icc_train_dev"])
-    assert d["required_test_failures_with_s0"] >= 320 and d["top_up_needed"]
-    assert d["pilot_deff"] == pytest.approx(19.76)          # N* is fixed by the pilot (A11)
+    assert d["role"].startswith("descriptive") and d["pilot_failure_deff"] == pytest.approx(19.76)
+    assert d["natural"]["icc_failure_train_dev"] > 0 and d["natural"]["deff"] > 1
+    assert d["natural"]["n_eff"] == pytest.approx(d["natural"]["test_failures_with_s0"] / d["natural"]["deff"])
+    assert "required_test_failures_with_s0" not in d and "top_up_needed" not in d
+
+
+def test_sampled_items_cover_both_populations_only(tmp_path):
+    run = pipeline.Run("m", tmp_path, tmp_path / "s", tmp_path / "r", "smoke")
+    rows = [{"problem_id": "c", "prompt": "terse_p0", "split": "test", "population": "natural", "correct": False},
+            {"problem_id": "d", "prompt": "terse_p0", "split": "test", "population": "primary", "correct": False},
+            {"problem_id": "e", "prompt": "terse_p0", "split": "test", "population": None, "correct": False},
+            {"problem_id": "f", "prompt": "terse_p0", "split": "dev", "population": "primary", "correct": False}]
+    pipeline.write_jsonl(rows, run.scored)
+    items = pipeline.sampled_items(run)
+    assert {i[0] for i in items} == {"c", "d"} and len(items) == 2 * 5
 
 
 def test_estimate_projection_and_budget_flag():
@@ -323,9 +346,13 @@ def test_estimate_projection_and_budget_flag():
         "session_setup_minutes": 15.0,
     }
     p = estimate.project(meas, 2)
-    n = 89 * 8 * 6
-    assert p["sizes"]["greedy_traces"] == n == 4272
-    assert p["sizes"]["sampled_runs"] == math_ceil(40 * 8 * 6 * (1 - 0.483)) * 5
+    n = 89 * 8 * 6 * 2                                   # A14: clean and distractor conditions
+    assert p["sizes"]["greedy_traces"] == n == 8544 and p["sizes"]["conditions"] == 2
+    assert p["sizes"]["sampled_runs_natural"] == math_ceil(40 * 8 * 6 * (1 - 0.483)) * 5
+    assert p["sizes"]["sampled_runs_primary"] == math_ceil(40 * 8 * 6 * max(0.71 * 0.388, 0.1875)) * 5
+    assert p["sizes"]["sampled_runs"] == p["sizes"]["sampled_runs_natural"] + p["sizes"]["sampled_runs_primary"]
+    tl = estimate.project(meas, 2, engine="tl")
+    assert tl["t4_gpu_hours"]["generation"] == pytest.approx(n * 150 / 20 / 3600 + 2 * 120 / 3600, abs=1e-3)
     assert p["t4_gpu_hours"]["generation"] == pytest.approx(n * 150 / 200 / 3600 + 2 * 120 / 3600, abs=1e-3)
     assert p["disk_gb"]["activation_store"] == pytest.approx(n * 11 * 27 * 2304 * 2 / 1e9, abs=1e-3)
     assert not p["exceeds_budget"] and p["kaggle_sessions"] == 1
@@ -342,7 +369,7 @@ def test_budget_rule_order(monkeypatch):
 
     calls = []
 
-    def fake_project(meas, n_gpu, instances=None, sampled=True):
+    def fake_project(meas, n_gpu, instances=None, sampled=True, engine="hf_batched"):
         inst = instances or 8
         calls.append((inst, sampled))
         hours = inst * 4.0 + (10.0 if sampled else 0.0)
@@ -353,12 +380,15 @@ def test_budget_rule_order(monkeypatch):
     monkeypatch.setattr(estimate, "project", fake_project)
     cfg = estimate.experiment_config()
     pw = cfg["data"]["power"]
-    # with the pilot N* (4209) no instance count reaches the floor: step 1 is not possible
+    # A14/A15: 320 primary failures at the lower paired rate (pilot 0.1875) need 9 instances,
+    # more than the 8 planned: step 1 is not possible
     br = estimate.apply_budget_rule({}, 2)
+    assert br["power_floor_failures"] == 320 and br["power_floor_instances"] == 9
     assert br["steps"][0]["step"] == "reduce_instances_to_power_floor" and not br["steps"][0]["applied"]
     assert br["steps"][1]["step"] == "drop_sampled_runs" and br["final"]["sizes"]["sampled_runs_included"] is False
-    # with a reachable floor (N* = 320 -> 6 instances), step 1 reduces 8 -> 6 first
-    monkeypatch.setitem(pw, "deff", {"required_test_failures_with_s0": 320})
+    # with a reachable floor (a higher paired rate -> 6 instances), step 1 reduces 8 -> 6 first
+    monkeypatch.setitem(pw, "pilot_distractor_failure_rate", 0.30)
+    monkeypatch.setitem(pw, "pilot_distractor_failure_given_clean_right", 0.45)
     monkeypatch.setattr(estimate, "experiment_config", lambda: cfg)
     br = estimate.apply_budget_rule({}, 2)
     assert br["steps"][0]["applied"] and br["steps"][0]["instances_per_template"] == 6

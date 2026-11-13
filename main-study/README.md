@@ -63,13 +63,17 @@ so the GSM-Symbolic study problems stay untouched.
 6. **First observation (2B, GSM8K train, tool-building only).** The first error in failed
    traces is planning in 42%, binding in 39%, arithmetic in 11%, and none is found in 8%.
 7. **Pre-registrations.** `prereg/E0.md` is committed. `prereg/S2.md` was **signed off on
-   2026-11-13** (A8–A13). It becomes binding with the commit made immediately before the first
+   2026-11-13** (A8–A13; amended A14–A17). It becomes binding with the commit made immediately before the first
    study data. It covers:
-   - the population: GSM-Symbolic `main`, natural failures;
-   - **89 templates** (the ones with gold programs) × 8 instances × 6 prompts = 4,272 greedy
-     traces, with a 33/16/40 template split, seed 0, committed;
+   - the population (A14): primary = GSM-Symbolic distractor failures (right without the
+     no-op clause, wrong with it), secondary = natural failures;
+   - **89 templates** (the ones with gold programs) × 8 instances × 6 prompts × 2 conditions =
+     8,544 greedy traces, with a 33/16/40 template split, seed 0, committed;
    - the frozen paraphrases;
-   - the pilot Kish design effect, 19.76, which gives **N* = 4,209**;
+   - the design effect for the target on the primary paired outcomes, estimated on train + dev
+     templates before any primary analysis, with a pre-specified top-up rule (A15); the pilot's
+     failure-occurrence deff (19.76) is descriptive;
+   - template clustering and effective n stated with every result (A16);
    - the automatic over-budget rule;
    - and, from the draft, max_new_tokens 512 with a stop at the
    answer line, parser v4 frozen with lenient s0 primary, the batched-generation equivalence
@@ -81,20 +85,20 @@ so the GSM-Symbolic study problems stay untouched.
    - `make estimate` projects the GPU-hours from a timed smoke test.
 9. **Colab notebook for the 9B proof of concept:** `notebooks/colab_9b_poc.ipynb`, kept for
    Semester 8.
-10. **Tests:** 136 pass and 2 are skipped (`pytest`). They are offline and use a tiny random
+10. **Tests:** 146 pass and 2 are skipped (`pytest`). They are offline and use a tiny random
     model, including an end-to-end run of the pipeline with two workers.
 
 ## What is left
 
-1. **Human review of the 88 distractor clauses** (`docs/review/`, D34), about 1.5 h per
-   reviewer. Study generation waits for it.
-2. **A group decision on the design-effect shortfall** (D31): N* = 4,209 is out of reach at
-   any instance count.
-3. **S2–S4 on Gemma-2-2B-IT:** 4,272 greedy traces, the equivalence gate, the residual cache,
+1. **The reviewers' answers for the 89 distractor clauses** (`docs/review/`, D34, D39), which
+   now include template 50's new clause. Then `scripts/review_agreement.py` computes kappa and
+   the agreed rewrites are re-checked. Study generation waits for it.
+2. **S2–S4 on Gemma-2-2B-IT:** 8,544 greedy traces (re-projected: 13.0 T4-hours with the
+   safety factor), the equivalence gate, the residual cache,
    the sampled subset, and parsing with a fresh 40-step hand check.
-4. **S5–S11:** E1–E4 as in the plan, with gates G1 and G2. E4 needs two annotators on 20% of the
+3. **S5–S11:** E1–E4 as in the plan, with gates G1 and G2. E4 needs two annotators on 20% of the
    failures.
-5. **Semester 8:** S1–S4 on Gemma-2-9B-IT and Qwen2.5-7B-Instruct, then the RQ3 gate re-check
+4. **Semester 8:** S1–S4 on Gemma-2-9B-IT and Qwen2.5-7B-Instruct, then the RQ3 gate re-check
    on 9B.
 
 **Compute for S2–S4 (minor project):** free Kaggle T4s, budget 25 T4 GPU-hours. The measured
@@ -112,7 +116,10 @@ All deviations are dated in the pre-registrations.
   CPU (A4).
 - Sampled runs only on test failures (A5).
 - 89 templates with gold programs, split 33/16/40 (A8, replacing A6's 97).
-- Design effect estimated on the pilot (Kish, unequal clusters): N* = 4,209 (A11).
+- Design effect estimated on the pilot (Kish, unequal clusters): N* = 4,209 (A11), descriptive
+  since A15. The target uses the primary-outcome deff.
+- Primary population: distractor failures with the study's own reviewed clauses, both
+  conditions per instance (A14, A17).
 - Over budget, a fixed rule applies automatically: fewer instances down to the power floor,
   then no sampled runs (A13).
 - Kaggle's copy of the Gemma weights, with Phase 0 re-run on it (A12).

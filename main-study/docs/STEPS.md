@@ -33,6 +33,9 @@ for them and the RQ3 gate G2 is re-checked on 9B first.
 * Review `prereg/E0.md`, fill in the date and commit it before running `scripts/s1_sae.sh`.
 * ~~`max_new_tokens` 1024~~: withdrawn. 512 with a stop at the answer line (`prereg/S2.md` A3).
 * ~~Which 97 templates~~: the 89 with gold programs, for train, dev and test (`prereg/S2.md` A8).
-* ~~Decide the S2 population~~: GSM-Symbolic `main` with natural failures (A9).
-* Human review of the 88 distractor clauses (`docs/review/distractor_clauses.csv`, D34).
-* The design-effect shortfall: N* = 4,209 (A11, D31) cannot be reached by adding instances.
+* ~~Decide the S2 population~~: distractor failures primary, natural failures secondary (A14,
+  replacing A9).
+* Human review of the 89 distractor clauses (`docs/review/distractor_clauses.csv`, D34), then
+  `scripts/review_agreement.py` (kappa, rewrites, D39). The answers are not in the repository yet.
+* ~~The design-effect shortfall~~: the target uses the primary-outcome deff, with a top-up
+  rule applied before any primary analysis (A15, D36).

@@ -19,7 +19,7 @@ generation:
     temperature: 0.7
     k: 5
     do_sample: true
-    population: test_failures # amendment A5: greedy failures on test templates only
+    population: test_failures # A5, A14: test-template primary (distractor) and natural failures only
   prompt_styles: [marked, terse]
   paraphrases_per_style: 3
 
@@ -28,6 +28,11 @@ scope:                               # prereg/S2.md amendment A1 (DECISIONS D21)
   semester8_replication_models: [gemma-2-9b-it, qwen2.5-7b-instruct]   # RQ8
 
 data:
+  population:                        # amendment A14 (D35)
+    primary: distractor_failures     # clean condition right, distractor condition wrong (same instance, prompt)
+    secondary: natural_failures      # clean condition wrong
+    conditions: [clean, distractor]  # both generated for every instance
+    clauses: data/distractor_clauses_reviewed.json   # after the two-person review (D39)
   instances_per_template: 8          # amendment A6: from the power analysis below (4 in D19's reduced run)
   n_templates: 89                    # amendment A8 (D28): the templates with a gold program under parser v4
   # amendment A8: train, dev AND test come only from these 89 GSM-Symbolic `main` templates
@@ -39,6 +44,11 @@ data:
     n_after_holm: 213                # McNemar 15% vs 5%, 80% power, Holm over five comparisons
     max_absorbed_deff: 1.5           # 320 = 213 x 1.5
     min_test_failures: 320
+    # A15 (D36): this pilot deff is of failure OCCURRENCE and is DESCRIPTIVE. The power target and
+    # the top-up rule use the deff of the primary paired outcomes (harness.power.primary_outcome_deff),
+    # estimated on train + dev templates before any primary analysis. Before that, the target is
+    # the deff <= 1.5 floor of 320 primary test failures with s0.
+    primary_target_before_outcome_deff: 320
     deff:                            # amendment A11 (D31): Kish, from the pilot; scripts/pilot_design_effect.py
       source: pilot                  # results/traces/traces.jsonl.gz, variant main, the study templates
       formula: "1 + (m_bar * (1 + CV^2) - 1) * ICC"
@@ -47,8 +57,12 @@ data:
       cv: 0.396
       m_eff: 33.01
       value: 19.76
-      required_test_failures_with_s0: 4209   # N* = max(320, ceil(213 x 19.76))
+      role: descriptive              # A15: not a target
+      required_test_failures_with_s0_if_it_were_the_target: 4209   # max(320, ceil(213 x 19.76))
     pilot_accuracy: 0.483            # Gemma-2-2B-IT on GSM-Symbolic main (baseline prompt; 352 traces, 88 study templates)
+    pilot_noop_accuracy: 0.355       # same 352 instances with the baseline no-op clause
+    pilot_distractor_failure_rate: 0.1875          # of all pairs: clean right and distractor wrong (66 / 352)
+    pilot_distractor_failure_given_clean_right: 0.388   # 66 / 170
   template_split:                    # by template; test >= 40 templates
     train: 40
     dev: 20

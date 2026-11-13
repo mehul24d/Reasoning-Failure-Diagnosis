@@ -10,12 +10,23 @@ outside LFS (config, generation config, index, tokenizer config) are compared by
 
     python -m harness.weights_provenance --dir /kaggle/input/.../gemma-2-2b-it/2 \
         --model gemma-2-2b-it --out reports/m1/weights_gemma-2-2b-it.json
+
+With an `HF_TOKEN` in the ENVIRONMENT (never in a file) of an account that has accepted the Gemma
+licence, the API returns the real LFS sha256, and the weights can be compared byte for byte. The
+saved report can be re-compared without the weights (DECISIONS D38):
+
+    HF_TOKEN=... python -m harness.weights_provenance --recompare reports/m1/weights_gemma-2-2b-it.json \
+        --fetch-hf google/gemma-2-2b-it
+
+The token is sent only to huggingface.co and is not written anywhere; the report records only
+whether the request was authenticated.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 
@@ -83,19 +94,23 @@ def _published(h: str) -> bool:
 
 
 def fetch_hf_reference(repo: str) -> dict:
-    """Published file hashes from the Hugging Face API (public metadata, no token): LFS sha256
-    for the weights and tokenizer, git blob sha1 for the rest."""
+    """Published file hashes from the Hugging Face API: LFS sha256 for the weights and tokenizer,
+    git blob sha1 for the rest. Uses HF_TOKEN from the environment when it is set (a gated repo
+    hides the LFS sha256 from anonymous requests)."""
     import urllib.request
 
+    token = os.environ.get("HF_TOKEN")
+
     def get(url):
-        with urllib.request.urlopen(url, timeout=60) as r:
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"} if token else {})
+        with urllib.request.urlopen(req, timeout=60) as r:
             return json.load(r)
     info = get(f"https://huggingface.co/api/models/{repo}")
     tree = get(f"https://huggingface.co/api/models/{repo}/tree/{info['sha']}")
     files = {f["path"]: {"size": f["size"], "sha256": (f.get("lfs") or {}).get("oid"),
                          "git_oid": f.get("oid")} for f in tree if f.get("type") == "file"}
     return {"repo": repo, "revision": info["sha"], "last_modified": info.get("lastModified"),
-            "files": files}
+            "authenticated": bool(token), "files": files}
 
 
 def provenance(model_dir: str, model: str, hf: dict | None = None) -> dict:
@@ -117,12 +132,25 @@ def provenance(model_dir: str, model: str, hf: dict | None = None) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--dir", required=True)
+    ap.add_argument("--dir", default=None)
+    ap.add_argument("--recompare", default=None, metavar="REPORT",
+                    help="re-compare a saved report's file hashes with HF (no weights needed); updates REPORT")
     ap.add_argument("--model", default="gemma-2-2b-it")
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out", default=None)
     ap.add_argument("--fetch-hf", default=None, metavar="REPO",
                     help="fetch the reference hashes from the HF API (e.g. google/gemma-2-2b-it)")
     a = ap.parse_args()
+    if a.recompare:
+        if not a.fetch_hf:
+            ap.error("--recompare needs --fetch-hf REPO")
+        rep = json.loads(Path(a.recompare).read_text())
+        hf = fetch_hf_reference(a.fetch_hf)
+        rep["hf_reference"], rep["vs_hugging_face"] = hf, compare_with_hf(rep["files"], hf)
+        Path(a.recompare).write_text(json.dumps(rep, indent=2))
+        print(json.dumps({"authenticated": hf["authenticated"], "vs_hugging_face": rep["vs_hugging_face"]}, indent=1))
+        return
+    if not (a.dir and a.out):
+        ap.error("--dir and --out are required")
     rep = provenance(a.dir, a.model, fetch_hf_reference(a.fetch_hf) if a.fetch_hf else None)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(rep, indent=2))

@@ -62,5 +62,19 @@
       "s0_rate": 0.81,
       "test_templates": 40
     }
+  },
+  "paired_distractor_failures": {
+    "pairs": 352,
+    "clean_right": 170,
+    "distractor_failures": 66,
+    "rate_of_all_pairs": 0.1875,
+    "rate_given_clean_right": 0.38823529411764707,
+    "icc_distractor_failure_given_clean_right": 0.43152891803880195,
+    "m_bar": 17.33837837837838,
+    "cv": 0.5070666827479245,
+    "m_eff": 21.79636363636364,
+    "deff": 9.974232299141487,
+    "expected_test_failures_with_s0_at_8_instances": 291.6,
+    "role": "descriptive (A15): failure occurrence, not the primary outcome"
   }
 }

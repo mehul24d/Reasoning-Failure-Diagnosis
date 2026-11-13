@@ -74,29 +74,52 @@ def _verify_load(stage_status: dict, vrecs: list[dict], in_sample: bool) -> floa
 
 
 def sampled_failure_rate(pw: dict) -> float:
-    """Failure rate used to size the sampled runs: the higher of the planning value (M0, GSM8K)
-    and the pilot (GSM-Symbolic main), so the compute projection errs on the high side."""
+    """Natural-failure rate used to size the sampled runs: the higher of the planning value (M0,
+    GSM8K) and the pilot (GSM-Symbolic main), so the compute projection errs on the high side."""
     return max(1 - pw["planning_accuracy"], 1 - pw.get("pilot_accuracy", pw["planning_accuracy"]))
 
 
-def project(meas: dict, n_gpu: int, instances: int | None = None, sampled: bool = True) -> dict:
+def distractor_failure_rates(pw: dict) -> tuple[float, float]:
+    """Rate of primary distractor failures per pair (A14): (high, low). High sizes the compute
+    (planning accuracy x the pilot's P(fail with clause | right without), or the pilot's paired
+    rate, whichever is larger); low sizes the power floor (the smaller one)."""
+    if "pilot_distractor_failure_rate" not in pw:
+        return 0.0, 0.0
+    a = pw["planning_accuracy"] * pw["pilot_distractor_failure_given_clean_right"]
+    b = pw["pilot_distractor_failure_rate"]
+    return max(a, b), min(a, b)
+
+
+def n_conditions(exp: dict) -> int:
+    return len((exp["data"].get("population") or {}).get("conditions", ["clean"]))
+
+
+def project(meas: dict, n_gpu: int, instances: int | None = None, sampled: bool = True,
+            engine: str = "hf_batched") -> dict:
     exp = experiment_config()
     d, pw = exp["data"], exp["data"]["power"]
     mc = model_config(meas["model"])
     inst = instances or d["instances_per_template"]
     n_prompts = 2 * exp["generation"]["paraphrases_per_style"]
-    n_greedy = d["n_templates"] * inst * n_prompts
-    n_test = d["min_test_templates"] * inst * n_prompts
-    n_sampled = (math.ceil(n_test * sampled_failure_rate(pw)) * exp["generation"]["sampled_subset"]["k"]
-                 if sampled else 0)
+    n_cond = n_conditions(exp)
+    n_greedy = d["n_templates"] * inst * n_prompts * n_cond
+    n_test = d["min_test_templates"] * inst * n_prompts          # per condition
+    k = exp["generation"]["sampled_subset"]["k"]
+    n_sampled_natural = math.ceil(n_test * sampled_failure_rate(pw)) * k if sampled else 0
+    n_sampled_primary = (math.ceil(n_test * distractor_failure_rates(pw)[0]) * k
+                         if sampled and n_cond > 1 else 0)
+    n_sampled = n_sampled_natural + n_sampled_primary
     g, v, s, f = meas["greedy"], meas["verify"], meas["sampled"], meas["tl_fallback"]
     load = meas["load_seconds_per_stage"]
+    if engine == "tl" and not f:
+        raise ValueError("no TL fallback measurement")
+    gen_tps = f["tokens_per_gpu_second"] if engine == "tl" else g["tokens_per_gpu_second"]
     hours = {
-        "generation": n_greedy * g["mean_new_tokens"] / g["tokens_per_gpu_second"] / 3600,
+        "generation": n_greedy * g["mean_new_tokens"] / gen_tps / 3600,
         "verification_and_caching": n_greedy * v["mean_seq_tokens"] * v["seconds_per_seq_token"] / 3600,
         "sampled_runs": n_sampled * s["mean_new_tokens"] / s["tokens_per_gpu_second"] / 3600,
     }
-    loads = {k: n_gpu * load.get(k, 0) / 3600 for k in hours}     # every GPU loads the model
+    loads = {k: n_gpu * load.get(k, 0) / 3600 if hours[k] > 0 else 0.0 for k in hours}   # every GPU loads the model
     gpu_hours = {k: hours[k] + loads[k] for k in hours}
     total = sum(gpu_hours.values())
     setup_h = meas["session_setup_minutes"] / 60
@@ -115,9 +138,11 @@ def project(meas: dict, n_gpu: int, instances: int | None = None, sampled: bool 
     budget = exp["budget"]["max_t4_gpu_hours"]
     fallback_gen = n_greedy * g["mean_new_tokens"] / f["tokens_per_gpu_second"] / 3600 if f else None
     return {
-        "sizes": {"greedy_traces": n_greedy, "test_traces": n_test, "sampled_runs": n_sampled,
-                  "templates": d["n_templates"], "instances_per_template": inst,
+        "sizes": {"greedy_traces": n_greedy, "test_traces": n_test * n_cond, "sampled_runs": n_sampled,
+                  "sampled_runs_natural": n_sampled_natural, "sampled_runs_primary": n_sampled_primary,
+                  "conditions": n_cond, "templates": d["n_templates"], "instances_per_template": inst,
                   "prompts": n_prompts, "sampled_runs_included": sampled},
+        "engine": engine,
         "t4_gpu_hours": {k: round(x, 3) for k, x in gpu_hours.items()},
         "t4_gpu_hours_total": round(total, 3),
         "t4_gpu_hours_total_with_safety": round(total * sf, 3),
@@ -134,12 +159,15 @@ def project(meas: dict, n_gpu: int, instances: int | None = None, sampled: bool 
     }
 
 
-def apply_budget_rule(meas: dict, n_gpu: int) -> dict:
+def apply_budget_rule(meas: dict, n_gpu: int, engine: str = "hf_batched") -> dict:
     """The over-budget rule of amendment A13 (DECISIONS D33), fixed before any measurement and
     applied automatically, in this order:
       1. reduce instances per template, never below the power floor: the fewest instances whose
-         expected test failures with s0 (planning accuracy, the conservative side) reach N*
-         after the design effect, from the 40 test templates;
+         expected test failures with s0 reach the target from the 40 test templates. With the
+         distractor population (A14, A15) the units are primary failures, the target is 320 (the
+         deff <= 1.5 floor; the primary-outcome deff is not known before data) and the rate is
+         the lower of the planning and pilot paired rates. Without it (smoke tests, the old
+         natural-failure design) the target is the pilot N* at the planning accuracy;
       2. if still over, drop the sampled runs (the stable/borderline split is reported as not
          done).
     Returns the first projection, the steps taken and the final projection."""
@@ -149,14 +177,18 @@ def apply_budget_rule(meas: dict, n_gpu: int) -> dict:
     d, pw = exp["data"], exp["data"]["power"]
     n_prompts = 2 * exp["generation"]["paraphrases_per_style"]
     cur = d["instances_per_template"]
-    need = (pw.get("deff") or {}).get("required_test_failures_with_s0", pw["min_test_failures"])
-    floor = min_instances_for(need, d["template_split"]["test"], n_prompts,
-                              1 - pw["planning_accuracy"], pw["planning_s0_rate"])
-    first = project(meas, n_gpu)
+    if n_conditions(exp) > 1:
+        need = pw.get("primary_target_before_outcome_deff", pw["min_test_failures"])
+        rate = distractor_failure_rates(pw)[1]
+    else:
+        need = (pw.get("deff") or {}).get("required_test_failures_with_s0", pw["min_test_failures"])
+        rate = 1 - pw["planning_accuracy"]
+    floor = min_instances_for(need, d["template_split"]["test"], n_prompts, rate, pw["planning_s0_rate"])
+    first = project(meas, n_gpu, engine=engine)
     final, steps = first, []
     if first["exceeds_budget"]:
         if floor is not None and floor < cur:
-            final = project(meas, n_gpu, instances=floor)
+            final = project(meas, n_gpu, instances=floor, engine=engine)
             steps.append({"step": "reduce_instances_to_power_floor", "applied": True,
                           "instances_per_template": floor, "from": cur, "power_floor_failures": need})
         else:
@@ -167,10 +199,10 @@ def apply_budget_rule(meas: dict, n_gpu: int) -> dict:
                                     "the power floor is above what any instance count reaches"})
         if final["exceeds_budget"]:
             final = project(meas, n_gpu, instances=final["sizes"]["instances_per_template"],
-                            sampled=False)
+                            sampled=False, engine=engine)
             steps.append({"step": "drop_sampled_runs", "applied": True,
                           "consequence": "stable vs borderline split reported as not done"})
-    return {"rule": exp["budget"]["over_budget_rule"], "power_floor_failures": need,
+    return {"rule": exp["budget"]["over_budget_rule"], "engine": engine, "power_floor_failures": need,
             "power_floor_instances": floor, "first": first, "steps": steps, "final": final,
             "still_over_budget": final["exceeds_budget"]}
 
@@ -195,8 +227,10 @@ def markdown(rep: dict) -> str:
         f"(x{p['safety_factor']} = {p['t4_gpu_hours_total_with_safety']:.2f}) |",
         "",
         f"* Sizes: {p['sizes']['greedy_traces']} greedy traces ({p['sizes']['templates']} templates x "
-        f"{p['sizes']['instances_per_template']} instances x {p['sizes']['prompts']} prompts), "
-        f"{p['sizes']['sampled_runs']} sampled runs.",
+        f"{p['sizes']['instances_per_template']} instances x {p['sizes']['prompts']} prompts x "
+        f"{p['sizes'].get('conditions', 1)} condition(s)), {p['sizes']['sampled_runs']} sampled runs"
+        f" ({p['sizes'].get('sampled_runs_primary', 0)} for primary distractor failures, "
+        f"{p['sizes'].get('sampled_runs_natural', p['sizes']['sampled_runs'])} for natural failures).",
         f"* Kaggle quota: about **{p['kaggle_quota_hours']:.1f} h** of session time with {p['n_gpus']} GPU(s) "
         f"in parallel, in {p['kaggle_sessions']} session(s) (setup {m['session_setup_minutes']} min each).",
         f"* Disk: activation store {p['disk_gb']['activation_store']:.2f} GB, traces "
@@ -230,6 +264,37 @@ def markdown(rep: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def reproject(model: str) -> dict:
+    """Projection of the CURRENT design from the measured throughputs (no GPU needed). Writes
+    reports/m1/estimate_<model>_reprojected.{json,md}; the measurement file is not changed."""
+    from .config import REPO_ROOT
+    from .pipeline import git_commit
+
+    src = REPO_ROOT / "reports" / "m1" / f"estimate_{model}.json"
+    old = json.loads(src.read_text())
+    meas, n_gpu = old["measured"], len(old["gpus"]) or 1
+    rep = {**{k: old[k] for k in ("model", "gpus", "batch_size")},
+           "date": time.strftime("%Y-%m-%d"), "commit": old["commit"], "reprojected_at_commit": git_commit(),
+           "measured_on": {"date": old["date"], "commit": old["commit"], "file": src.name},
+           "measured": meas, "projection": project(meas, n_gpu),
+           "budget_rule": apply_budget_rule(meas, n_gpu),
+           "if_equivalence_fails": apply_budget_rule(meas, n_gpu, engine="tl")}
+    out = src.with_name(f"estimate_{model}_reprojected.json")
+    out.write_text(json.dumps(rep, indent=2, default=str))
+    md = markdown(rep).replace("(`make estimate`,", "(re-projected for the current design,")
+    fb = rep["if_equivalence_fails"]
+    md += ("\n**If the equivalence gate fails (TL generation), with the budget rule:** first projection "
+           f"{fb['first']['t4_gpu_hours_total']:.2f} T4 GPU-hours (x1.25 = {fb['first']['t4_gpu_hours_total_with_safety']:.2f}); "
+           + "; ".join(f"{st['step']}: {'applied' if st['applied'] else 'not possible'}" for st in fb["steps"])
+           + f"; final {fb['final']['t4_gpu_hours_total_with_safety']:.2f} with safety: "
+           + ("**still over budget: the run does not start; the group decides.**" if fb["still_over_budget"]
+              else "within budget.") + "\n")
+    md += f"\nThroughputs measured on {old['date']} (code `{old['commit']}`), {src.name}.\n"
+    out.with_suffix(".md").write_text(md)
+    print(md)
+    return rep
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", default="gemma-2-2b-it")
@@ -241,7 +306,13 @@ def main() -> None:
                     help="per-session install/restore time (the notebook passes its measurement)")
     ap.add_argument("--allow-any-gpu", action="store_true")
     ap.add_argument("--fresh", action="store_true", help="delete an earlier smoke run first")
+    ap.add_argument("--reproject", action="store_true",
+                    help="no GPU: re-project the saved measurement (reports/m1/estimate_<model>.json) "
+                         "for the current configs, and apply the budget rule for both engines")
     a = ap.parse_args()
+    if a.reproject:
+        reproject(a.model)
+        return
 
     gpus = gpu_names()
     if not a.allow_any_gpu and not (gpus and all("T4" in g for g in gpus)):

@@ -15,7 +15,7 @@ For traces of any other problem file (S2: GSM-Symbolic), pass the problems JSONL
 generated from; each trace's gold program is then built from that file's question, solution and
 source (prereg/S2.md):
     python scripts/validate_parsing.py --traces data/generated/gemma-2-9b-it/s2_traces_scored.jsonl \
-        --problems data/s2_gsms_main_i8.jsonl --label s2_traces \
+        --problems data/s2_gsms_pairs_i8.jsonl --label s2_traces \
         --out reports/m1/parse_coverage_gemma-2-9b-it.json \
         --sample-out reports/m1/parsing_sample_gemma-2-9b-it.md --seed 4
 """

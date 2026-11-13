@@ -1,0 +1,296 @@
+{
+  "model": "gemma-2-2b-it",
+  "gpus": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "batch_size": 16,
+  "date": "2026-11-13",
+  "commit": "b920121",
+  "reprojected_at_commit": "6a1baa7",
+  "measured_on": {
+    "date": "2026-11-12",
+    "commit": "b920121",
+    "file": "estimate_gemma-2-2b-it.json"
+  },
+  "measured": {
+    "model": "gemma-2-2b-it",
+    "greedy": {
+      "new_tokens": 52968,
+      "gpu_busy_seconds": 741.915,
+      "tokens_per_gpu_second": 71.39362325872911,
+      "mean_new_tokens": 137.9375,
+      "traces": 384
+    },
+    "greedy_summary": {
+      "traces": 384,
+      "stop_reasons": {
+        "answer_line": 377,
+        "eos": 5,
+        "max_new_tokens": 2
+      },
+      "hit_max_tokens_fraction": 0.005208333333333333,
+      "mean_new_tokens": 137.9375,
+      "max_new_tokens_seen": 512
+    },
+    "sampled": {
+      "new_tokens": 24827,
+      "gpu_busy_seconds": 361.762,
+      "tokens_per_gpu_second": 68.62799298986627,
+      "mean_new_tokens": 155.16875,
+      "traces": 160
+    },
+    "tl_fallback": {
+      "new_tokens": 1102,
+      "gpu_busy_seconds": 87.87299999999999,
+      "tokens_per_gpu_second": 12.540825964744576,
+      "mean_new_tokens": 183.66666666666666,
+      "traces": 6
+    },
+    "verify": {
+      "reproduction": 1.0,
+      "max_abs_logit_diff": 0.00029754638671875,
+      "traces_with_any_mismatch": 0,
+      "fp16_check": {
+        "traces": 32,
+        "max_abs_err": 0.498291015625,
+        "max_rel_err": 0.00040624456596560776,
+        "max_abs_value": 1352.629638671875
+      },
+      "seconds_per_trace": 0.38501380208333336,
+      "seconds_per_seq_token": 0.001596670482526243,
+      "tokens": 52968,
+      "mean_seq_tokens": 241.13541666666666
+    },
+    "rows_per_trace": 12.2421875,
+    "char_map_failed": 0,
+    "bytes_per_greedy_trace": 9815.25,
+    "bytes_per_sampled_trace": 2722.76875,
+    "load_seconds_per_stage": {
+      "generation": 29.646000000000015,
+      "verification_and_caching": 215.48909999999995,
+      "sampled_runs": 25.980999999999995
+    },
+    "session_setup_minutes": 1.4,
+    "smoke_wall_seconds": 1055.9,
+    "fallback_info": {
+      "seconds": 127.7,
+      "lines": 6
+    }
+  },
+  "projection": {
+    "sizes": {
+      "greedy_traces": 8544,
+      "test_traces": 3840,
+      "sampled_runs": 7610,
+      "sampled_runs_natural": 4965,
+      "sampled_runs_primary": 2645,
+      "conditions": 2,
+      "templates": 89,
+      "instances_per_template": 8,
+      "prompts": 6,
+      "sampled_runs_included": true
+    },
+    "engine": "hf_batched",
+    "t4_gpu_hours": {
+      "generation": 4.602,
+      "verification_and_caching": 1.033,
+      "sampled_runs": 4.794
+    },
+    "t4_gpu_hours_total": 10.429,
+    "t4_gpu_hours_total_with_safety": 13.037,
+    "safety_factor": 1.25,
+    "kaggle_quota_hours": 5.238,
+    "kaggle_sessions": 1,
+    "n_gpus": 2,
+    "disk_gb": {
+      "activation_store": 13.014,
+      "traces_and_sidecars": 0.105,
+      "fp32_reference": 0.097,
+      "total": 13.216
+    },
+    "budget_t4_gpu_hours": 25,
+    "exceeds_budget": false,
+    "fallback_tl_generation_t4_gpu_hours": 26.104,
+    "total_if_fallback_t4_gpu_hours": 31.948
+  },
+  "budget_rule": {
+    "rule": [
+      "reduce_instances_to_power_floor",
+      "drop_sampled_runs"
+    ],
+    "engine": "hf_batched",
+    "power_floor_failures": 320,
+    "power_floor_instances": 9,
+    "first": {
+      "sizes": {
+        "greedy_traces": 8544,
+        "test_traces": 3840,
+        "sampled_runs": 7610,
+        "sampled_runs_natural": 4965,
+        "sampled_runs_primary": 2645,
+        "conditions": 2,
+        "templates": 89,
+        "instances_per_template": 8,
+        "prompts": 6,
+        "sampled_runs_included": true
+      },
+      "engine": "hf_batched",
+      "t4_gpu_hours": {
+        "generation": 4.602,
+        "verification_and_caching": 1.033,
+        "sampled_runs": 4.794
+      },
+      "t4_gpu_hours_total": 10.429,
+      "t4_gpu_hours_total_with_safety": 13.037,
+      "safety_factor": 1.25,
+      "kaggle_quota_hours": 5.238,
+      "kaggle_sessions": 1,
+      "n_gpus": 2,
+      "disk_gb": {
+        "activation_store": 13.014,
+        "traces_and_sidecars": 0.105,
+        "fp32_reference": 0.097,
+        "total": 13.216
+      },
+      "budget_t4_gpu_hours": 25,
+      "exceeds_budget": false,
+      "fallback_tl_generation_t4_gpu_hours": 26.104,
+      "total_if_fallback_t4_gpu_hours": 31.948
+    },
+    "steps": [],
+    "final": {
+      "sizes": {
+        "greedy_traces": 8544,
+        "test_traces": 3840,
+        "sampled_runs": 7610,
+        "sampled_runs_natural": 4965,
+        "sampled_runs_primary": 2645,
+        "conditions": 2,
+        "templates": 89,
+        "instances_per_template": 8,
+        "prompts": 6,
+        "sampled_runs_included": true
+      },
+      "engine": "hf_batched",
+      "t4_gpu_hours": {
+        "generation": 4.602,
+        "verification_and_caching": 1.033,
+        "sampled_runs": 4.794
+      },
+      "t4_gpu_hours_total": 10.429,
+      "t4_gpu_hours_total_with_safety": 13.037,
+      "safety_factor": 1.25,
+      "kaggle_quota_hours": 5.238,
+      "kaggle_sessions": 1,
+      "n_gpus": 2,
+      "disk_gb": {
+        "activation_store": 13.014,
+        "traces_and_sidecars": 0.105,
+        "fp32_reference": 0.097,
+        "total": 13.216
+      },
+      "budget_t4_gpu_hours": 25,
+      "exceeds_budget": false,
+      "fallback_tl_generation_t4_gpu_hours": 26.104,
+      "total_if_fallback_t4_gpu_hours": 31.948
+    },
+    "still_over_budget": false
+  },
+  "if_equivalence_fails": {
+    "rule": [
+      "reduce_instances_to_power_floor",
+      "drop_sampled_runs"
+    ],
+    "engine": "tl",
+    "power_floor_failures": 320,
+    "power_floor_instances": 9,
+    "first": {
+      "sizes": {
+        "greedy_traces": 8544,
+        "test_traces": 3840,
+        "sampled_runs": 7610,
+        "sampled_runs_natural": 4965,
+        "sampled_runs_primary": 2645,
+        "conditions": 2,
+        "templates": 89,
+        "instances_per_template": 8,
+        "prompts": 6,
+        "sampled_runs_included": true
+      },
+      "engine": "tl",
+      "t4_gpu_hours": {
+        "generation": 26.121,
+        "verification_and_caching": 1.033,
+        "sampled_runs": 4.794
+      },
+      "t4_gpu_hours_total": 31.948,
+      "t4_gpu_hours_total_with_safety": 39.935,
+      "safety_factor": 1.25,
+      "kaggle_quota_hours": 16.021,
+      "kaggle_sessions": 2,
+      "n_gpus": 2,
+      "disk_gb": {
+        "activation_store": 13.014,
+        "traces_and_sidecars": 0.105,
+        "fp32_reference": 0.097,
+        "total": 13.216
+      },
+      "budget_t4_gpu_hours": 25,
+      "exceeds_budget": true,
+      "fallback_tl_generation_t4_gpu_hours": 26.104,
+      "total_if_fallback_t4_gpu_hours": 31.948
+    },
+    "steps": [
+      {
+        "step": "reduce_instances_to_power_floor",
+        "applied": false,
+        "power_floor_failures": 320,
+        "floor_instances": 9,
+        "reason": "the power floor needs at least the planned instances"
+      },
+      {
+        "step": "drop_sampled_runs",
+        "applied": true,
+        "consequence": "stable vs borderline split reported as not done"
+      }
+    ],
+    "final": {
+      "sizes": {
+        "greedy_traces": 8544,
+        "test_traces": 3840,
+        "sampled_runs": 0,
+        "sampled_runs_natural": 0,
+        "sampled_runs_primary": 0,
+        "conditions": 2,
+        "templates": 89,
+        "instances_per_template": 8,
+        "prompts": 6,
+        "sampled_runs_included": false
+      },
+      "engine": "tl",
+      "t4_gpu_hours": {
+        "generation": 26.121,
+        "verification_and_caching": 1.033,
+        "sampled_runs": 0.0
+      },
+      "t4_gpu_hours_total": 27.154,
+      "t4_gpu_hours_total_with_safety": 33.943,
+      "safety_factor": 1.25,
+      "kaggle_quota_hours": 13.624,
+      "kaggle_sessions": 2,
+      "n_gpus": 2,
+      "disk_gb": {
+        "activation_store": 13.014,
+        "traces_and_sidecars": 0.084,
+        "fp32_reference": 0.097,
+        "total": 13.195
+      },
+      "budget_t4_gpu_hours": 25,
+      "exceeds_budget": true,
+      "fallback_tl_generation_t4_gpu_hours": 26.104,
+      "total_if_fallback_t4_gpu_hours": 27.154
+    },
+    "still_over_budget": true
+  }
+}

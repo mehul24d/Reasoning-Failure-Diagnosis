@@ -39,22 +39,31 @@ section by section. Copy it into the next version of the plan.
   25 are excluded. SAE activations are computed on CPU from the stored float32-computed
   residuals (stored in float16; the effect of float16 storage on SAE features is measured and
   reported).
-- **Datasets and failure sets.** Population as before: GSM-Symbolic `main` with natural
-  failures, because the no-op data of Qu and Gomes are not public.
+- **Datasets and failure sets.** Population as in the proposal (A14): the primary population
+  is **GSM-Symbolic distractor failures** (right without the no-op clause, wrong with it, same
+  instance and prompt), using the study's own clauses after a two-person review, because the
+  no-op data of Qu and Gomes are not public. Natural failures (clean condition) are secondary.
+  Both conditions are generated for every instance.
   - **The 89 templates with a gold program** under parser v4 are used, for train, dev and test
     (A8). The 11 without one are listed with reasons in DECISIONS D28.
   - 8 instances per template, split 33/16/40 by template with seed 0.
-  - Target: N* = max(320, ⌈213 × deff⌉) held-out test failures with a first-error step, from at
-    least 40 test templates. The Kish deff, 1 + (m̄ (1 + CV²) − 1) × ICC, is estimated on the
-    pilot traces: ICC 0.586, deff 19.76, **N* = 4,209** (A11). The expected yield is far below
-    it (about 800), and adding instances cannot close the gap (see Section 12).
+  - Target: N* = max(320, ⌈213 × deff⌉) held-out primary test failures with a first-error
+    step, from at least 40 test templates.
+    - The Kish deff, 1 + (m̄ (1 + CV²) − 1) × ICC, is that of the **primary paired outcomes**:
+      E3 gold-value decodability and the paired repair difference. It is estimated on train
+      and dev templates before any primary analysis (A15).
+    - If it exceeds 1.5, or the primary test failures fall short of N*, and the budget allows,
+      instances 9–16 are generated. Otherwise the study is reported as underpowered.
+    - The pilot's failure-occurrence deff (ICC 0.586, deff 19.76) is descriptive.
+    - Every result states its template clustering and effective n (A16).
 - **Generation.** Greedy decoding (T = 0), fixed templates. Two prompt styles and three
   paraphrases, as before.
   - **Batched** Hugging Face generation: KV cache, float32, eager attention, left padding,
     pure greedy.
   - Generation stops at the end of the "Final Answer:" line, with max_new_tokens 512. The
     fraction of traces that hit the cap is reported, and truncated traces count as failures.
-  - The sampled subset (T = 0.7, k = 5) is drawn from **test-split greedy failures only**. It
+  - The sampled subset (T = 0.7, k = 5) is drawn from **test-split greedy failures of the two
+    populations only**. It
     is used solely to separate stable from borderline failures.
 - **Tooling.** TransformerLens hooks, SAELens and the released code of Qu and Gomes. Each
   finished trace gets **one verified TransformerLens forward pass**, which does two things:
@@ -78,7 +87,7 @@ section by section. Copy it into the next version of the plan.
 | Milestone | Deliverables | Gate / check |
 |---|---|---|
 | M0 (Sem. 7, week 1) | Harness; TransformerLens–HuggingFace equivalence; SAE validation; Appendix A check, **on 2B** | Done: 6/6 equivalence checks, 24/26 SAE layers |
-| M1 (weeks 2–3) | Phase 0 on the Kaggle weights; `make estimate` on Kaggle T4s; human review of the distractor clauses; failure sets and gold variable extraction **on 2B**; batched-generation equivalence gate; residual cache | Phase 0 6/6 (+ repeat-greedy); equivalence gate ≥ 0.99 on ≥ 200 traces; N* = 4,209 test failures with s0 from ≥ 40 templates, or documented shortfall (expected, D31) |
+| M1 (weeks 2–3) | Phase 0 on the Kaggle weights; `make estimate` on Kaggle T4s; human review of the distractor clauses; failure sets and gold variable extraction **on 2B**; batched-generation equivalence gate; residual cache | Phase 0 6/6 (+ repeat-greedy); equivalence gate ≥ 0.99 on ≥ 200 traces; N* = max(320, ⌈213 × deff_primary⌉) primary test failures with s0 from ≥ 40 templates, or the A15 top-up / reported as underpowered |
 | M2 (weeks 4–6) | Direction construction (E1) and readout map (E2), on 2B | RQ1 and RQ2 criteria |
 | M3 (weeks 7–10) | Self-sourced feasibility (E3), on 2B | RQ3 criterion on 2B; provisionally decides inclusion of RQ7 |
 | M4 (weeks 11–13) | Content attribution and typology (E4); minor report including negative results, with its claims restricted to 2B | RQ4 criterion |
@@ -96,11 +105,14 @@ section by section. Copy it into the next version of the plan.
   in TransformerLens. Outputs end at the answer line, with a 512-token cap. A small sampled
   subset of test failures gives stability estimates. Conclusions about sampled generation are
   not claimed.
-- **Statistical power.** With the pilot's design effect (19.76), 40 test templates give at most
-  about 68 effective test failures for any number of instances. The power analysis needs 213.
-  The pre-registered comparisons are therefore underpowered in the minor project, and this is
-  stated with every result. The template-clustered bootstrap CIs, unchanged, carry the
-  clustering into every interval.
+- **Statistical power.** Power is judged on the design effect of the primary paired outcomes,
+  estimated on train and dev templates before any primary analysis (A15). If that deff is as
+  large as the pilot's for failure occurrence (19.76, descriptive), 40 test templates give at
+  most about 68 effective units, short of the 213 the power analysis needs.
+  - The pilot also projects about 292 primary test failures with s0 at 8 instances, below the
+    320 floor. So the A15 top-up may apply, and the study may be reported as underpowered.
+  - Every result states its template clustering and effective n (A16). The template-clustered
+    bootstrap CIs, unchanged, carry the clustering into every interval.
 - **Storage precision.** Residuals are computed in float32 and stored in float16. The measured
   maximum error is reported. Analyses that need full precision recompute from the traces.
 - Task domain, variables, edit family and mechanism evidence: unchanged.
@@ -110,7 +122,7 @@ section by section. Copy it into the next version of the plan.
 | Risk | Mitigation |
 |---|---|
 | Not enough GPU time (college cannot provide ~70 GPU-hours) | Minor project on 2B only, on free Kaggle T4s. Batched generation, stop at the answer line, one TL pass per trace for verification and caching, and sampled runs on test failures only. `make estimate` projects GPU-hours before any full run. Above 25 T4-hours, the rule fixed beforehand applies: fewer instances down to the power floor, then no sampled runs; it is recorded, and anything beyond it goes to the group. |
-| Failures cluster strongly by template (pilot ICC 0.59) | N* raised to 4,209 (A11). The shortfall is documented. Template-clustered CIs throughout. Whether to spend GPU-hours on the instance top-up, which barely changes the effective n, is put to the group before S2. |
+| Failures cluster strongly by template (pilot ICC 0.59) | Descriptive since A15. The target uses the primary-outcome deff, with a pre-specified top-up before any primary analysis. Template-clustered CIs and effective n with every result (A16). |
 | Batched Hugging Face generation differs from TransformerLens | Pre-registered equivalence gate on ≥ 200 traces stratified by template, at the Phase 0 threshold, with a max logit difference report. If it fails: TransformerLens generation, reported. |
 | Kaggle sessions end (12 h limit, preemption) | Every stage is resumable per trace or shard and is run as Save & Run All commits. Each session restores the previous output and stops cleanly before its deadline. |
 | Results do not transfer from 2B to 9B (replaces "from 9B to 2B") | The minor-project report claims 2B only. The RQ3 gate is re-checked on 9B at the start of Semester 8, and RQ8 reports effect sizes per model. |
@@ -144,3 +156,17 @@ passed on the Kaggle weights (7/7). Full report: `reports/m1/estimate_gemma-2-2b
   - TL reproduced the HF tokens exactly, with a max logit difference of 3.0e-4;
   - float16 storage max relative error 4.1e-4.
 - This replaces the interim projection (4.7 GPU-hours) given here before the measurement.
+
+**Re-projected for the distractor design (A14)** from the same measurement
+(`reports/m1/estimate_gemma-2-2b-it_reprojected.md`):
+
+| Stage | Projected T4 GPU-hours |
+|---|---|
+| Generation, 8,544 traces (2 conditions) | 4.60 |
+| Verification + cache | 1.03 |
+| Sampled runs, 7,610 (2,645 primary, 4,965 natural) | 4.79 |
+| **Total** | **10.43** (× 1.25 = **13.04**), budget 25 |
+
+- Disk: 13.2 GB.
+- If the equivalence gate fails, TL generation would bring the total to 33.9 even after the
+  budget rule, so the run would not start and the group would decide.

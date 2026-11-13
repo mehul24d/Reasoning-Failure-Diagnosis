@@ -974,3 +974,115 @@ The checks are written to `docs/review/distractor_clauses.csv`, with empty colum
 reviewers. **Study generation waits until the group confirms that this review is done.** Under
 D29 the S2 population inserts no clause, so the review matters for any later distractor
 population: the preferred primary population of the plan, if it is rebuilt from these clauses.
+
+## D35 (2026-11-13) Population: distractor failures are primary, natural failures secondary
+
+Group decision, recorded before any study data (prereg/S2.md A14). It replaces the population
+part of D29.
+- **Primary population: GSM-Symbolic distractor failures**, as in the proposal: a problem the
+  model solves without the no-op clause and fails with it, for the same instance and prompt. The
+  clauses are the study's own recreation (the Qu & Gomes data are not public), after the
+  two-person review (D39).
+- **Both conditions are generated for every instance:** clean (GSM-Symbolic `main`) and
+  distractor (the same question with its template's clause). That gives 89 × 8 × 6 × 2 =
+  **8,544 greedy traces** (`harness/distractor.py`, `pipeline` stage `problems`).
+- **Secondary population: natural failures**, the clean-condition traces scored wrong.
+- A distractor-condition failure whose clean twin also failed belongs to neither population. It
+  stays in the files but gets no sampled runs.
+- This restores the content/binary cell of the 2 × 2 design: the distractor-bound failures.
+- Sampled runs (A5) go to the test-template failures of both populations.
+- **Template 50** had no clause in the baseline. It is a test template, and without a clause
+  only 39 test templates would have the distractor condition (40 are required). A clause was
+  drafted ("The room has {d} windows."). It passes all automated checks and goes through the
+  same human review.
+- **Re-projected compute** (from the measured throughputs; `harness.estimate --reproject`,
+  `reports/m1/estimate_gemma-2-2b-it_reprojected.md`):
+
+  | Stage | T4 GPU-hours |
+  |---|---|
+  | Generation, 8,544 traces | 4.60 |
+  | Verification + cache | 1.03 |
+  | Sampled runs, 7,610 (2,645 primary, 4,965 natural) | 4.79 |
+  | **Total** | **10.43** (× 1.25 = **13.04**) |
+
+  - Within the 25-hour budget, so the A13 rule does not apply. Disk: 13.2 GB.
+  - If the equivalence gate fails, TL generation would give 31.95 (39.94 with the safety factor).
+    The rule then cannot reduce instances (floor 9, below), so it drops the sampled runs, which
+    still leaves 33.94. **In that case the run does not start and the group decides.**
+- **Expected primary test failures with s0 at 8 instances:**
+  - 292 at the pilot's paired rate (66 of 352 pilot pairs, 0.1875);
+  - 429 at the planning accuracy × the pilot's rate given a clean pass (0.71 × 0.388).
+
+## D36 (2026-11-13) Design effect: estimated on the primary paired outcomes
+
+The pre-registered rule (D31, A11) did not name the outcome. Clarified before any study data
+(prereg/S2.md A15):
+- **The design effect that sets the target is that of the primary paired outcomes, clustered by
+  template:**
+  - E3 gold-value decodability, per primary failure;
+  - the paired repair difference, per primary failure.
+- **Estimate:**
+  - ICC by one-way ANOVA across the **train + dev** templates (never test);
+  - Kish deff with the unequal-cluster-size adjustment, at the observed test-template cluster
+    sizes (primary test failures with s0);
+  - the larger of the two outcomes' deffs decides (`harness.power.primary_outcome_deff`).
+- **N\*** = max(320, ⌈213 × deff_primary⌉).
+- **Descriptive only, from now on:**
+  - The failure-occurrence ICC 0.586 / deff 19.76 (D31), and N* = 4,209 derived from it.
+  - Two further descriptive values: the pilot's paired distractor failures (ICC 0.432,
+    deff 9.97) and the S2 failure-occurrence deff per population (`pipeline.design_effect`).
+- **Pre-specified rule, applied once before any primary (test-template) analysis**
+  (`harness.power.top_up_decision`): generate instances 9–16 for all 89 study templates, in both
+  conditions and under the same rules, if
+  - the primary-outcome deff exceeds 1.5, or the primary test failures with s0 fall below N*;
+  - **and** the projected cost fits what is left of the 25 T4-hour budget.
+
+  Otherwise there is no top-up. If the target is not met, the study is reported as underpowered.
+  The count condition is the proposal's existing top-up rule (A6), kept next to the group's
+  deff condition.
+- **Before outcome data exist,** the A13 power floor is 320 primary test failures with s0, at
+  the lower of the two paired rates. At 0.1875 that needs **9 instances**, so step 1 of the
+  budget rule cannot reduce the planned 8.
+- **No top-up now.**
+
+## D37 (2026-11-13) Every reported result states template clustering and effective sample size
+
+Recorded before any study data (prereg/S2.md A16). Every reported result states:
+- n units and n templates;
+- the ICC of the unit outcome across templates;
+- the Kish deff (unequal sizes);
+- the effective sample size n_eff = n / deff.
+
+These come from `harness.power.clustering`, which `analysis.stats.cluster_bootstrap` attaches
+when it is given `unit_values`. No threshold, random-direction count or CI procedure changes:
+the CIs stay template-clustered bootstrap CIs.
+
+## D38 (2026-11-13) Weights: authenticated comparison with Hugging Face (optional)
+
+- `harness.weights_provenance` now sends `HF_TOKEN` from the environment, when one is set, so
+  that the API returns the real LFS sha256. The token is never written to a file, and the
+  report records only whether the request was authenticated.
+- `--recompare reports/m1/weights_gemma-2-2b-it.json --fetch-hf google/gemma-2-2b-it` compares
+  the saved Kaggle hashes without the weights.
+- **Not run yet:** no HF_TOKEN is available in this environment. Until it runs, D32 stands:
+  identical non-LFS files, and the weight files have the published sizes.
+
+## D39 (2026-11-13) Reconciling the two-person clause review
+
+- **Procedure** (`main-study/scripts/review_agreement.py`):
+  - **Verdict:** a reviewer's verdict on a clause is FIX if they wrote FIX, or answered "no" to
+    "is it a no-op" or to "is it grammatical".
+  - **Agreement:** Cohen's kappa on the verdict and on each of the two questions.
+  - **Rewrites:** every clause marked FIX by either reviewer is rewritten as agreed in the joint
+    discussion (`docs/review/clause_rewrites.csv`), unless the agreed action is drop.
+  - **Re-checks:** every rewrite is re-run through the automated checks on its template's 8
+    instances, and one failure stops the script.
+  - **Outputs:** the changes are recorded in `reports/m1/distractor_review_agreement.{json,md}`,
+    and the reconciled table is written to `main-study/data/distractor_clauses_reviewed.json`.
+- **Gate:** the `problems` stage refuses to run without that table. It also refuses if fewer
+  than 40 test templates keep a clause.
+- **Status on 2026-11-13:** the reviewers' answers were not in the repository. The reviewer
+  columns of `docs/review/distractor_clauses.csv` were empty, and no other sheet was in
+  `docs/review/`, on `origin/main` or on `origin/neil`. So kappa has not been computed, no
+  clause has been rewritten, and S2 has not started. The template 50 clause (D35) was added to
+  the sheet; the other 88 rows are byte-identical to the version sent for review.

@@ -23,7 +23,8 @@ from collections import defaultdict
 
 
 def icc_anova(groups: dict) -> float | None:
-    """One-way ANOVA ICC of a 0/1 indicator, groups = {cluster: [0/1, ...]}. Clipped at 0."""
+    """One-way ANOVA ICC of a numeric outcome (a 0/1 indicator or a continuous value),
+    groups = {cluster: [values]}. Clipped at 0."""
     groups = {k: v for k, v in groups.items() if v}
     k = len(groups)
     n = sum(len(g) for g in groups.values())
@@ -111,3 +112,56 @@ def pilot_design_effect(pilot_rows: list[dict], study_templates: set[int], insta
         "sizing": {"instances": instances, "prompts": n_prompts, "s0_rate": s0_rate,
                    "test_templates": n_test_templates},
     }
+
+
+def clustering(values, clusters) -> dict:
+    """Template clustering and effective sample size of one reported result (prereg/S2.md A16,
+    DECISIONS D37): n units, n templates, the one-way ANOVA ICC of the unit outcome across
+    templates, the Kish deff with the unequal-size adjustment (cluster size = units per
+    template), and n_eff = n / deff. Every reported result carries this."""
+    groups = defaultdict(list)
+    for v, c in zip(values, clusters):
+        groups[c].append(float(v))
+    n = sum(len(g) for g in groups.values())
+    icc = icc_anova(groups)
+    k = kish_deff([len(g) for g in groups.values()], icc or 0.0)
+    return {"n_units": n, "n_templates": len(groups), "icc": icc, "m_bar": k["m_bar"],
+            "cv_cluster_size": k["cv"], "deff": k["deff"],
+            "n_eff": n / k["deff"] if k["deff"] else None}
+
+
+def primary_outcome_deff(outcomes: dict[str, list[tuple]], test_cluster_sizes: list[int]) -> dict:
+    """Design effect on the PRIMARY paired outcomes (prereg/S2.md A15, DECISIONS D36).
+
+    `outcomes` = {name: [(template, value), ...]} for the primary outcomes measured on the
+    train + dev templates only (E3 gold-value decodability per primary failure; the paired repair
+    difference per primary failure). For each, ICC across templates (one-way ANOVA) and the Kish
+    deff at the observed test-template cluster sizes (primary test failures with s0). The
+    largest deff decides."""
+    per = {}
+    for name, rows in outcomes.items():
+        groups = defaultdict(list)
+        for t, v in rows:
+            groups[t].append(float(v))
+        icc = icc_anova(groups)
+        per[name] = {"icc": icc, "n_units": len(rows), "n_templates": len(groups),
+                     **kish_deff(test_cluster_sizes, icc or 0.0)}
+    deffs = [p["deff"] for p in per.values()]
+    return {"per_outcome": per, "deff": max(deffs) if deffs else None}
+
+
+def top_up_decision(deff: float | None, observed_primary_with_s0: int, power: dict,
+                    top_up_t4_hours: float, remaining_t4_hours: float) -> dict:
+    """The pre-specified rule (A15), applied once, before any primary (test-template) analysis:
+    generate instances 9-16 for all study templates if the primary-outcome deff exceeds 1.5, or
+    the primary test failures with s0 fall below N* = max(320, ceil(213 x deff)), AND the
+    projected cost fits the remaining budget; otherwise no top-up, and the study is reported as
+    underpowered whenever the target is not met."""
+    need = required_failures(deff if deff is not None else 1.0, power)
+    trigger = (deff is not None and deff > power["max_absorbed_deff"]) or observed_primary_with_s0 < need
+    fits = top_up_t4_hours <= remaining_t4_hours
+    return {"deff": deff, "required": need, "observed": observed_primary_with_s0,
+            "trigger": trigger, "budget_allows": fits,
+            "action": "top_up_instances_9_16" if trigger and fits else "none",
+            "underpowered": observed_primary_with_s0 < need and not (trigger and fits),
+            "top_up_t4_hours": top_up_t4_hours, "remaining_t4_hours": remaining_t4_hours}

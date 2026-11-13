@@ -1,8 +1,9 @@
 """Automated checks of the no-op distractor clauses and the human-review sheet (DECISIONS D34).
 
-For each of the 89 study templates (prereg/S2.md A8), the baseline clause
-(`src/rfd/data/distractor.py`, D6) is inserted into the study's 8 instances (the first 8 by
-instance number) exactly as the baseline does it: `insert_clause` before the final sentence,
+For each of the 89 study templates (prereg/S2.md A8), the study's clause
+(`harness/distractor.py`: the baseline's clauses of `src/rfd/data/distractor.py`, D6, plus the
+clause drafted for template 50, A17) is inserted into the study's 8 instances (the first 8 by
+instance number) exactly as the pipeline does it: `insert_clause` before the final sentence,
 the distractor value d drawn by `sample_distractor_value` with the baseline's seed rule
 (42 * 1000 + template * 100 + instance) and its forbidden values (question numbers and gold
 operands/results, plus the unit constants 7, 10, 12). Checks, per instance:
@@ -21,29 +22,24 @@ operands/results, plus the unit constants 7, 10, 12). Checks, per instance:
 Writes docs/review/distractor_clauses.csv (repository root), one row per template, with empty
 columns for two human reviewers. Run from main-study/:
 
-    PYTHONPATH=.:../src python scripts/distractor_review.py
+    PYTHONPATH=. python scripts/distractor_review.py
 """
 from __future__ import annotations
 
 import csv
 import json
 import re
-import sys
 from fractions import Fraction
 from pathlib import Path
 
-import numpy as np
-
 from harness.config import REPO_ROOT, experiment_config
 from harness.datasets import gsm_symbolic
+from harness.distractor import _RESERVED, DRAFT_CLAUSES, make_variant
 from parsing.gold import gold_program, slots
 
-sys.path.insert(0, str(REPO_ROOT.parent / "src"))
-from rfd.data.distractor import (_RESERVED, NOOP_CLAUSES, insert_clause,  # noqa: E402
-                                 sample_distractor_value)
+NOOP_CLAUSES = DRAFT_CLAUSES        # the study's table: the baseline's 88 clauses + template 50 (A17)
 
 OUT = REPO_ROOT.parent / "docs" / "review" / "distractor_clauses.csv"
-BASELINE_SEED = 42
 NUM = re.compile(r"\d+(?:\.\d+)?")
 CHECKS = ["contains_number", "gold_answer_unchanged", "gold_program_unchanged", "d_no_collision",
           "sentence_boundary", "clause_one_sentence", "final_question"]
@@ -74,15 +70,14 @@ def _steps(prog, sl):
     return [(s.op, s.a, s.b, s.result, ref(s.a_ref), ref(s.b_ref)) for s in prog.steps]
 
 
-def check_instance(t: int, row: dict, inst: int) -> dict:
+def check_instance(t: int, row: dict, inst: int, clause_template: str | None = None) -> dict:
+    """Checks on one instance, on exactly the text the pipeline generates (harness.distractor)."""
     q = row["question"]
     p0, sl0 = gold_program(q, row["solution"], row["answer"], "gsm_symbolic")
-    forbidden = [float(s.value) for s in sl0] + [float(v) for st in p0.steps for v in (st.a, st.b, st.result)]
-    d = sample_distractor_value(forbidden, np.random.default_rng(BASELINE_SEED * 1000 + t * 100 + inst))
-    clause = NOOP_CLAUSES[t].format(d=d)
-    vq = insert_clause(q, clause)
-    start = vq.index(clause)
-    span = (start, start + len(clause))
+    v = make_variant(t, inst, row, clause_template or NOOP_CLAUSES[t])
+    d, clause, vq = v["d"], v["clause"], v["question"]
+    start = v["distractor_span"][0]
+    span = tuple(v["distractor_span"])
     p1, sl1 = gold_program(vq, row["solution"], row["answer"], "gsm_symbolic", distractor_span=span)
     dslots = [s for s in sl1 if s.distractor]
     before, after = vq[:start], vq[span[1]:]
@@ -119,7 +114,7 @@ def main() -> None:
         base = {"template_id": t, "split": split_of[t], "instances_checked": len(insts)}
         if t not in NOOP_CLAUSES:
             out.append({**base, "clause_template": "", "auto_pass": "NO CLAUSE",
-                        "auto_notes": "no clause was written for this template (baseline excluded it, D2/D6)",
+                        "auto_notes": "no clause for this template",
                         "original_problem": insts[0]["question"]})
             continue
         n_clauses += 1

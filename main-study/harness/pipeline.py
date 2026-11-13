@@ -61,7 +61,7 @@ class Run:
         root = Path(root or os.environ.get("BTP_DATA_ROOT", REPO_ROOT))
         inst = experiment_config()["data"]["instances_per_template"]
         return cls(model, root / "data" / "generated" / model, root / "cache" / "store" / model,
-                   root / "reports" / "m1", "s2", root / "data" / f"s2_gsms_main_i{inst}.jsonl",
+                   root / "reports" / "m1", "s2", root / "data" / f"s2_gsms_pairs_i{inst}.jsonl",
                    SPLIT_FILE)
 
     @classmethod
@@ -202,9 +202,13 @@ def greedy_items(run: Run) -> list[tuple]:
 
 
 def sampled_items(run: Run) -> list[tuple]:
-    """(problem, prompt, sample) for every greedy failure on a TEST template (amendment A5)."""
+    """(problem, prompt, sample) for every analysed greedy failure on a TEST template (A5, A14):
+    primary distractor failures (in the distractor condition) and natural failures (in the clean
+    condition). A distractor-condition failure whose clean twin also failed is in neither
+    population and gets no sampled runs."""
     k = experiment_config()["generation"]["sampled_subset"]["k"]
-    fails = [r for r in read_jsonl(run.scored) if r.get("split") == "test" and not r["correct"]]
+    fails = [r for r in read_jsonl(run.scored) if r.get("split") == "test"
+             and r.get("population") in ("primary", "natural")]
     fails.sort(key=lambda r: (r["problem_id"], r["prompt"]))
     return [(r["problem_id"], r["prompt"], s) for r in fails for s in range(k)]
 
@@ -455,15 +459,26 @@ def stage_problems(run: Run, **_) -> dict:
         if set(templates) != want:   # amendment A8: train, dev and test only from the 89
             raise RuntimeError(f"{run.split} does not cover exactly the {len(want)} study templates "
                                f"(extra {sorted(set(templates) - want)}, missing {sorted(want - set(templates))})")
+    from .distractor import REVIEWED, pair_rows, reviewed_clauses
+
     inst = experiment_config()["data"]["instances_per_template"]
     ids = [int(t.split("-")[-1]) for t in templates]
-    rows = gsm_symbolic("main", templates=ids, instances=inst)
+    clauses = reviewed_clauses()          # refuses until the two-person review is reconciled (D39)
+    rows = pair_rows(gsm_symbolic("main", templates=ids, instances=inst), clauses)
     wj(rows, run.problems)
     n_t = len({r["template_id"] for r in rows})
     if n_t != len(templates):
         raise RuntimeError(f"problems cover {n_t} templates, split has {len(templates)}")
+    with_d = {r["template_id"] for r in rows if r["condition"] == "distractor"}
+    test_d = len(with_d & set(sp["test"]))
+    if test_d < experiment_config()["data"]["min_test_templates"]:
+        raise RuntimeError(f"only {test_d} test templates have a reviewed clause; >= "
+                           f"{experiment_config()['data']['min_test_templates']} are required (A14)")
     return {"problems": len(rows), "templates": n_t, "instances_per_template": inst,
-            "sha256": sha256(run.problems)}
+            "clean": sum(r["condition"] == "clean" for r in rows),
+            "distractor": sum(r["condition"] == "distractor" for r in rows),
+            "templates_with_distractor": len(with_d), "test_templates_with_distractor": test_d,
+            "reviewed_clauses_sha256": sha256(REVIEWED), "sha256": sha256(run.problems)}
 
 
 def stage_generate(run: Run, kind="greedy", loader=None, n_workers=None, deadline=None,
@@ -561,7 +576,11 @@ def stage_score(run: Run, loader=None, **_) -> dict:
         r = score_record(r)
         r["split"] = split_of.get(r["template_id"])
         p = probs[r["problem_id"]]
-        prog, sl = gold_program(p["question"], p["solution"], p["answer"], p["source"])
+        span = p.get("distractor_span")
+        prog, sl = gold_program(p["question"], p["solution"], p["answer"], p["source"],
+                                distractor_span=tuple(span) if span else None)
+        r["condition"] = p.get("condition", "clean")
+        r["pair_id"] = p.get("pair_id", p["problem_id"])
         r["gold_ok"] = prog.ok
         r["s0"] = r["s0_strict"] = None
         if prog.ok:
@@ -577,12 +596,15 @@ def stage_score(run: Run, loader=None, **_) -> dict:
         c["char_map_failed"] += not pos["char_map_ok"]
         c["positions"] += len(pos["positions"])
         c["unique_rows"] += len({q["tok"] for q in pos["positions"]})
-        if r["split"] == "test" and not r["correct"]:
+        scored.append(r)
+    label_populations(scored)
+    pop = population_counts(scored)
+    for r in scored:
+        if r["split"] == "test" and r["population"] == "natural":
             c["test_failures"] += 1
             if r["s0"] is not None:
                 c["test_failures_with_s0"] += 1
                 s0_test_templates.add(r["template_id"])
-        scored.append(r)
     write_jsonl(scored, run.scored)
     write_jsonl(positions, run.positions)
     n = max(c["traces"], 1)
@@ -592,47 +614,77 @@ def stage_score(run: Run, loader=None, **_) -> dict:
             "unique_rows": c["unique_rows"], "rows_per_trace": c["unique_rows"] / n,
             "test_failures": c["test_failures"], "test_failures_with_s0": c["test_failures_with_s0"],
             "test_templates_with_s0_failure": len(s0_test_templates),
+            "populations": pop,
+            "accuracy_by_condition": {k: sum(r["correct"] for r in scored if r["condition"] == k)
+                                      / max(sum(r["condition"] == k for r in scored), 1)
+                                      for k in sorted({r["condition"] for r in scored})},
             "design_effect": design_effect(scored),
             "sha256_scored": sha256(run.scored), "sha256_positions": sha256(run.positions)}
 
 
+def label_populations(scored: list[dict]) -> None:
+    """`population` of every trace (A14), in place:
+    * primary: distractor condition, wrong, and its clean twin (same instance and prompt) right;
+    * natural: clean condition, wrong (the secondary population);
+    * None otherwise (correct traces, and distractor failures whose clean twin also failed).
+    `clean_correct` on a distractor trace is its clean twin's correctness (None if absent)."""
+    clean = {(r["pair_id"], r["prompt"]): r["correct"] for r in scored if r.get("condition", "clean") == "clean"}
+    for r in scored:
+        if r.get("condition", "clean") == "distractor":
+            cc = clean.get((r["pair_id"], r["prompt"]))
+            r["clean_correct"] = cc
+            r["population"] = "primary" if cc is True and not r["correct"] else None
+        else:
+            r["population"] = None if r["correct"] else "natural"
+
+
+def population_counts(scored: list[dict]) -> dict:
+    out = {}
+    for pop in ("primary", "natural"):
+        rows = [r for r in scored if r.get("population") == pop]
+        test = [r for r in rows if r.get("split") == "test"]
+        s0 = [r for r in test if r.get("s0") is not None]
+        out[pop] = {"failures": len(rows), "test_failures": len(test), "test_failures_with_s0": len(s0),
+                    "test_templates_with_s0_failure": len({r["template_id"] for r in s0})}
+    return out
+
+
 def design_effect(scored: list[dict]) -> dict:
-    """Kish design effect of the test failure set, clustered by template (amendments A6, A11).
+    """Design effect of failure OCCURRENCE, clustered by template: DESCRIPTIVE only (A15, D36).
 
-    deff = 1 + (m_bar * (1 + CV^2) - 1) * rho (harness.power.kish_deff): m_i = test failures with
-    s0 in test template i, rho = the one-way ANOVA ICC of the failure indicator on the train +
-    dev templates (so the test split informs nothing but its own count).
+    For each population, deff = 1 + (m_bar (1 + CV^2) - 1) x rho (harness.power.kish_deff):
+    rho = the one-way ANOVA ICC of the failure indicator on the train + dev templates (primary:
+    distractor traces whose clean twin is correct; natural: clean traces), m_i = test failures
+    with s0 of template i. Reported next to the pilot's failure-occurrence deff (19.76).
 
-    The pre-registered target N* comes from the PILOT estimate (A11, configs data.power.deff);
-    the value recomputed here on the S2 traces is reported next to it, and decides nothing.
+    The decision on a top-up uses the PRIMARY-OUTCOME deff (harness.power.primary_outcome_deff
+    and top_up_decision), estimated on train + dev templates before any primary analysis.
     """
-    from .power import icc_anova, kish_deff, required_failures
+    from .power import icc_anova, kish_deff
 
-    groups = defaultdict(list)
-    for r in scored:
-        if r.get("split") in ("train", "dev"):
-            groups[r["template_id"]].append(0 if r["correct"] else 1)
-    rho = icc_anova(groups)
-    test = defaultdict(int)
-    for r in scored:
-        if r.get("split") == "test" and not r["correct"] and r.get("s0") is not None:
-            test[r["template_id"]] += 1
-    m = sum(test.values()) / max(len(test), 1)
-    power = experiment_config()["data"]["power"]
-    k = None if rho is None else kish_deff(list(test.values()), rho)
-    pilot = power.get("deff") or {}
-    need = pilot.get("required_test_failures_with_s0")
-    s2_need = None if k is None else required_failures(k["deff"], power)
-    if need is None:
-        need = s2_need
-    return {"rho_failure_icc_train_dev": rho, "mean_test_failures_per_template": m,
-            "deff": None if k is None else k["deff"], "m_eff": None if k is None else k["m_eff"],
-            "cv_cluster_size": None if k is None else k["cv"],
-            "required_test_failures_with_s0_s2_estimate": s2_need,
-            "pilot_deff": pilot.get("value"),
-            "required_test_failures_with_s0": need,
-            "observed_test_failures_with_s0": sum(test.values()),
-            "top_up_needed": None if need is None else sum(test.values()) < need}
+    pw = experiment_config()["data"]["power"]
+    out = {"role": "descriptive (A15): failure occurrence; the top-up rule uses the primary-outcome deff",
+           "pilot_failure_deff": (pw.get("deff") or {}).get("value")}
+    at_risk = {"primary": lambda r: r.get("condition") == "distractor" and r.get("clean_correct") is True,
+               "natural": lambda r: r.get("condition", "clean") == "clean"}
+    for pop, risk in at_risk.items():
+        groups, test = defaultdict(list), defaultdict(int)
+        for r in scored:
+            if not risk(r):
+                continue
+            if r.get("split") in ("train", "dev"):
+                groups[r["template_id"]].append(0 if r["correct"] else 1)
+            elif r.get("split") == "test" and not r["correct"] and r.get("s0") is not None:
+                test[r["template_id"]] += 1
+        rho = icc_anova(groups)
+        k = None if rho is None else kish_deff(list(test.values()), rho)
+        n = sum(test.values())
+        out[pop] = {"icc_failure_train_dev": rho, "deff": None if k is None else k["deff"],
+                    "m_eff": None if k is None else k["m_eff"],
+                    "cv_cluster_size": None if k is None else k["cv"],
+                    "test_failures_with_s0": n, "test_templates": len(test),
+                    "n_eff": None if not k else n / k["deff"]}
+    return out
 
 
 def equivalence_sample(run: Run) -> list[str]:

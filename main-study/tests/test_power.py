@@ -40,7 +40,9 @@ def test_pilot_values_pinned_in_config():
     assert pw["deff"]["icc_failure"] == pytest.approx(rep["icc_failure"], abs=5e-4)
     assert pw["deff"]["value"] == pytest.approx(rep["deff"], abs=5e-3)
     assert pw["deff"]["m_eff"] == pytest.approx(rep["m_eff"], abs=5e-3)
-    assert pw["deff"]["required_test_failures_with_s0"] == rep["required_test_failures_with_s0"]
+    assert pw["deff"]["required_test_failures_with_s0_if_it_were_the_target"] == rep["required_test_failures_with_s0"]
+    assert pw["deff"]["role"] == "descriptive"                        # A15
+    assert pw["primary_target_before_outcome_deff"] == 320
     assert pw["pilot_accuracy"] == pytest.approx(rep["pilot_accuracy"], abs=5e-4)
 
 
@@ -90,3 +92,67 @@ def test_prompts_frozen_by_s2_signoff():
     from harness.prompts import TEMPLATES
     h = hashlib.sha256(json.dumps(TEMPLATES, sort_keys=True).encode()).hexdigest()
     assert h == "5ebffca76922ce476170fac8480ed3579875e4f5cc0e18c47de1df44a3dd51e5"
+
+
+# --------------------------------------------------------------------- A15, A16 (D36, D37)
+def test_clustering_reports_icc_deff_and_effective_n():
+    vals = [0] * 10 + [1] * 10 + [0, 1] * 5
+    cl = ["a"] * 10 + ["b"] * 10 + ["c"] * 10
+    c = power.clustering(vals, cl)
+    assert c["n_units"] == 30 and c["n_templates"] == 3 and c["icc"] > 0.5
+    assert c["deff"] == pytest.approx(1 + 9 * c["icc"]) and c["n_eff"] == pytest.approx(30 / c["deff"])
+    # no clustering: deff 1, n_eff n
+    flat = power.clustering([0, 1] * 15, [i % 3 for i in range(30)])
+    assert flat["icc"] == 0 and flat["deff"] == 1 and flat["n_eff"] == 30
+
+
+def test_primary_outcome_deff_takes_the_largest():
+    clustered = [(t, float(t)) for t in range(5) for _ in range(6)]
+    flat = [(t, float(i % 2)) for t in range(5) for i in range(6)]
+    r = power.primary_outcome_deff({"e3_decodability": flat, "repair_difference": clustered}, [8] * 40)
+    assert r["per_outcome"]["e3_decodability"]["deff"] == 1
+    assert r["deff"] == r["per_outcome"]["repair_difference"]["deff"] > 1.5
+
+
+def test_top_up_rule():
+    pw = {"min_test_failures": 320, "n_after_holm": 213, "max_absorbed_deff": 1.5}
+    # deff above 1.5 and budget allows -> top-up
+    d = power.top_up_decision(2.0, 500, pw, top_up_t4_hours=11, remaining_t4_hours=12)
+    assert d["trigger"] and d["action"] == "top_up_instances_9_16" and d["required"] == 426
+    # same, budget does not allow -> none, reported underpowered (500 >= 426 so not underpowered)
+    d = power.top_up_decision(2.5, 500, pw, top_up_t4_hours=11, remaining_t4_hours=5)
+    assert d["action"] == "none" and d["underpowered"] and d["required"] == 533
+    # deff <= 1.5 but fewer than 320 failures -> trigger (the proposal's count rule)
+    d = power.top_up_decision(1.2, 290, pw, 11, 12)
+    assert d["trigger"] and d["action"] == "top_up_instances_9_16"
+    # nothing to do
+    d = power.top_up_decision(1.2, 400, pw, 11, 12)
+    assert not d["trigger"] and d["action"] == "none" and not d["underpowered"]
+
+
+def test_cohens_kappa_and_bootstrap_clustering():
+    import numpy as np
+
+    from analysis.stats import cluster_bootstrap, cohens_kappa
+
+    assert cohens_kappa(["OK", "OK", "FIX", "FIX"], ["OK", "FIX", "FIX", "FIX"]) == pytest.approx(0.5)
+    assert cohens_kappa([1, 0, 1, 0], [1, 0, 1, 0]) == 1
+    assert cohens_kappa([1, 1], [1, 1]) is None
+    ids = np.repeat(np.arange(6), 5)
+    vals = ids.astype(float)
+    r = cluster_bootstrap(ids, lambda w: float(np.average(np.arange(6), weights=w)), n_resamples=50,
+                          unit_values=vals)
+    assert r["clustering"]["n_templates"] == 6 and r["clustering"]["n_eff"] < 30
+
+
+def test_authenticated_hf_hashes_compare_byte_for_byte():
+    from harness import weights_provenance as wp
+
+    files = {"model-00001-of-00002.safetensors": {"size": 5, "sha256": "a" * 64, "git_blob_sha1": "x"},
+             "config.json": {"size": 3, "sha256": "c" * 64, "git_blob_sha1": "g"}}
+    hf = {"revision": "r", "files": {"model-00001-of-00002.safetensors": {"size": 5, "sha256": "a" * 64},
+                                     "config.json": {"size": 3, "sha256": None, "git_oid": "g"}}}
+    c = wp.compare_with_hf(files, hf)
+    assert c["weights_identical_to_hf"] is True and c["weights_hash_published"]
+    hf["files"]["model-00001-of-00002.safetensors"]["sha256"] = "b" * 64
+    assert wp.compare_with_hf(files, hf)["weights_identical_to_hf"] is False
