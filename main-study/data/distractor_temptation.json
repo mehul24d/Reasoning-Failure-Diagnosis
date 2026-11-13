@@ -1,0 +1,426 @@
+{
+ "role": "covariate only (A19); never used to exclude templates",
+ "scale": "PASS = tempting, WEAK = little pull, UNSURE",
+ "templates": {
+  "1": {
+   "rating": "UNSURE",
+   "source": "AI pre-screen"
+  },
+  "3": {
+   "rating": "PASS",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "4": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "5": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "6": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "7": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "8": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "12": {
+   "rating": "PASS",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "13": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "14": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "16": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "18": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "19": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "20": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "21": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "22": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "23": {
+   "rating": "UNSURE",
+   "source": "AI pre-screen"
+  },
+  "24": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "26": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "27": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "28": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "29": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "30": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "UNSURE"
+  },
+  "31": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "32": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "33": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "34": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "35": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "36": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "37": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "38": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "39": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "40": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "UNSURE"
+  },
+  "41": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "42": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "UNSURE"
+  },
+  "43": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "44": {
+   "rating": "PASS",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "45": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "46": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "47": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "48": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "49": {
+   "rating": "UNSURE",
+   "source": "AI pre-screen"
+  },
+  "50": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "51": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "52": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "53": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "54": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "55": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "56": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "57": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "58": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "59": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "60": {
+   "rating": "UNSURE",
+   "source": "AI pre-screen"
+  },
+  "61": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "62": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "63": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "64": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "65": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "67": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "68": {
+   "rating": "PASS",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "69": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "70": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "71": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "72": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "73": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "74": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "75": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "77": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "UNSURE"
+  },
+  "78": {
+   "rating": "UNSURE",
+   "source": "AI pre-screen"
+  },
+  "79": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "80": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "81": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "82": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "83": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "84": {
+   "rating": "WEAK",
+   "source": "AI pre-screen"
+  },
+  "86": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "UNSURE"
+  },
+  "87": {
+   "rating": "UNSURE",
+   "source": "AI pre-screen"
+  },
+  "88": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "89": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "90": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "91": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "92": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "93": {
+   "rating": "PASS",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "UNSURE"
+  },
+  "94": {
+   "rating": "PASS",
+   "source": "AI pre-screen"
+  },
+  "95": {
+   "rating": "PASS",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  },
+  "96": {
+   "rating": "WEAK",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "WEAK"
+  },
+  "97": {
+   "rating": "UNSURE",
+   "source": "AI pre-screen"
+  },
+  "98": {
+   "rating": "PASS",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "UNSURE"
+  },
+  "99": {
+   "rating": "UNSURE",
+   "source": "AI re-rating of the rewritten clause",
+   "prescreen_rating_of_draft": "PASS"
+  }
+ }
+}

@@ -19,4 +19,6 @@ Within budget (25 T4 GPU-hours, safety factor included).
 
 **If the equivalence gate fails (TL generation), with the budget rule:** first projection 31.95 T4 GPU-hours (x1.25 = 39.94); reduce_instances_to_power_floor: not possible; drop_sampled_runs: applied; final 33.94 with safety: **still over budget: the run does not start; the group decides.**
 
+**Top-up (A20):** with instances 9-16 the projection is 20.71 T4 GPU-hours (x1.25 = 25.89) against 25: **no top-up; the study is reported as underpowered.**
+
 Throughputs measured on 2026-11-12 (code `b920121`), estimate_gemma-2-2b-it.json.

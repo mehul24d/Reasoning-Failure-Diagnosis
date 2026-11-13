@@ -1,45 +1,61 @@
-# Human review of the distractor clauses (DECISIONS D34)
+# Human review of the distractor clauses (DECISIONS D34, D40)
 
-`distractor_clauses.csv` has one row for each of the 89 study templates, each with a no-op
-clause written by the AI assistant and never reviewed by a person. 88 come from the baseline
-(D6). **Template 50's clause is new (2026-11-13, A17):** it is a test template, and without a
-clause only 39 test templates would have the distractor condition. Study generation waits until
-two group members have reviewed every row.
+**The sheet to fill in: `human_review_final.csv`** (one row per study template, 89 rows).
 
-**Already checked automatically, for each template's 8 study instances**
-(`main-study/scripts/distractor_review.py`, columns `check_*`):
-- the clause holds exactly one number;
-- the gold program and answer are unchanged, and the gold program never uses that number;
-- the number equals no number in the problem and no gold value;
-- the clause is one well-formed sentence, inserted at a sentence boundary before the final
+Each row shows one problem without and with its no-op clause (`original_problem`,
+`problem_with_clause`). `rewritten` says whether the clause was rewritten on 2026-11-13, before
+this review. The row has no AI verdicts. The clauses are those of the study
+(`harness.distractor.FINAL_CLAUSES`); study generation waits until two group members have
+reviewed every row.
+
+**Already checked automatically, on instances 1–16 of every template** (`distractor_checks_final.csv`;
+`main-study/scripts/distractor_review.py`). All 89 pass every check:
+- **The number:** the clause holds exactly one number. It equals no number in the problem and
+  no gold value.
+- **The gold solution:** the gold program and answer are unchanged, and the gold program never
+  uses the clause's number.
+- **The sentence:** one well-formed sentence, inserted at a sentence boundary before the final
   question or instruction.
+- **Partitive clauses ("d of the X"):** d is smaller than the number of X in every instance.
+- **Grounding:**
+  - the clause names nothing that only some instances have (GSM-Symbolic changes names,
+    objects, places and days between instances);
+  - a he/she matches the problem;
+  - the clause does not mention a story word before the problem introduces it.
+- **Rewritten clauses:** an independent solver gives the same answer with and without the
+  clause, on every instance.
 
-All 89 pass.
+**What only a person can judge.** Two reviewers work independently.
+1. **`reviewerN_is_noop` (yes/no):** is it really a no-op? Could a careful reader think the
+   clause changes the answer, e.g. because it is about a quantity the question asks about? If
+   not sure, write `no` and say why in `notes`.
+2. **`reviewerN_grammatical` (yes/no):** is it grammatical and natural in place? Does what it
+   refers to exist in the problem, and does its tense match? A plausible size for the number?
+   (The number changes between instances, from 2 to 19.)
+3. Put anything else in `notes`, with your initials.
 
-**What only a person can judge.** Two reviewers work independently, then agree.
-1. **Is it really a no-op?** Could a careful reader think the clause changes the answer?
-   Examples: a clause about a quantity the question asks about; "spare cups" in a problem that
-   measures water in cups (template 5); a subset of an item the question counts. If yes, write
-   `no` and say why.
-2. **Is it grammatical and natural** in place (read `problem_with_clause`)? Does what it refers
-   to exist in the problem ("the remoras", "the boxes sold on Tuesday")? Note any tense that
-   does not match the problem.
-3. Fill in `reviewerN_initials`, `reviewerN_is_noop`, `reviewerN_grammatical` and `reviewerN_notes`.
-   Then fill in `agreed_action` (keep / rewrite / drop) together, with a rewrite in the notes.
+Reviewer 1 fills the `reviewer1_*` columns and reviewer 2 the `reviewer2_*` columns. Do not
+look at the other reviewer's answers until both are done; separate copies passed with
+`--sheets` are fine.
 
-**Time:** about 1 minute per row, so **about 1.5 hours per reviewer** for 89 rows. The two
-reviewers can work in parallel. Allow another **20–30 minutes** together to settle
-disagreements. A rewritten clause is re-run through the script before it is used.
+**Time:** about 1 minute per row, so about 1.5 hours per reviewer, and 20–30 minutes together
+to settle disagreements.
 
-**These clauses define the primary population (A14, D35).** Every instance is generated with
-and without its clause.
+**After the review:**
+1. For every row where either reviewer wrote `no`, agree a change in the joint discussion. Put
+   it in `clause_rewrites.csv` with the columns `template_id,action,new_clause_template,reason`:
+   `action` is `rewrite` (keep `{d}` where the number goes) or `drop`.
+2. Run `PYTHONPATH=. python scripts/review_agreement.py` from `main-study/`, or with
+   `--sheets A.csv B.csv` for separate copies. It does three things:
+   - computes Cohen's kappa per question;
+   - re-runs every rewrite through all the checks on instances 1–16. A rewrite of a template
+     without an independent solver fails until one is added in `harness/clause_solvers.py`;
+   - writes the reviewed table that the pipeline reads.
 
-**After the review** (D39):
-1. Write FIX in `reviewerN_verdict` for any clause you want changed (a "no" answer counts as
-   FIX too).
-2. After the joint discussion, put every agreed rewrite in `clause_rewrites.csv`, with columns
-   `template_id,new_clause_template,reason`. Keep `{d}` where the number goes.
-3. Fill in `agreed_action`.
-4. Run `PYTHONPATH=. python scripts/review_agreement.py` from `main-study/`, or pass each
-   reviewer's own copy with `--sheets A.csv B.csv`. It computes Cohen's kappa, re-checks every
-   rewrite and writes the reviewed table that the pipeline reads.
+**Other files here:**
+- `distractor_checks_final.csv`: every automated check per template, with the draft clause
+  and the reason for each rewrite.
+- `distractor_clauses_ai_prescreen*.csv`: the AI pre-screen of the drafts. Its temptation
+  rating is kept only as a covariate (D41).
+- `distractor_clauses.csv`: the earlier sheet of the draft clauses, which showed instance 1
+  only. It is kept as a record and is no longer used.

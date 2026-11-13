@@ -1086,3 +1086,92 @@ the CIs stay template-clustered bootstrap CIs.
   `docs/review/`, on `origin/main` or on `origin/neil`. So kappa has not been computed, no
   clause has been rewritten, and S2 has not started. The template 50 clause (D35) was added to
   the sheet; the other 88 rows are byte-identical to the version sent for review.
+
+## D40 (2026-11-13) Distractor clauses: instance-level checks and pre-review rewrites (S2 A18)
+
+- **Input:** the AI pre-screen of the 89 draft clauses (`docs/review/distractor_clauses_ai_prescreen.csv`
+  and its workings). The human columns are not filled yet.
+- **Bug found:**
+  - Partitive clauses ("d of the X") contradict the problem when d is not smaller than the
+    count of X in the instance (FIX on 52, 56, 64, 68, 72; 45 and 47 also checked).
+  - GSM-Symbolic also varies names, objects, places, days and units between instances, while
+    a clause is one fixed sentence. The drafts were written against instance 1, which is the
+    only instance the review sheets showed. In 48 templates they name a word that is absent
+    from some instances: "the oranges" in a pomegranate problem, "Quinn" in 15 of 16.
+- **Instance-level checks** (`main-study/harness/instance_checks.py`), on instances 1–16 of
+  every study template, i.e. including the top-up instances 9–16 (`data.clause_check_instances`):
+  - **partitive_size:** d < the count of X stated or implied in the instance. Each partitive
+    clause has an entry saying how the count is read. An ambiguous X takes the smallest
+    candidate. An X absent from the instance fails. "His coworkers", never counted, passes.
+  - **grounding:**
+    - no clause word appears in some instances but not others;
+    - a he/his (she/her) needs the same in the question;
+    - no story word appears in the clause before the problem introduces it.
+- **Draft results:** 57 of 89 drafts fail.
+  - 32 fail the partitive check: in 14, d reaches the count on some instance; in the rest, X
+    is absent from some instances.
+  - 48 name an instance-specific word.
+  - 4 mention a story word too early.
+- **Rewritten before the human review:** 64 clauses (`harness.distractor.PREREVIEW_REWRITES`,
+  each with its reason):
+  - the 20 with FAIL or UNSURE on irrelevant, natural or no_hint in the pre-screen (using the
+    ai_note);
+  - every other clause failing an instance-level check;
+  - 53 and 70, found by reading each kept clause against its template's variation (a
+    dartboard when the game can be basketball; brushes when the painter can be an
+    electrician);
+  - 96, for plausibility (a 19-hour party).
+
+  Failing partitive clauses became non-partitive. Rules:
+  - the answer is unchanged;
+  - only entities already introduced, or clearly new ones;
+  - the story's tense;
+  - no hint that the number is irrelevant;
+  - a plausible magnitude for every d in 2–19;
+  - inserted after the entities the clause mentions (the insertion point is unchanged:
+    before the final sentence).
+- **Checks of the final table** (`scripts/distractor_review.py` → `docs/review/distractor_checks_final.csv`,
+  `main-study/reports/m1/distractor_checks_final.json`):
+  - all 7 earlier checks, partitive_size and the 3 grounding checks pass on all 89 × 16
+    instances;
+  - for every rewritten clause, an independent solver (`harness/clause_solvers.py`, which
+    reads the numbers from the text) gives the dataset answer with and without the clause on
+    all 16 instances.
+- **Human review:**
+  - The reviewers get `docs/review/human_review_final.csv`: template, split, original
+    problem, problem with clause (instance 1), rewrite flag, empty yes/no columns and notes.
+    It has no AI verdict columns.
+  - `scripts/review_agreement.py` then computes Cohen's kappa per question and applies the
+    agreed changes (`docs/review/clause_rewrites.csv`: template_id, action, new_clause_template,
+    reason). Each change is re-run through every check on instances 1–16.
+  - The review is recorded in prereg/S2.md before the binding commit.
+- **Not changed:** the insertion rule, the d rule (seed, range 2–19, forbidden values), the
+  thresholds. The old sheet `docs/review/distractor_clauses.csv` is kept as the record of the
+  drafts.
+
+## D41 (2026-11-13) Clause temptation is a covariate, not a filter (S2 A19)
+
+- Weakly tempting clauses are kept.
+- `main-study/data/distractor_temptation.json` holds one rating per template (PASS / WEAK /
+  UNSURE) of the clause actually used. Kept clauses carry the pre-screen's rating; rewritten
+  clauses carry an AI re-rating on the same scale, with the pre-screen rating of the draft
+  alongside it.
+- It is used only as a covariate in later analysis, never to exclude templates.
+- Final: 16 PASS, 54 WEAK, 19 UNSURE. The drafts were 47 PASS, 28 WEAK, 14 UNSURE.
+
+## D42 (2026-11-13) Top-up decided by budget before any data; population unchanged (S2 A20)
+
+- **Population:** unchanged from D35. Distractor failures (right without the clause, wrong
+  with it) are primary and natural failures secondary, with both conditions for the same
+  instances.
+- **Top-up rule**, superseding D36's:
+  - Generate instances 9–16 if and only if the projected T4-hours with 16 instances stay
+    within 25.
+  - The projection includes the distractor condition and the sampled runs, with the budget
+    rule's × 1.25 safety factor (`harness.estimate.top_up_by_budget`, in
+    `estimate_gemma-2-2b-it_reprojected.json`).
+- **Result:** 20.71 T4-hours, × 1.25 = 25.89 > 25. **No top-up; the study is reported as
+  underpowered**, with n_eff (D37).
+- **Reported either way:** the template-clustered deff of the primary outcomes (E3
+  decodability; paired repair differences) next to the failure-rate ICC and deff (19.76
+  descriptive). Neither triggers anything.

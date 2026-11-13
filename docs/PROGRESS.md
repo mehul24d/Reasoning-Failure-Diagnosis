@@ -1,5 +1,25 @@
 # Progress
 
+## 2026-11-13: Clause generator fix and pre-review rewrites (D40–D42, S2 A18–A20); human review of the final clauses pending
+
+No GPU time used, and none of the 25-hour S2–S4 budget.
+
+- **Bug (D40):**
+  - Partitive clauses could contradict the instance.
+  - GSM-Symbolic varies the entities between instances, so 57 of the 89 drafts failed an
+    instance-level check on instances 1–16: 32 partitive, 48 naming an instance-specific word.
+- **64 clauses rewritten before the human review:** the 20 flagged by the AI pre-screen, every
+  instance-check failure, and 53, 70 and 96 from reading.
+- **All checks pass on 89 × 16 instances.** For every rewrite, an independent solver gives the
+  same answer with and without the clause (`main-study/reports/m1/distractor_checks_final.json`).
+- **Human sheet ready:** `docs/review/human_review_final.csv`. After it is filled:
+  `scripts/review_agreement.py` (kappa per question, agreed changes), then the review is
+  recorded in S2 and the binding commit is made.
+- **Temptation covariate (D41):** `main-study/data/distractor_temptation.json`. Final: 16
+  PASS, 54 WEAK, 19 UNSURE; the drafts were 47 PASS.
+- **Top-up (D42):** with instances 9–16 the projection is 20.71 T4-h, × 1.25 = 25.89 > 25. No
+  top-up; reported as underpowered.
+
 ## 2026-11-13: Group decisions D35–D39 (S2 A14–A17); S2 still waiting for the clause review
 
 No GPU time used, and none of the 25-hour S2–S4 budget.

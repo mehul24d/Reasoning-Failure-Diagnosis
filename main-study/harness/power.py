@@ -152,7 +152,11 @@ def primary_outcome_deff(outcomes: dict[str, list[tuple]], test_cluster_sizes: l
 
 def top_up_decision(deff: float | None, observed_primary_with_s0: int, power: dict,
                     top_up_t4_hours: float, remaining_t4_hours: float) -> dict:
-    """The pre-specified rule (A15), applied once, before any primary (test-template) analysis:
+    """SUPERSEDED by A20 (D42): the top-up is decided by budget alone, before any data
+    (harness.estimate.top_up_by_budget; configs/experiment.yaml data.power.top_up). Kept as the
+    record of the A15 rule; nothing calls it.
+
+    The pre-specified rule (A15), applied once, before any primary (test-template) analysis:
     generate instances 9-16 for all study templates if the primary-outcome deff exceeds 1.5, or
     the primary test failures with s0 fall below N* = max(320, ceil(213 x deff)), AND the
     projected cost fits the remaining budget; otherwise no top-up, and the study is reported as

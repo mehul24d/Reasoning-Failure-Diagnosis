@@ -120,6 +120,121 @@ DRAFT_CLAUSES: dict[int, str] = {
     99: '{d} of the eggs she buys are brown.',
 }
 
+# Pre-review rewrites (2026-11-13, prereg/S2.md A18, DECISIONS D40): template -> (clause, reason).
+# Reasons: "prescreen" = FAIL/UNSURE on irrelevant, natural or no_hint in the AI pre-screen
+# (docs/review/distractor_clauses_ai_prescreen.csv, note quoted); "partitive" = d is not smaller
+# than the group the clause names on some instance 1-16; "grounding" = the clause names a word
+# that is a template variable (absent from some instances), a pronoun without a same-gender
+# antecedent, or a story word before the problem introduces it (harness/instance_checks.py);
+# "plausibility" = implausible for some d in 2-19. Failing partitive clauses become non-partitive.
+PREREVIEW_REWRITES: dict[int, tuple[str, str]] = {
+    3: ("{d} of the students are left-handed.",
+        "prescreen: chess could be read as another hobby group, shrinking 'the rest'"),
+    5: ("The sugar comes from a farm {d} kilometers away.",
+        "prescreen: 'cups' is also the unit of water; spare cups might be read into the total"),
+    6: ("The field is {d} kilometers from the nearest town.",
+        "partitive + grounding: the fruit varies (oranges in 2/16 instances); 19 > 6 per square yard in one"),
+    7: ("He lives {d} kilometers from the feed store.",
+        "grounding: the animals vary (alpacas in 4/16); the clause also had a second number ('ten')"),
+    12: ("He is expecting {d} guests tonight.",
+         "prescreen: 'but can still be placed' hints that d is irrelevant; grounding: crackers in 2/16"),
+    14: ("They pass {d} traffic lights on the way.", "grounding: the landmark varies (cinema in 9/16)"),
+    16: ("He has helped with this fundraiser for {d} years.", "grounding: the days vary (Tuesday in 7/16)"),
+    20: ("He started this job {d} weeks ago.",
+         "prescreen: tense mismatch; grounding: the fruit (2/16) and the days (7/16) vary"),
+    22: ("She had invited {d} friends.",
+         "prescreen: 'the new package' is ambiguous and bounds the unknown; partitive: d >= the answer on 2/16"),
+    26: ("Their kitchen has {d} cupboards.", "grounding: 'family' first appears in the question"),
+    28: ("Each new patient waits about {d} minutes to be seen.", "grounding: the facility varies (clinic in 3/16)"),
+    30: ("The store opened {d} years ago.", "grounding: the item varies (washers in 4/16)"),
+    31: ("They live {d} kilometers apart.",
+         "prescreen: 'their grandmother' assumes the two are related, which the problem never says"),
+    32: ("She has been searching for {d} months.", "grounding: the property type varies (townhouse in 6/16)"),
+    33: ("Their school is {d} kilometers from their home.",
+         "prescreen: 'the first book' is undefined; partitive: d >= the smaller book on 2/16"),
+    34: ("He had lived there for {d} years.", "grounding: the property type varies (cottage in 5/16)"),
+    35: ("He started raising money {d} days ago.", "grounding: the event varies (conference in 3/16)"),
+    36: ("She was there for {d} minutes.", "grounding: the venue and the treats vary (tarts in 6/16)"),
+    37: ("It was made {d} hours ago.", "grounding: the dish and its pieces vary (pieces in 5/16)"),
+    38: ("The baker has worked there for {d} years.", "grounding: the venue varies (cafe in 3/16)"),
+    39: ("They have done this job for {d} years.", "grounding: floors or rooms vary (floors in 10/16)"),
+    40: ("Her vacation lasted {d} days.", "grounding: the candy (8/16) and the store (9/16) vary"),
+    41: ("It took {d} minutes to build.",
+         "partitive + grounding: colours and objects vary (orange tiles in 7/16); 19 > 14 orange tiles in one"),
+    42: ("The store is {d} minutes from his house.", "grounding: the product varies (tea in 4/16)"),
+    43: ("It took them {d} minutes to get there.", "grounding: the insects vary (grasshoppers in 7/16)"),
+    44: ("There are also {d} parents watching.", "partitive: d >= the number of girls on 2/16"),
+    45: ("She has had the flower bed for {d} years.",
+         "prescreen + partitive: d >= the flowers she owns on 8/16 instances"),
+    46: ("The venue has {d} entrances.", "grounding: the venue varies (auditorium in 3/16)"),
+    47: ("The hunt started {d} minutes ago.",
+         "prescreen: tense mismatch; grounding: Quinn appears in 1/16 instances"),
+    48: ("She has been cooking for {d} years.",
+         "prescreen: 'the mushrooms' before they are introduced; grounding: mushrooms in 3/16; partitive on 2/16"),
+    50: ("It has {d} windows.", "grounding: 'room' first appears in the question in some instances"),
+    51: ("He has run the stand for {d} years.", "grounding: the bundles vary (bundles in 5/16)"),
+    52: ("He has been saving for {d} weeks.",
+         "prescreen + partitive: d >= the coloring books bought on 4/16; grounding: the item varies (5/16)"),
+    53: ("They have known each other for {d} years.", "grounding: the game varies (darts or basketball)"),
+    56: ("He bought the drinks {d} days ago.",
+         "prescreen + partitive: d >= the cartons drunk on 6/16; 'a different store' has no first store"),
+    57: ("They both started painting {d} years ago.",
+         "prescreen: unclear whose black tubes; grounding: the colours vary (black in 4/16)"),
+    58: ("The mine is {d} kilometers from the nearest village.",
+         "prescreen: 'the trolls' before any group is introduced; grounding: trolls in 7/16"),
+    59: ("I bought both drinks {d} days ago.",
+         "prescreen: no bottle is mentioned; grounding: the drink varies (grape in 11/16)"),
+    61: ("The walk home took {d} minutes.", "grounding: the objects vary (pebbles in 6/16)"),
+    62: ("The set was printed {d} years ago.", "grounding: the colours vary (purple in 10/16)"),
+    63: ("They live {d} kilometers from school.", "grounding: the objects vary (marbles in 2/16)"),
+    64: ("She bought the jars {d} days ago.", "prescreen + partitive: d >= the jars on 10/16 instances"),
+    65: ("She has worked for herself for {d} years.", "grounding: the professional varies (bookkeeper in 5/16)"),
+    67: ("He is {d} kilometers from home.", "grounding: the vehicle varies (van in 5/16)"),
+    68: ("Her best friend played for {d} hours over the same period.",
+         "prescreen + partitive: d >= the chess puzzles on 5/16; grounding: the puzzles vary"),
+    70: ("He has {d} coworkers.", "grounding: the trade varies (painter or electrician: 'brushes')"),
+    71: ("He has kept livestock for {d} years.", "grounding: the animals vary (alpacas in 4/16)"),
+    72: ("He lives {d} kilometers from the nearest post office.",
+         "prescreen + partitive: d >= his remaining pen pals on 14/16 instances"),
+    75: ("The balls arrived {d} days ago.", "grounding: 'the shop' is absent from some instances (6/16)"),
+    77: ("It is due in {d} days.", "grounding: the document varies (thesis in 7/16)"),
+    81: ("The twins arrived {d} minutes late.", "grounding: the objects vary (coins in 2/16)"),
+    82: ("The venue had {d} windows.", "grounding: the professions vary (engineers in 4/16)"),
+    83: ("They started baking {d} hours ago.", "grounding: the baked goods vary (brownies in 3/16)"),
+    86: ("Her team practices {d} hours a week.", "grounding: no store is mentioned; jerseys in 8/16"),
+    88: ("She owns {d} pairs of sneakers.", "grounding: 'running' first appears in the question"),
+    89: ("He drives {d} kilometers in that time.", "grounding: the vehicle varies (car in 3/16)"),
+    90: ("Each of them posts {d} times a week.", "grounding: the names and the platform vary (3/16)"),
+    91: ("He walks {d} minutes to get to the store.", "grounding: the fruit varies (bananas in 7/16)"),
+    92: ("They fought for {d} hours.", "grounding: the names and creatures vary (goblins in 1/16)"),
+    93: ("The swimming spot is a {d}-minute bike ride from home.",
+         "prescreen: no pool is mentioned and 16 m is implausibly deep"),
+    95: ("The school employs {d} coaches.",
+         "partitive: d >= the badminton players on 1/16; grounding: the sports vary (9/16)"),
+    96: ("The party venue is {d} kilometers away.", "plausibility: a party lasting up to 19 hours"),
+    98: ("It was first reported by a team of {d} scientists.", "grounding: virus or infection varies (4/16)"),
+    99: ("The local farm has {d} hens.",
+         "prescreen: the clause opens the problem, so 'she' and 'the eggs' precede Nia; no 'she' in 16/16"),
+}
+
+# A19 (D41): temptation rating of the rewritten clauses, on the pre-screen's scale (PASS = the
+# number has a plausible use in the problem, WEAK = little pull, UNSURE). The pre-screen rated the
+# DRAFT clauses; these rate the clauses actually used. A covariate only, never an exclusion rule.
+REWRITE_TEMPTATION_AI: dict[int, str] = {
+    3: "PASS", 5: "WEAK", 6: "WEAK", 7: "UNSURE", 12: "PASS", 14: "WEAK", 16: "WEAK", 20: "WEAK",
+    22: "UNSURE", 26: "WEAK", 28: "WEAK", 30: "WEAK", 31: "UNSURE", 32: "WEAK", 33: "WEAK", 34: "WEAK",
+    35: "WEAK", 36: "WEAK", 37: "UNSURE", 38: "WEAK", 39: "WEAK", 40: "WEAK", 41: "WEAK", 42: "WEAK",
+    43: "WEAK", 44: "PASS", 45: "WEAK", 46: "WEAK", 47: "WEAK", 48: "WEAK", 50: "WEAK", 51: "WEAK",
+    52: "UNSURE", 53: "WEAK", 56: "WEAK", 57: "WEAK", 58: "WEAK", 59: "WEAK", 61: "WEAK", 62: "WEAK",
+    63: "WEAK", 64: "WEAK", 65: "WEAK", 67: "UNSURE", 68: "PASS", 70: "UNSURE", 71: "WEAK", 72: "WEAK",
+    75: "WEAK", 77: "UNSURE", 81: "WEAK", 82: "WEAK", 83: "UNSURE", 86: "WEAK", 88: "WEAK", 89: "UNSURE",
+    90: "UNSURE", 91: "WEAK", 92: "WEAK", 93: "PASS", 95: "PASS", 96: "WEAK", 98: "PASS", 99: "UNSURE",
+}
+TEMPTATION = REPO_ROOT / "data" / "distractor_temptation.json"
+
+# the clauses the human reviewers see (docs/review/human_review_final.csv)
+FINAL_CLAUSES: dict[int, str] = {t: PREREVIEW_REWRITES.get(t, (c, ""))[0] for t, c in DRAFT_CLAUSES.items()}
+
 _RESERVED = {7.0, 10.0, 12.0}               # unit constants that appear in solutions
 _D_RANGE = range(2, 20)
 _BOUNDARY_RE = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9])")

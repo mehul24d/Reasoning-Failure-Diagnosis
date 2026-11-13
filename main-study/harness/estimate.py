@@ -264,6 +264,22 @@ def markdown(rep: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def top_up_by_budget(meas: dict, n_gpu: int, instances: int = 16) -> dict:
+    """Amendment A20 (D42), decided before any study data: generate instances 9-16 for all study
+    templates iff the projected total with 16 instances (both conditions, sampled runs included,
+    x the safety factor, the same comparison as the budget rule) stays within the budget;
+    otherwise no top-up and the study is reported as underpowered."""
+    p = project(meas, n_gpu, instances=instances)
+    fits = not p["exceeds_budget"]
+    return {"rule": "generate instances 9-16 iff projected T4-hours with 16 instances x safety <= budget",
+            "instances": instances, "projection": p,
+            "t4_gpu_hours_total": p["t4_gpu_hours_total"],
+            "t4_gpu_hours_total_with_safety": p["t4_gpu_hours_total_with_safety"],
+            "budget_t4_gpu_hours": p["budget_t4_gpu_hours"], "fits": fits,
+            "decision": "generate_instances_9_16" if fits else "skip",
+            "reported_as": None if fits else "underpowered"}
+
+
 def reproject(model: str) -> dict:
     """Projection of the CURRENT design from the measured throughputs (no GPU needed). Writes
     reports/m1/estimate_<model>_reprojected.{json,md}; the measurement file is not changed."""
@@ -278,7 +294,8 @@ def reproject(model: str) -> dict:
            "measured_on": {"date": old["date"], "commit": old["commit"], "file": src.name},
            "measured": meas, "projection": project(meas, n_gpu),
            "budget_rule": apply_budget_rule(meas, n_gpu),
-           "if_equivalence_fails": apply_budget_rule(meas, n_gpu, engine="tl")}
+           "if_equivalence_fails": apply_budget_rule(meas, n_gpu, engine="tl"),
+           "top_up": top_up_by_budget(meas, n_gpu)}
     out = src.with_name(f"estimate_{model}_reprojected.json")
     out.write_text(json.dumps(rep, indent=2, default=str))
     md = markdown(rep).replace("(`make estimate`,", "(re-projected for the current design,")
@@ -289,6 +306,11 @@ def reproject(model: str) -> dict:
            + f"; final {fb['final']['t4_gpu_hours_total_with_safety']:.2f} with safety: "
            + ("**still over budget: the run does not start; the group decides.**" if fb["still_over_budget"]
               else "within budget.") + "\n")
+    tu = rep["top_up"]
+    md += (f"\n**Top-up (A20):** with instances 9-16 the projection is {tu['t4_gpu_hours_total']:.2f} T4 GPU-hours "
+           f"(x{tu['projection']['safety_factor']} = {tu['t4_gpu_hours_total_with_safety']:.2f}) against "
+           f"{tu['budget_t4_gpu_hours']}: " + ("**generate instances 9-16.**" if tu["fits"] else
+           "**no top-up; the study is reported as underpowered.**") + "\n")
     md += f"\nThroughputs measured on {old['date']} (code `{old['commit']}`), {src.name}.\n"
     out.with_suffix(".md").write_text(md)
     print(md)

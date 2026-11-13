@@ -657,13 +657,14 @@ def design_effect(scored: list[dict]) -> dict:
     distractor traces whose clean twin is correct; natural: clean traces), m_i = test failures
     with s0 of template i. Reported next to the pilot's failure-occurrence deff (19.76).
 
-    The decision on a top-up uses the PRIMARY-OUTCOME deff (harness.power.primary_outcome_deff
-    and top_up_decision), estimated on train + dev templates before any primary analysis.
+    The PRIMARY-OUTCOME deff (harness.power.primary_outcome_deff: E3 gold-value decodability and
+    the paired repair difference, train + dev templates) is reported next to it (A20, D42). Neither
+    triggers a top-up: that was decided by budget before any data (data.power.top_up: skip).
     """
     from .power import icc_anova, kish_deff
 
     pw = experiment_config()["data"]["power"]
-    out = {"role": "descriptive (A15): failure occurrence; the top-up rule uses the primary-outcome deff",
+    out = {"role": "descriptive (A15, A20): failure occurrence; reported with the primary-outcome deff",
            "pilot_failure_deff": (pw.get("deff") or {}).get("value")}
     at_risk = {"primary": lambda r: r.get("condition") == "distractor" and r.get("clean_correct") is True,
                "natural": lambda r: r.get("condition", "clean") == "clean"}

@@ -7,7 +7,7 @@
   "batch_size": 16,
   "date": "2026-11-13",
   "commit": "b920121",
-  "reprojected_at_commit": "6a1baa7",
+  "reprojected_at_commit": "8201c8d",
   "measured_on": {
     "date": "2026-11-12",
     "commit": "b920121",
@@ -292,5 +292,51 @@
       "total_if_fallback_t4_gpu_hours": 27.154
     },
     "still_over_budget": true
+  },
+  "top_up": {
+    "rule": "generate instances 9-16 iff projected T4-hours with 16 instances x safety <= budget",
+    "instances": 16,
+    "projection": {
+      "sizes": {
+        "greedy_traces": 17088,
+        "test_traces": 7680,
+        "sampled_runs": 15220,
+        "sampled_runs_natural": 9930,
+        "sampled_runs_primary": 5290,
+        "conditions": 2,
+        "templates": 89,
+        "instances_per_template": 16,
+        "prompts": 6,
+        "sampled_runs_included": true
+      },
+      "engine": "hf_batched",
+      "t4_gpu_hours": {
+        "generation": 9.187,
+        "verification_and_caching": 1.947,
+        "sampled_runs": 9.573
+      },
+      "t4_gpu_hours_total": 20.708,
+      "t4_gpu_hours_total_with_safety": 25.885,
+      "safety_factor": 1.25,
+      "kaggle_quota_hours": 10.377,
+      "kaggle_sessions": 1,
+      "n_gpus": 2,
+      "disk_gb": {
+        "activation_store": 26.027,
+        "traces_and_sidecars": 0.209,
+        "fp32_reference": 0.097,
+        "total": 26.334
+      },
+      "budget_t4_gpu_hours": 25,
+      "exceeds_budget": true,
+      "fallback_tl_generation_t4_gpu_hours": 52.209,
+      "total_if_fallback_t4_gpu_hours": 63.746
+    },
+    "t4_gpu_hours_total": 20.708,
+    "t4_gpu_hours_total_with_safety": 25.885,
+    "budget_t4_gpu_hours": 25,
+    "fits": false,
+    "decision": "skip",
+    "reported_as": "underpowered"
   }
 }

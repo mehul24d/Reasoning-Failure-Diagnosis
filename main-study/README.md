@@ -63,7 +63,7 @@ so the GSM-Symbolic study problems stay untouched.
 6. **First observation (2B, GSM8K train, tool-building only).** The first error in failed
    traces is planning in 42%, binding in 39%, arithmetic in 11%, and none is found in 8%.
 7. **Pre-registrations.** `prereg/E0.md` is committed. `prereg/S2.md` was **signed off on
-   2026-11-13** (A8–A13; amended A14–A17). It becomes binding with the commit made immediately before the first
+   2026-11-13** (A8–A13; amended A14–A17, A18–A20). It becomes binding with the commit made immediately before the first
    study data. It covers:
    - the population (A14): primary = GSM-Symbolic distractor failures (right without the
      no-op clause, wrong with it), secondary = natural failures;
@@ -71,8 +71,11 @@ so the GSM-Symbolic study problems stay untouched.
      8,544 greedy traces, with a 33/16/40 template split, seed 0, committed;
    - the frozen paraphrases;
    - the design effect for the target on the primary paired outcomes, estimated on train + dev
-     templates before any primary analysis, with a pre-specified top-up rule (A15); the pilot's
-     failure-occurrence deff (19.76) is descriptive;
+     templates, reported with the pilot's failure-occurrence deff (19.76, descriptive); the
+     top-up to instances 9–16 was decided by budget before any data: none, so the study is
+     reported as underpowered (A20);
+   - the distractor clauses checked on instances 1–16 (partitive, grounding, independent
+     solver), 64 rewritten before the human review of `docs/review/human_review_final.csv` (A18);
    - template clustering and effective n stated with every result (A16);
    - the automatic over-budget rule;
    - and, from the draft, max_new_tokens 512 with a stop at the

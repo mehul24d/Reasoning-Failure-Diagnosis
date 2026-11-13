@@ -35,7 +35,11 @@ for them and the RQ3 gate G2 is re-checked on 9B first.
 * ~~Which 97 templates~~: the 89 with gold programs, for train, dev and test (`prereg/S2.md` A8).
 * ~~Decide the S2 population~~: distractor failures primary, natural failures secondary (A14,
   replacing A9).
-* Human review of the 89 distractor clauses (`docs/review/distractor_clauses.csv`, D34), then
-  `scripts/review_agreement.py` (kappa, rewrites, D39). The answers are not in the repository yet.
-* ~~The design-effect shortfall~~: the target uses the primary-outcome deff, with a top-up
-  rule applied before any primary analysis (A15, D36).
+* ~~Clause generator bug~~: instance-level partitive and grounding checks on instances 1–16; 64
+  clauses rewritten before the review; all checks pass (A18, D40).
+* Human review of the 89 FINAL clauses (`docs/review/human_review_final.csv`), then
+  `scripts/review_agreement.py` (kappa per question, agreed changes), then the review is
+  recorded in S2. Waiting for the filled sheet.
+* ~~The design-effect shortfall~~: the primary-outcome deff is reported with the failure deff;
+  the top-up to 16 instances is over budget (25.89 T4-h), so none, and the study is reported as
+  underpowered (A20, D42).

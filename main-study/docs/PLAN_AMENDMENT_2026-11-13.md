@@ -87,7 +87,7 @@ section by section. Copy it into the next version of the plan.
 | Milestone | Deliverables | Gate / check |
 |---|---|---|
 | M0 (Sem. 7, week 1) | Harness; TransformerLens–HuggingFace equivalence; SAE validation; Appendix A check, **on 2B** | Done: 6/6 equivalence checks, 24/26 SAE layers |
-| M1 (weeks 2–3) | Phase 0 on the Kaggle weights; `make estimate` on Kaggle T4s; human review of the distractor clauses; failure sets and gold variable extraction **on 2B**; batched-generation equivalence gate; residual cache | Phase 0 6/6 (+ repeat-greedy); equivalence gate ≥ 0.99 on ≥ 200 traces; N* = max(320, ⌈213 × deff_primary⌉) primary test failures with s0 from ≥ 40 templates, or the A15 top-up / reported as underpowered |
+| M1 (weeks 2–3) | Phase 0 on the Kaggle weights; `make estimate` on Kaggle T4s; human review of the distractor clauses; failure sets and gold variable extraction **on 2B**; batched-generation equivalence gate; residual cache | Phase 0 6/6 (+ repeat-greedy); equivalence gate ≥ 0.99 on ≥ 200 traces; N* = max(320, ⌈213 × deff_primary⌉) primary test failures with s0 from ≥ 40 templates, else reported as underpowered (no top-up, A20) |
 | M2 (weeks 4–6) | Direction construction (E1) and readout map (E2), on 2B | RQ1 and RQ2 criteria |
 | M3 (weeks 7–10) | Self-sourced feasibility (E3), on 2B | RQ3 criterion on 2B; provisionally decides inclusion of RQ7 |
 | M4 (weeks 11–13) | Content attribution and typology (E4); minor report including negative results, with its claims restricted to 2B | RQ4 criterion |
@@ -110,7 +110,8 @@ section by section. Copy it into the next version of the plan.
   large as the pilot's for failure occurrence (19.76, descriptive), 40 test templates give at
   most about 68 effective units, short of the 213 the power analysis needs.
   - The pilot also projects about 292 primary test failures with s0 at 8 instances, below the
-    320 floor. So the A15 top-up may apply, and the study may be reported as underpowered.
+    320 floor. The top-up to instances 9–16 would cost 25.89 T4-hours with the safety factor,
+    over the budget, so there is none and the study is reported as underpowered (A20, D42).
   - Every result states its template clustering and effective n (A16). The template-clustered
     bootstrap CIs, unchanged, carry the clustering into every interval.
 - **Storage precision.** Residuals are computed in float32 and stored in float16. The measured
@@ -122,7 +123,7 @@ section by section. Copy it into the next version of the plan.
 | Risk | Mitigation |
 |---|---|
 | Not enough GPU time (college cannot provide ~70 GPU-hours) | Minor project on 2B only, on free Kaggle T4s. Batched generation, stop at the answer line, one TL pass per trace for verification and caching, and sampled runs on test failures only. `make estimate` projects GPU-hours before any full run. Above 25 T4-hours, the rule fixed beforehand applies: fewer instances down to the power floor, then no sampled runs; it is recorded, and anything beyond it goes to the group. |
-| Failures cluster strongly by template (pilot ICC 0.59) | Descriptive since A15. The target uses the primary-outcome deff, with a pre-specified top-up before any primary analysis. Template-clustered CIs and effective n with every result (A16). |
+| Failures cluster strongly by template (pilot ICC 0.59) | Descriptive since A15. The target uses the primary-outcome deff, reported with the failure deff; no top-up (A20, over budget). Template-clustered CIs and effective n with every result (A16). |
 | Batched Hugging Face generation differs from TransformerLens | Pre-registered equivalence gate on ≥ 200 traces stratified by template, at the Phase 0 threshold, with a max logit difference report. If it fails: TransformerLens generation, reported. |
 | Kaggle sessions end (12 h limit, preemption) | Every stage is resumable per trace or shard and is run as Save & Run All commits. Each session restores the previous output and stops cleanly before its deadline. |
 | Results do not transfer from 2B to 9B (replaces "from 9B to 2B") | The minor-project report claims 2B only. The RQ3 gate is re-checked on 9B at the start of Semester 8, and RQ8 reports effect sizes per model. |
