@@ -72,6 +72,11 @@ def test_weights_provenance_compare(tmp_path):
     assert c["weights_identical_to_hf"] and c["all_required_identical"]
     hf["files"]["model-00001-of-00001.safetensors"]["sha256"] = "0" * 64
     assert not wp.compare_with_hf(files, hf)["weights_identical_to_hf"]
+    # gated repo, anonymous request: the hash is masked, so the size is compared and it says so
+    hf["files"]["model-00001-of-00001.safetensors"].update(sha256="*" * 64, size=100)
+    c = wp.compare_with_hf(files, hf)
+    assert c["weights_identical_to_hf"] is None and not c["weights_hash_published"]
+    assert c["all_required_identical"] and c["per_file"]["model-00001-of-00001.safetensors"].startswith("same size")
     # git blob sha1 of "{}" (as `git hash-object` gives it)
     assert files["config.json"]["git_blob_sha1"] == "9e26dfeeb6e641a33dae4961196235bdb965b21b"
     h = wp.kaggle_handle("/kaggle/input/gemma-2/transformers/gemma-2-2b-it/2")

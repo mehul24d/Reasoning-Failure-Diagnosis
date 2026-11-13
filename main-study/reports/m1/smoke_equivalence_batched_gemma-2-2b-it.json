@@ -1,0 +1,25 @@
+{
+  "check": "teacher-forced TL logits reproduce the HF batched greedy tokens",
+  "threshold": ">= 0.99",
+  "sample_size": 256,
+  "verified": 256,
+  "traces": 256,
+  "templates": 64,
+  "tokens": 35015,
+  "reproduction": 1.0,
+  "traces_with_any_mismatch": 0,
+  "max_abs_logit_diff": 0.00029754638671875,
+  "p99_trace_max_abs_logit_diff": 0.00013446807861328125,
+  "mean_abs_logit_diff": 8.482843165089195e-06,
+  "hf_top1_is_output": 35015,
+  "mismatches": [],
+  "fp16_check": {
+    "traces": 32,
+    "max_abs_err": 0.498291015625,
+    "max_rel_err": 0.00040624456596560776,
+    "max_abs_value": 1352.629638671875
+  },
+  "seconds_per_trace": 0.387149609375,
+  "seconds_per_seq_token": 0.0016147002280873248,
+  "pass": true
+}

@@ -1,0 +1,20 @@
+{
+  "traces": 384,
+  "templates": 64,
+  "tokens": 52968,
+  "reproduction": 1.0,
+  "traces_with_any_mismatch": 0,
+  "max_abs_logit_diff": 0.00029754638671875,
+  "p99_trace_max_abs_logit_diff": 0.0001468658447265625,
+  "mean_abs_logit_diff": 8.454024476634828e-06,
+  "hf_top1_is_output": 52968,
+  "mismatches": [],
+  "fp16_check": {
+    "traces": 32,
+    "max_abs_err": 0.498291015625,
+    "max_rel_err": 0.00040624456596560776,
+    "max_abs_value": 1352.629638671875
+  },
+  "seconds_per_trace": 0.38501380208333336,
+  "seconds_per_seq_token": 0.001596670482526243
+}

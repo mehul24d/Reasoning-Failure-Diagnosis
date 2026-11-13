@@ -1,0 +1,93 @@
+{
+  "model": "gemma-2-2b-it",
+  "hf_id": "google/gemma-2-2b-it",
+  "device": "cuda",
+  "tl_n_devices": 2,
+  "tl_soft_caps": {
+    "output_logits_soft_cap": 30.0,
+    "attn_scores_soft_cap": 50.0
+  },
+  "dtype": "float32",
+  "torch": "2.15.0+cu132",
+  "all_pass": true,
+  "checks": {
+    "resid_tl_vs_hf": {
+      "value": 1.4987213379620246e-06,
+      "layer": "L25(ln_final)",
+      "threshold": "< 0.01",
+      "pass": true
+    },
+    "top1_agreement": {
+      "value": 1.0,
+      "tokens": 344,
+      "threshold": ">= 0.99",
+      "pass": true
+    },
+    "padded_vs_single": {
+      "value": 9.437759261231555e-07,
+      "threshold": "< 0.01",
+      "pass": true
+    },
+    "teacher_forced_reproduction": {
+      "value": 1.0,
+      "tokens": 394,
+      "threshold": ">= 0.99",
+      "pass": true
+    },
+    "pure_greedy_config": {
+      "value": true,
+      "pass": true
+    },
+    "greedy_repeat_identical": {
+      "value": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "threshold": "all identical",
+      "note": "added on the Kaggle re-run (A12); not a Table 5 check",
+      "pass": true
+    },
+    "one_bos_per_prompt": {
+      "value": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "uses_bos": true,
+      "pass": true
+    }
+  },
+  "per_layer_rel_err": {
+    "embed": 0.0,
+    "L0": 5.8631058233535e-07,
+    "L1": 6.569466891389285e-07,
+    "L2": 7.174608118849655e-07,
+    "L3": 7.301817630252617e-07,
+    "L4": 6.802487751729379e-07,
+    "L5": 6.948420884736104e-07,
+    "L6": 6.742579557525206e-07,
+    "L7": 6.2776363252734e-07,
+    "L8": 6.626029448199693e-07,
+    "L9": 6.884222968048948e-07,
+    "L10": 7.191700646054697e-07,
+    "L11": 7.410954370230059e-07,
+    "L12": 7.463992441280914e-07,
+    "L13": 7.741639260530771e-07,
+    "L14": 7.97586287641667e-07,
+    "L15": 7.522487550540743e-07,
+    "L16": 8.265321101480488e-07,
+    "L17": 8.427800464950298e-07,
+    "L18": 8.959405833164597e-07,
+    "L19": 9.350106034192586e-07,
+    "L20": 9.716798988159319e-07,
+    "L21": 1.0235515310779894e-06,
+    "L22": 1.0827067705052217e-06,
+    "L23": 1.1396349011689961e-06,
+    "L24": 1.1312225884160925e-06,
+    "L25(ln_final)": 1.4987213379620246e-06
+  },
+  "logits_rel_err": 1.0227195656658415e-06
+}

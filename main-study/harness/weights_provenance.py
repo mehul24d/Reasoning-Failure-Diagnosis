@@ -3,8 +3,10 @@
 Hashes every file of a model directory (sha256, and the git blob sha1 that the Hugging Face API
 reports for files outside LFS), records the Kaggle Models handle and version taken from the
 path, and compares the files with the published Hugging Face hashes
-fetched from the HF API with --fetch-hf (on Kaggle: the local network of the project Mac masks
-64-hex strings in API answers, so a locally saved reference is unusable).
+fetched from the HF API with --fetch-hf or saved in reports/m1/hf_hub_files_<model>.json.
+For a gated repository such as Gemma, the API hides the LFS sha256 from anonymous requests
+("****…"): those files are then compared by exact size only, and the comparison says so. Files
+outside LFS (config, generation config, index, tokenizer config) are compared by git blob sha1.
 
     python -m harness.weights_provenance --dir /kaggle/input/.../gemma-2-2b-it/2 \
         --model gemma-2-2b-it --out reports/m1/weights_gemma-2-2b-it.json
@@ -53,6 +55,14 @@ def compare_with_hf(files: dict, hf: dict) -> dict:
             if name.endswith(".safetensors") or name in REQUIRED:
                 ok = False
             continue
+        if ref.get("sha256") and not _published(ref["sha256"]):
+            # gated repo, anonymous request: the hash is hidden, only the size can be compared
+            same = mine["size"] == ref.get("size")
+            out[name] = ("same size (sha256 not published to anonymous requests)" if same
+                         else "DIFFERENT size")
+            if not same and (name.endswith(".safetensors") or name in REQUIRED):
+                ok = False
+            continue
         if ref.get("sha256"):
             same = mine["sha256"] == ref["sha256"]
         else:
@@ -61,8 +71,15 @@ def compare_with_hf(files: dict, hf: dict) -> dict:
         if not same and (name.endswith(".safetensors") or name in REQUIRED):
             ok = False
     weights = [n for n in hf["files"] if n.endswith(".safetensors")]
-    return {"per_file": out, "weights_identical_to_hf": all(out.get(n) == "identical" for n in weights),
+    hashed = all(_published(hf["files"][n].get("sha256") or "") for n in weights)
+    return {"per_file": out,
+            "weights_identical_to_hf": all(out.get(n) == "identical" for n in weights) if hashed else None,
+            "weights_hash_published": hashed,
             "all_required_identical": ok, "hf_revision": hf.get("revision")}
+
+
+def _published(h: str) -> bool:
+    return bool(re.fullmatch(r"[0-9a-f]{64}", h))
 
 
 def fetch_hf_reference(repo: str) -> dict:
@@ -77,9 +94,6 @@ def fetch_hf_reference(repo: str) -> dict:
     tree = get(f"https://huggingface.co/api/models/{repo}/tree/{info['sha']}")
     files = {f["path"]: {"size": f["size"], "sha256": (f.get("lfs") or {}).get("oid"),
                          "git_oid": f.get("oid")} for f in tree if f.get("type") == "file"}
-    for n, v in files.items():
-        if v["sha256"] is not None and not re.fullmatch(r"[0-9a-f]{64}", v["sha256"]):
-            raise ValueError(f"malformed sha256 for {n} in the HF API answer")
     return {"repo": repo, "revision": info["sha"], "last_modified": info.get("lastModified"),
             "files": files}
 

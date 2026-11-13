@@ -934,8 +934,14 @@ step last token, and the final-answer token (`main-study/cache/positions.py`).
 
   If any check fails, nothing else runs.
 - **Provenance:** the Kaggle handle and version, the sha256 of every file, and a comparison
-  with the published Hugging Face hashes (`reports/m1/hf_hub_files_gemma-2-2b-it.json`).
-  Written by `harness.weights_provenance` to `reports/m1/weights_gemma-2-2b-it.json`.
+  with the Hugging Face repository. Written by `harness.weights_provenance` to
+  `reports/m1/weights_gemma-2-2b-it.json`.
+- **Result (2026-11-13):** Phase 0 passes all 7 checks, with values equal to M0's.
+  - The non-LFS files are byte-identical to HF, and the 4 LFS files have the published sizes.
+  - HF hides the LFS sha256 of a gated model from anonymous requests, so the weight hashes
+    could not be compared. A first attempt read the masked values ("****") as a mismatch; that
+    was corrected before anything was reported.
+  - Weight-shard sha256: `532d792c9178…` and `6d6d9ce84db3…`.
 
 ## D33 (2026-11-13) Over-budget rule, fixed before measuring
 

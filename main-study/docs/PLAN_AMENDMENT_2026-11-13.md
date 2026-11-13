@@ -122,39 +122,25 @@ section by section. Copy it into the next version of the plan.
 
 ## Compute: measured estimate
 
-The pre-registered figure is `reports/m1/estimate_gemma-2-2b-it.md` (the `make estimate` smoke
-test on Kaggle T4s).
+Measured on 2026-11-13 by `make estimate` on Kaggle 2 × T4 (code `b920121`), after Phase 0 had
+passed on the Kaggle weights (7/7). Full report: `reports/m1/estimate_gemma-2-2b-it.md`.
 
-**Status: `make estimate` has not produced a measurement yet.** Both Kaggle runs of the
-smoke test (2026-11-13) stopped at setup because the Kaggle account cannot access the Gemma
-weights. Kaggle answers `403 Forbidden` to a download of `google/gemma-2/transformers/gemma-2-2b-it/2`,
-so the gated model input is not mounted. This needs the account owner to accept the Gemma licence
-on Kaggle. Once that is done, the notebook runs unchanged and its result replaces the interim
-figures below.
-
-**Interim projection (not measured on a T4).** These figures come from Gemma-2-2B-IT runs
-already in this repository, so they are an order-of-magnitude check, not the pre-registered
-estimate:
-- generation: 124 tokens/s at batch 24, float32, eager attention, on an L4 (`results/smoke/smoke.json`),
-  taken as 100 tokens/s per T4;
-- TL forward: 8 × 959 tokens in 5.9 s on the L4, scaled down to about 430 tokens/s per T4;
-- trace length: 114.5 generated tokens per trace (the 776 baseline traces) and a 474-token
-  median prompt.
-
-| Stage | Central (T4 GPU-hours) | Pessimistic (40 tok/s, 150 tok/s) |
+| Stage | Measured on T4 | Projected T4 GPU-hours |
 |---|---|---|
-| Greedy generation, 4,656 traces | 1.5 | 3.7 |
-| Verification + residual cache (one TL pass) | 1.8 | 5.1 |
-| Sampled runs, ≈ 557 test failures × 5 | 0.9 | 2.2 |
-| Model loads (≈ 6 sessions × 2 GPUs) | 0.6 | 0.6 |
-| **Total** | **4.7** | **11.6** |
-| **Total × 1.25 safety** | **5.9** | **14.5** |
+| Greedy generation, 4,272 traces (89 × 8 × 6) | 71 new tokens/s per GPU, mean 138 tokens | 2.31 |
+| Verification + residual cache (one TL pass) | 0.39 s per trace | 0.58 |
+| Sampled runs, 4,965 (test failures × 5) | 69 new tokens/s per GPU | 3.13 |
+| **Total** (model loads included) | | **6.02** |
+| **Total × 1.25 safety** | | **7.52**, budget 25 |
 
-- Disk: about 51,000 cached positions × 27 sites × 2,304 × 2 bytes ≈ **6.4 GB** of float16
-  shards, plus traces and the float32 references, which are well under 1 GB.
-- The TL-generation fallback (only if the equivalence gate fails) adds about **10 GPU-hours** at
-  an assumed 15 tokens/s per T4.
-- Both columns are under the 25 T4-hour budget, and so is the central case with the fallback
-  (≈ 18 with the safety factor). The pessimistic case with the fallback would not be (≈ 27). No
-  cut is proposed on interim figures; the measured `make estimate` result decides.
-
+- Within budget, so the A13 rule did not apply.
+- Kaggle quota about 3.0 h, in one session.
+- Disk: **6.66 GB**, of which 6.51 GB is float16 residual shards at 12.2 positions per trace.
+- TL-generation fallback, if the equivalence gate fails: a total of 16.8 (21.0 with the
+  safety factor).
+- The proposal's instance top-up to 16 would take it to about 12 (15).
+- Smoke checks:
+  - 0.5% of traces hit the cap;
+  - TL reproduced the HF tokens exactly, with a max logit difference of 3.0e-4;
+  - float16 storage max relative error 4.1e-4.
+- This replaces the interim projection (4.7 GPU-hours) given here before the measurement.

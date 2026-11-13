@@ -62,9 +62,16 @@ so the GSM-Symbolic study problems stay untouched.
    - `reports/m0/parsing_manual_check_v4.md`, `parsing_validation_v4.json`
 6. **First observation (2B, GSM8K train, tool-building only).** The first error in failed
    traces is planning in 42%, binding in 39%, arithmetic in 11%, and none is found in 8%.
-7. **Pre-registrations.** `prereg/E0.md` is committed. `prereg/S2.md` is a **draft**, amended
-   on 2026-11-13. It covers the population, 97 templates × 8 instances × 6 prompts (4,656
-   greedy traces), a 38/19/40 template split with seed 0, max_new_tokens 512 with a stop at the
+7. **Pre-registrations.** `prereg/E0.md` is committed. `prereg/S2.md` was **signed off on
+   2026-11-13** (A8–A13). It becomes binding with the commit made immediately before the first
+   study data. It covers:
+   - the population: GSM-Symbolic `main`, natural failures;
+   - **89 templates** (the ones with gold programs) × 8 instances × 6 prompts = 4,272 greedy
+     traces, with a 33/16/40 template split, seed 0, committed;
+   - the frozen paraphrases;
+   - the pilot Kish design effect, 19.76, which gives **N* = 4,209**;
+   - the automatic over-budget rule;
+   - and, from the draft, max_new_tokens 512 with a stop at the
    answer line, parser v4 frozen with lenient s0 primary, the batched-generation equivalence
    gate, the residual cache and the acceptance criteria.
 8. **S2–S4 pipeline for Kaggle T4s** (`harness/pipeline.py`, `harness/batched.py`, `cache/`).
@@ -74,22 +81,20 @@ so the GSM-Symbolic study problems stay untouched.
    - `make estimate` projects the GPU-hours from a timed smoke test.
 9. **Colab notebook for the 9B proof of concept:** `notebooks/colab_9b_poc.ipynb`, kept for
    Semester 8.
-10. **Tests:** 124 pass and 2 are skipped (`pytest`). They are offline and use a tiny random
+10. **Tests:** 136 pass and 2 are skipped (`pytest`). They are offline and use a tiny random
     model, including an end-to-end run of the pipeline with two workers.
 
 ## What is left
 
-1. **Group sign-off on `prereg/S2.md`:**
-   - the population: the Qu & Gomes no-op data, or the fallback of Apple GSM-Symbolic `main`
-     with natural failures;
-   - the prompt paraphrases 1 and 2 in `harness/prompts.py`;
-   - which 97 templates, and whether test is drawn from templates with gold programs (open
-     item 4).
-2. **S2–S4 on Gemma-2-2B-IT:** 4,656 greedy traces, the equivalence gate, the residual cache,
+1. **Human review of the 88 distractor clauses** (`docs/review/`, D34), about 1.5 h per
+   reviewer. Study generation waits for it.
+2. **A group decision on the design-effect shortfall** (D31): N* = 4,209 is out of reach at
+   any instance count.
+3. **S2–S4 on Gemma-2-2B-IT:** 4,272 greedy traces, the equivalence gate, the residual cache,
    the sampled subset, and parsing with a fresh 40-step hand check.
-3. **S5–S11:** E1–E4 as in the plan, with gates G1 and G2. E4 needs two annotators on 20% of the
+4. **S5–S11:** E1–E4 as in the plan, with gates G1 and G2. E4 needs two annotators on 20% of the
    failures.
-4. **Semester 8:** S1–S4 on Gemma-2-9B-IT and Qwen2.5-7B-Instruct, then the RQ3 gate re-check
+5. **Semester 8:** S1–S4 on Gemma-2-9B-IT and Qwen2.5-7B-Instruct, then the RQ3 gate re-check
    on 9B.
 
 **Compute for S2–S4 (minor project):** free Kaggle T4s, budget 25 T4 GPU-hours. The measured
@@ -106,7 +111,11 @@ All deviations are dated in the pre-registrations.
 - Residual cache in float16 storage at the pre-registered positions; SAE features computed on
   CPU (A4).
 - Sampled runs only on test failures (A5).
-- 97 templates, split 38/19/40 (A6).
+- 89 templates with gold programs, split 33/16/40 (A8, replacing A6's 97).
+- Design effect estimated on the pilot (Kish, unequal clusters): N* = 4,209 (A11).
+- Over budget, a fixed rule applies automatically: fewer instances down to the power floor,
+  then no sampled runs (A13).
+- Kaggle's copy of the Gemma weights, with Phase 0 re-run on it (A12).
 - Python 3.13 instead of 3.11.
 - Kaggle 2 × T4 instead of one large GPU.
 - 131k SAEs for 9B (Semester 8), because 65k exists only at one 9B layer.

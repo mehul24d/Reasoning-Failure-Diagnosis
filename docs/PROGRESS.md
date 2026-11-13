@@ -1,45 +1,69 @@
 # Progress
 
-## 2026-11-13: minor-project compute estimate (Gemma-2-2B-IT, Kaggle T4s)
+## 2026-11-13: Phase 0 on the Kaggle weights and the measured compute estimate (Gemma-2-2B-IT)
 
-Scope and amendments: `main-study/docs/PLAN_AMENDMENT_2026-11-13.md`, `main-study/prereg/S2.md`
-A1–A7, `docs/DECISIONS.md` D21–D27. Budget: 25 T4 GPU-hours for S2–S4, including the 1.25
-safety factor.
+Kaggle kernel `btp-minor-estimate` v3, code `b920121`, 2 × Tesla T4, 0.38 h of session time.
+Decisions D28–D34 (S2 A8–A13) were committed before it ran.
 
-**Status: `make estimate` has not produced a measurement yet.** Both Kaggle runs of the
-smoke test (2026-11-13) stopped at setup because the Kaggle account cannot access the Gemma
-weights. Kaggle answers `403 Forbidden` to a download of `google/gemma-2/transformers/gemma-2-2b-it/2`,
-so the gated model input is not mounted. This needs the account owner to accept the Gemma licence
-on Kaggle. Once that is done, the notebook runs unchanged and its result replaces the interim
-figures below.
+**Phase 0 on Kaggle's copy of the weights** (`google/gemma-2/transformers/gemma-2-2b-it/2`):
+**all 7 checks pass**. The report is `main-study/reports/m1/phase0_kaggle_gemma-2-2b-it.json`.
 
-**Interim projection (not measured on a T4).** These figures come from Gemma-2-2B-IT runs
-already in this repository, so they are an order-of-magnitude check, not the pre-registered
-estimate:
-- generation: 124 tokens/s at batch 24, float32, eager attention, on an L4 (`results/smoke/smoke.json`),
-  taken as 100 tokens/s per T4;
-- TL forward: 8 × 959 tokens in 5.9 s on the L4, scaled down to about 430 tokens/s per T4;
-- trace length: 114.5 generated tokens per trace (the 776 baseline traces) and a 474-token
-  median prompt.
-
-| Stage | Central (T4 GPU-hours) | Pessimistic (40 tok/s, 150 tok/s) |
+| Check | Value | Threshold |
 |---|---|---|
-| Greedy generation, 4,656 traces | 1.5 | 3.7 |
-| Verification + residual cache (one TL pass) | 1.8 | 5.1 |
-| Sampled runs, ≈ 557 test failures × 5 | 0.9 | 2.2 |
-| Model loads (≈ 6 sessions × 2 GPUs) | 0.6 | 0.6 |
-| **Total** | **4.7** | **11.6** |
-| **Total × 1.25 safety** | **5.9** | **14.5** |
+| TL vs HF residual stream, worst layer (relative) | 1.50e-6 (L25 after ln_final) | < 0.01 |
+| TL vs HF top-1 logit agreement | 1.000 (344 tokens) | ≥ 0.99 |
+| Left-padded batch vs single, last-token logits | 9.4e-7 | < 0.01 |
+| Teacher-forced greedy reproduction | 1.000 (394 tokens) | ≥ 0.99 |
+| Pure-greedy generation config | true | true |
+| One BOS per prompt | 1, 1, 1, 1 | 1 |
+| Second greedy run identical (added, A12) | 4 / 4 | all |
 
-- Disk: about 51,000 cached positions × 27 sites × 2,304 × 2 bytes ≈ **6.4 GB** of float16
-  shards, plus traces and the float32 references, which are well under 1 GB.
-- The TL-generation fallback (only if the equivalence gate fails) adds about **10 GPU-hours** at
-  an assumed 15 tokens/s per T4.
-- Both columns are under the 25 T4-hour budget, and so is the central case with the fallback
-  (≈ 18 with the safety factor). The pessimistic case with the fallback would not be (≈ 27). No
-  cut is proposed on interim figures; the measured `make estimate` result decides.
+The first four values equal those of the M0 run on the Hugging Face download to every printed
+digit. Weight provenance: Kaggle Models `google/gemma-2/transformers/gemma-2-2b-it`, **version 2**. The sha256 of all 11 files is in `main-study/reports/m1/weights_gemma-2-2b-it.json`: the two weight shards are `532d792c9178…` and `6d6d9ce84db3…`, and their combined hash is `bdad5059211d…`. Compared with the Hugging Face repository (revision `299a856`):
+- 7 non-LFS files are byte-identical by git blob hash: config, generation config, weight index, tokenizer config, special tokens, README and `.gitattributes`.
+- The 4 LFS files (the two weight shards, `tokenizer.json` and `tokenizer.model`) have exactly the published sizes.
+- Their sha256 could not be compared. Hugging Face hides the LFS hashes of a gated model from requests without a token (tried from the Mac and from Kaggle).
 
----
+Together with the Phase 0 values matching M0 to every digit, this is strong but indirect evidence that the weights are the same. A direct check needs one authenticated look at the HF file list; a group member with Gemma access can do it, and no token goes into the repository.
+
+**Measured estimate** (`main-study/reports/m1/estimate_gemma-2-2b-it.md`). The smoke test ran
+384 greedy traces on GSM8K train, through the real pipeline, on 2 × T4. It projects to the
+pre-registered sizes: 89 × 8 × 6 = 4,272 greedy traces, and 4,965 sampled runs (40 × 8 × 6 test
+traces × 0.517 pilot failure rate × 5).
+
+| Stage | Measured on T4 | Projected T4 GPU-hours |
+|---|---|---|
+| Greedy generation (HF batched, batch 16) | 71 new tokens/s per GPU, mean 138 tokens | 2.31 |
+| Verification + residual cache (one TL pass) | 1.6 ms per sequence token, 0.39 s per trace | 0.58 |
+| Sampled runs (T = 0.7, k = 5, test failures) | 69 new tokens/s per GPU, mean 155 tokens | 3.13 |
+| **Total** (model loads included) | | **6.02** |
+| **Total × 1.25 safety** | | **7.52** (budget 25) |
+
+- **Within budget**, so the A13 rule did not apply: 8 instances and the sampled runs are kept.
+- Kaggle quota: about 3.0 h of session time, in 1 session.
+- Disk: 6.51 GB of float16 residual shards, 12.2 cached positions per trace; **6.66 GB** in total.
+- **TL-generation fallback** (only if the equivalence gate fails): 12.5 tokens/s, so 13.1
+  GPU-hours for generation and a total of 16.8 (21.0 with the safety factor), still within
+  budget.
+- **The proposal's top-up** to instances 9–16 (D31) would roughly double the total, to about
+  12 GPU-hours (15 with the safety factor), also within budget.
+- Smoke checks (not results):
+  - 2 of 384 traces hit the 512 cap (0.5%); the other stops were 377 at the answer line and 5 at end of turn;
+  - TL reproduced the HF tokens exactly (1.0000, max logit difference 3.0e-4);
+  - float16 storage max relative error 4.1e-4 (max absolute 0.50, on values up to 1,353).
+- The interim projection of the earlier entry (4.7 GPU-hours) is replaced. Generation is slower
+  than assumed (71 tokens/s, not 100), the TL pass is faster, and the sampled runs are sized
+  at the pilot failure rate (51.7%) instead of 29%.
+
+**GPU time used so far** on the minor project: about 0.5 h of Kaggle quota, made up of this run
+(0.38 h on 2 × T4, so 0.76 T4 GPU-hours) and the two earlier runs that stopped at setup. S2–S4
+has used none of its 25 T4 GPU-hours.
+
+**Waiting for people:**
+1. The human review of the 88 distractor clauses (`docs/review/`, about 1.5 h per reviewer).
+2. A group decision on the design-effect shortfall (D31).
+
+S2 generation does not start before both.
 
 # Progress Report — Pilot Session
 
