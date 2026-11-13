@@ -3,7 +3,8 @@
 Hashes every file of a model directory (sha256, and the git blob sha1 that the Hugging Face API
 reports for files outside LFS), records the Kaggle Models handle and version taken from the
 path, and compares the files with the published Hugging Face hashes
-(reports/m1/hf_hub_files_<model>.json, retrieved from the HF API).
+fetched from the HF API with --fetch-hf (on Kaggle: the local network of the project Mac masks
+64-hex strings in API answers, so a locally saved reference is unusable).
 
     python -m harness.weights_provenance --dir /kaggle/input/.../gemma-2-2b-it/2 \
         --model gemma-2-2b-it --out reports/m1/weights_gemma-2-2b-it.json
@@ -64,7 +65,26 @@ def compare_with_hf(files: dict, hf: dict) -> dict:
             "all_required_identical": ok, "hf_revision": hf.get("revision")}
 
 
-def provenance(model_dir: str, model: str) -> dict:
+def fetch_hf_reference(repo: str) -> dict:
+    """Published file hashes from the Hugging Face API (public metadata, no token): LFS sha256
+    for the weights and tokenizer, git blob sha1 for the rest."""
+    import urllib.request
+
+    def get(url):
+        with urllib.request.urlopen(url, timeout=60) as r:
+            return json.load(r)
+    info = get(f"https://huggingface.co/api/models/{repo}")
+    tree = get(f"https://huggingface.co/api/models/{repo}/tree/{info['sha']}")
+    files = {f["path"]: {"size": f["size"], "sha256": (f.get("lfs") or {}).get("oid"),
+                         "git_oid": f.get("oid")} for f in tree if f.get("type") == "file"}
+    for n, v in files.items():
+        if v["sha256"] is not None and not re.fullmatch(r"[0-9a-f]{64}", v["sha256"]):
+            raise ValueError(f"malformed sha256 for {n} in the HF API answer")
+    return {"repo": repo, "revision": info["sha"], "last_modified": info.get("lastModified"),
+            "files": files}
+
+
+def provenance(model_dir: str, model: str, hf: dict | None = None) -> dict:
     d = Path(model_dir)
     files = {p.name: file_hashes(p) for p in sorted(d.iterdir()) if p.is_file()}
     weights = sorted(n for n in files if n.endswith(".safetensors"))
@@ -72,9 +92,12 @@ def provenance(model_dir: str, model: str) -> dict:
     rep = {"model": model, "kaggle": kaggle_handle(str(d)), "files": files,
            "weights_sha256_combined": combined,
            "combined_rule": "sha256 of the concatenated hex sha256 of the *.safetensors files, by name"}
-    hf_ref = REPO_ROOT / "reports" / "m1" / f"hf_hub_files_{model}.json"
-    if hf_ref.exists():
-        rep["vs_hugging_face"] = compare_with_hf(files, json.loads(hf_ref.read_text()))
+    if hf is None:
+        hf_ref = REPO_ROOT / "reports" / "m1" / f"hf_hub_files_{model}.json"
+        hf = json.loads(hf_ref.read_text()) if hf_ref.exists() else None
+    if hf is not None:
+        rep["hf_reference"] = hf
+        rep["vs_hugging_face"] = compare_with_hf(files, hf)
     return rep
 
 
@@ -83,8 +106,10 @@ def main() -> None:
     ap.add_argument("--dir", required=True)
     ap.add_argument("--model", default="gemma-2-2b-it")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--fetch-hf", default=None, metavar="REPO",
+                    help="fetch the reference hashes from the HF API (e.g. google/gemma-2-2b-it)")
     a = ap.parse_args()
-    rep = provenance(a.dir, a.model)
+    rep = provenance(a.dir, a.model, fetch_hf_reference(a.fetch_hf) if a.fetch_hf else None)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(rep, indent=2))
     print(json.dumps({"kaggle": rep["kaggle"], "weights_sha256_combined": rep["weights_sha256_combined"],
