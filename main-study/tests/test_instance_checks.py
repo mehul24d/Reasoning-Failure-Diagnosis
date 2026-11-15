@@ -73,7 +73,7 @@ def test_committed_check_record_is_clean():
                              "reviewer2_grammatical", "notes"]
     assert not any(k.startswith("ai_") for k in rows[0])        # no AI verdicts on the human sheet
     tt = json.loads(hd.TEMPTATION.read_text())["templates"]
-    assert len(tt) == 89 and all(v["rating"] in {"PASS", "WEAK", "UNSURE"} for v in tt.values())
+    assert len(tt) == 89 and all(v["rating"] in {"PASS", "WEAK", "UNSURE", "DROPPED"} for v in tt.values())
 
 
 def exp_templates():
@@ -128,3 +128,32 @@ def test_review_copies_and_proposals():
     props = {int(r["template_id"]): r for r in csv.DictReader(open(rev / "clause_rewrites_proposed.csv"))}
     assert sorted(props) == flagged and len(flagged) == 26
     assert set(props) <= set(SOLVERS)                           # every proposed rewrite can be solver-checked
+
+
+def test_clause_slots_fill_instance_words():
+    q = ("Mohammed has a bag. Jin slew 150 goblins with his mighty sword. But Oscar, having forgotten "
+         "his axe at home, slew a few. How many goblins has Oscar slain?")
+    assert hd.render_clause(92, "The nearby castle had {d} {weapon}s.", q, 7) == "The nearby castle had 7 axes."
+    assert hd.render_clause(1, "It has {d} windows.", "x", 3) == "It has 3 windows."
+    with pytest.raises(LookupError):
+        hd.render_clause(27, "{name}'s office has {d} windows.", "no name here", 3)
+
+
+def test_reviewed_table_after_joint_review():
+    from harness.distractor import reviewed_clauses
+    exp = experiment_config()["data"]
+    tab = json.loads(hd.REVIEWED.read_text())
+    acts = {int(t): c["action"] for t, c in tab["clauses"].items()}
+    assert sorted(t for t, a in acts.items() if a == "drop") == [12, 39, 44]
+    assert sum(a == "rewrite" for a in acts.values()) == 23 and len(acts) == 89
+    rc = reviewed_clauses()
+    split = json.loads((REPO_ROOT / "data" / "splits" / "gsm_symbolic_main_seed0.json").read_text())
+    test = {int(str(t).split("-")[-1]) for t in split["test"]}
+    assert len(test & set(rc)) == 39 >= exp["min_test_templates_with_clause"] and exp["min_test_templates"] == 40
+    ag = json.loads((REPO_ROOT / "reports" / "m1" / "distractor_review_agreement.json").read_text())
+    for k in ("is_noop", "grammatical", "verdict"):
+        assert ag["agreement"][k]["pabak"] == pytest.approx(2 * ag["agreement"][k]["percent_agreement"] - 1)
+    assert "EITHER" in ag["decision_rule"] and "jointly" in ag["changes_reviewed"] and ag["recheck"]["all_pass"]
+    tt = json.loads(hd.TEMPTATION.read_text())["templates"]
+    assert all(tt[str(t)]["rating"] == hd.POSTREVIEW_TEMPTATION_AI[t] for t, a in acts.items() if a == "rewrite")
+    assert all(tt[str(t)]["rating"] == "DROPPED" for t, a in acts.items() if a == "drop")

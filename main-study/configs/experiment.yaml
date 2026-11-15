@@ -76,6 +76,7 @@ data:
     provisional: true
   min_test_failures: 320
   min_test_templates: 40
+  min_test_templates_with_clause: 39   # A21 (D44): the joint review dropped test template 44; the split stays 40 test
 
 probing:
   positions: [step_first, step_last, final_answer]   # step_first is primary

@@ -1,0 +1,546 @@
+{
+ "source": "two-person review of the final clauses, DECISIONS D39/D40",
+ "clauses": {
+  "1": {
+   "action": "keep",
+   "clause_template": "At its densest point, the fog is {d} feet thick.",
+   "draft": "At its densest point, the fog is {d} feet thick."
+  },
+  "3": {
+   "action": "keep",
+   "clause_template": "{d} of the students are left-handed.",
+   "draft": "{d} of the students also play chess on weekends."
+  },
+  "4": {
+   "action": "keep",
+   "clause_template": "{d} of the kernels are slightly larger than the others.",
+   "draft": "{d} of the kernels are slightly larger than the others."
+  },
+  "5": {
+   "action": "keep",
+   "clause_template": "The sugar comes from a farm {d} kilometers away.",
+   "draft": "She keeps {d} spare cups in the cupboard."
+  },
+  "6": {
+   "action": "keep",
+   "clause_template": "The field is {d} kilometers from the nearest town.",
+   "draft": "{d} of the oranges on each square yard are a little smaller than average."
+  },
+  "7": {
+   "action": "keep",
+   "clause_template": "He lives {d} kilometers from the feed store.",
+   "draft": "{d} of the alpacas are older than ten years."
+  },
+  "8": {
+   "action": "keep",
+   "clause_template": "{d} of the balls are slightly heavier than the rest.",
+   "draft": "{d} of the balls are slightly heavier than the rest."
+  },
+  "12": {
+   "action": "drop",
+   "clause_template": null,
+   "reviewed": "He is expecting {d} guests tonight.",
+   "draft": "{d} of the crackers are slightly chipped but can still be placed."
+  },
+  "13": {
+   "action": "keep",
+   "clause_template": "{d} of the plants have purple flowers.",
+   "draft": "{d} of the plants have purple flowers."
+  },
+  "14": {
+   "action": "rewrite",
+   "clause_template": "The town has {d} schools.",
+   "reviewed": "They pass {d} traffic lights on the way.",
+   "reason": "joint verdict 'Accept' (proposal: R2: traffic lights could add walking time; nothing on the route)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "The cinema is showing {d} different movies today."
+  },
+  "16": {
+   "action": "keep",
+   "clause_template": "He has helped with this fundraiser for {d} years.",
+   "draft": "{d} of the boxes sold on Tuesday were wrapped in red paper."
+  },
+  "18": {
+   "action": "keep",
+   "clause_template": "The store had {d} other customers that day.",
+   "draft": "The store had {d} other customers that day."
+  },
+  "19": {
+   "action": "keep",
+   "clause_template": "The quiz was written by {d} different teachers.",
+   "draft": "The quiz was written by {d} different teachers."
+  },
+  "20": {
+   "action": "rewrite",
+   "clause_template": "The farm has {d} tractors.",
+   "reviewed": "He started this job {d} weeks ago.",
+   "reason": "joint verdict 'Accept' (proposal: R1+R2: 19 weeks of the job is ambiguous with the fruit total; no time words)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the pineapples picked on Thursday were slightly smaller than the rest."
+  },
+  "21": {
+   "action": "keep",
+   "clause_template": "His favorite show has {d} seasons.",
+   "draft": "His favorite show has {d} seasons."
+  },
+  "22": {
+   "action": "rewrite",
+   "clause_template": "Her house has {d} windows.",
+   "reviewed": "She had invited {d} friends.",
+   "reason": "joint verdict 'Accept' (proposal: R2: invited friends relate to the cutlery count; windows do not)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the spoons in the new package were blue."
+  },
+  "23": {
+   "action": "rewrite",
+   "clause_template": "Her house has {d} windows.",
+   "reviewed": "She has knitted {d} scarves for other relatives in the past.",
+   "reason": "joint verdict 'Accept' (proposal: R2: scarves may share the wool; windows do not)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "She has knitted {d} scarves for other relatives in the past."
+  },
+  "24": {
+   "action": "keep",
+   "clause_template": "The label on the bag is printed in {d} languages.",
+   "draft": "The label on the bag is printed in {d} languages."
+  },
+  "26": {
+   "action": "keep",
+   "clause_template": "Their kitchen has {d} cupboards.",
+   "draft": "The family owns {d} plates."
+  },
+  "27": {
+   "action": "rewrite",
+   "clause_template": "{name}'s office has {d} windows.",
+   "reviewed": "{d} of the emails that need a response come from the same client.",
+   "reason": "joint verdict 'Edit: Sanjay works for 9 hours everyday'; user decision 2026-11-15: the edit fails the no-forward-reference check ('work week' first appears in the final question) and d=17-19 gives implausible hours; replaced by the instance's name + office windows",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the emails that need a response come from the same client."
+  },
+  "28": {
+   "action": "rewrite",
+   "clause_template": "The building has {d} elevators.",
+   "reviewed": "Each new patient waits about {d} minutes to be seen.",
+   "reason": "joint verdict 'Accept' (proposal: R2: patient waiting time could read as delayed admissions; no time or patients)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "The clinic has {d} doctors on staff."
+  },
+  "29": {
+   "action": "keep",
+   "clause_template": "Their family dog is {d} years old.",
+   "draft": "Their family dog is {d} years old."
+  },
+  "30": {
+   "action": "keep",
+   "clause_template": "The store opened {d} years ago.",
+   "draft": "The store has {d} other kinds of washers on display."
+  },
+  "31": {
+   "action": "keep",
+   "clause_template": "They live {d} kilometers apart.",
+   "draft": "Their grandmother has {d} grandchildren in total."
+  },
+  "32": {
+   "action": "keep",
+   "clause_template": "She has been searching for {d} months.",
+   "draft": "The townhouse has {d} windows."
+  },
+  "33": {
+   "action": "keep",
+   "clause_template": "Their school is {d} kilometers from their home.",
+   "draft": "{d} of the signatures in the first book were signed in blue ink."
+  },
+  "34": {
+   "action": "keep",
+   "clause_template": "He had lived there for {d} years.",
+   "draft": "The cottage had {d} rooms."
+  },
+  "35": {
+   "action": "rewrite",
+   "clause_template": "The venue has {d} exits.",
+   "reviewed": "He started raising money {d} days ago.",
+   "reason": "joint verdict 'Accept' (proposal: R2: days of fundraising read as a rate; no time or money)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "The conference will last {d} hours."
+  },
+  "36": {
+   "action": "keep",
+   "clause_template": "She was there for {d} minutes.",
+   "draft": "{d} of the tarts had chocolate on top."
+  },
+  "37": {
+   "action": "rewrite",
+   "clause_template": "The recipe calls for {d} ingredients.",
+   "reviewed": "It was made {d} hours ago.",
+   "reason": "joint verdict 'Accept' (proposal: R1+R2: hours since it was made could shorten how long it lasts; no time)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the pieces have extra cheese on them."
+  },
+  "38": {
+   "action": "keep",
+   "clause_template": "The baker has worked there for {d} years.",
+   "draft": "The cafe has {d} tables."
+  },
+  "39": {
+   "action": "drop",
+   "clause_template": null,
+   "reviewed": "They have done this job for {d} years.",
+   "draft": "{d} of the floors have carpets instead of tiles."
+  },
+  "40": {
+   "action": "keep",
+   "clause_template": "Her vacation lasted {d} days.",
+   "draft": "The store had {d} other kinds of candy for sale."
+  },
+  "41": {
+   "action": "keep",
+   "clause_template": "It took {d} minutes to build.",
+   "draft": "{d} of the orange tiles are slightly cracked."
+  },
+  "42": {
+   "action": "keep",
+   "clause_template": "The store is {d} minutes from his house.",
+   "draft": "The store sells {d} different brands of tea."
+  },
+  "43": {
+   "action": "keep",
+   "clause_template": "It took them {d} minutes to get there.",
+   "draft": "{d} of the grasshoppers were bright green."
+  },
+  "44": {
+   "action": "drop",
+   "clause_template": null,
+   "reviewed": "There are also {d} parents watching.",
+   "draft": "{d} of the girls are wearing hats."
+  },
+  "45": {
+   "action": "keep",
+   "clause_template": "She has had the flower bed for {d} years.",
+   "draft": "{d} of the flowers she already owns are red."
+  },
+  "46": {
+   "action": "keep",
+   "clause_template": "The venue has {d} entrances.",
+   "draft": "The auditorium has {d} exits."
+  },
+  "47": {
+   "action": "rewrite",
+   "clause_template": "The yard has {d} trees.",
+   "reviewed": "The hunt started {d} minutes ago.",
+   "reason": "joint verdict 'Accept' (proposal: R2: a hunt that started minutes ago is still going; no time)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the eggs that Quinn found were painted yellow."
+  },
+  "48": {
+   "action": "rewrite",
+   "clause_template": "Her kitchen has {d} drawers.",
+   "reviewed": "She has been cooking for {d} years.",
+   "reason": "joint verdict 'Accept' (proposal: R2: years of cooking could change her speed; no time or skill)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the mushrooms are a bit smaller than the rest."
+  },
+  "49": {
+   "action": "keep",
+   "clause_template": "Each complex has {d} parking spots for visitors.",
+   "draft": "Each complex has {d} parking spots for visitors."
+  },
+  "50": {
+   "action": "keep",
+   "clause_template": "It has {d} windows.",
+   "draft": "The room has {d} windows."
+  },
+  "51": {
+   "action": "rewrite",
+   "clause_template": "The stand has {d} shelves.",
+   "reviewed": "He has run the stand for {d} years.",
+   "reason": "joint verdict 'Accept' (proposal: R1: years running the stand; no time)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the rose bundles are wrapped in paper."
+  },
+  "52": {
+   "action": "rewrite",
+   "clause_template": "The shop has {d} aisles.",
+   "reviewed": "He has been saving for {d} weeks.",
+   "reason": "joint verdict 'Accept' (proposal: R1+R2: weeks of saving suggest more money; no time or money)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the coloring books have animals on the cover."
+  },
+  "53": {
+   "action": "keep",
+   "clause_template": "They have known each other for {d} years.",
+   "draft": "The dartboard they played on is {d} years old."
+  },
+  "54": {
+   "action": "keep",
+   "clause_template": "{d} of the slices were thicker than the others.",
+   "draft": "{d} of the slices were thicker than the others."
+  },
+  "55": {
+   "action": "keep",
+   "clause_template": "Her pencil is {d} centimeters long.",
+   "draft": "Her pencil is {d} centimeters long."
+  },
+  "56": {
+   "action": "rewrite",
+   "clause_template": "{name} is {d} years old.",
+   "reviewed": "He bought the drinks {d} days ago.",
+   "reason": "joint verdict 'Edit: Pavel is 23 years old'; name filled per instance (CLAUSE_SLOTS); 23 -> {d}",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the cartons were bought at a different store."
+  },
+  "57": {
+   "action": "keep",
+   "clause_template": "They both started painting {d} years ago.",
+   "draft": "{d} of the black paint tubes are almost empty."
+  },
+  "58": {
+   "action": "keep",
+   "clause_template": "The mine is {d} kilometers from the nearest village.",
+   "draft": "{d} of the trolls have red beards."
+  },
+  "59": {
+   "action": "keep",
+   "clause_template": "I bought both drinks {d} days ago.",
+   "draft": "The bottle of grape drink has {d} stickers on it."
+  },
+  "60": {
+   "action": "keep",
+   "clause_template": "{d} of his coworkers also work the same shift.",
+   "draft": "{d} of his coworkers also work the same shift."
+  },
+  "61": {
+   "action": "keep",
+   "clause_template": "The walk home took {d} minutes.",
+   "draft": "{d} of the pebbles in the bag were white."
+  },
+  "62": {
+   "action": "keep",
+   "clause_template": "The set was printed {d} years ago.",
+   "draft": "{d} of the purple cards are slightly bent."
+  },
+  "63": {
+   "action": "keep",
+   "clause_template": "They live {d} kilometers from school.",
+   "draft": "{d} of his marbles are blue."
+  },
+  "64": {
+   "action": "keep",
+   "clause_template": "She bought the jars {d} days ago.",
+   "draft": "{d} of the jars have red lids."
+  },
+  "65": {
+   "action": "rewrite",
+   "clause_template": "The {helper} lives {d} miles away.",
+   "reviewed": "She has worked for herself for {d} years.",
+   "reason": "joint verdict 'Edit: The bookkeeper lives 10 miles away'; role filled per instance (bookkeeper/accountant/tax consultant/financial advisor); 10 -> {d}",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "The bookkeeper has {d} other clients."
+  },
+  "67": {
+   "action": "rewrite",
+   "clause_template": "The street has {d} streetlights.",
+   "reviewed": "He is {d} kilometers from home.",
+   "reason": "joint verdict 'Accept' (proposal: R1: a distance from home could be read as work done pushing; no distance)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "The van is {d} years old."
+  },
+  "68": {
+   "action": "rewrite",
+   "clause_template": "Her room has {d} posters on the wall.",
+   "reviewed": "Her best friend played for {d} hours over the same period.",
+   "reason": "joint verdict 'Accept' (proposal: R2: the best friend is a new person and 'she' became ambiguous; hours were the answer's unit)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the chess puzzles came from an old book."
+  },
+  "69": {
+   "action": "rewrite",
+   "clause_template": "The gym has {d} parking spaces.",
+   "reviewed": "He listens to {d} songs while he exercises.",
+   "reason": "joint verdict 'Accept' (proposal: R2: songs while exercising measure time; parking does not)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "He listens to {d} songs while he exercises."
+  },
+  "70": {
+   "action": "keep",
+   "clause_template": "He has {d} coworkers.",
+   "draft": "He uses {d} brushes for each job."
+  },
+  "71": {
+   "action": "rewrite",
+   "clause_template": "The barn has {d} windows.",
+   "reviewed": "He has kept livestock for {d} years.",
+   "reason": "joint verdict 'Accept' (proposal: R1: years keeping livestock; no time)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the alpacas are brown."
+  },
+  "72": {
+   "action": "keep",
+   "clause_template": "He lives {d} kilometers from the nearest post office.",
+   "draft": "{d} of his pen pals live in another country."
+  },
+  "73": {
+   "action": "keep",
+   "clause_template": "The comet's tail can be {d} million kilometers long.",
+   "draft": "The comet's tail can be {d} million kilometers long."
+  },
+  "74": {
+   "action": "keep",
+   "clause_template": "{d} of the girls ride the bus to school.",
+   "draft": "{d} of the girls ride the bus to school."
+  },
+  "75": {
+   "action": "keep",
+   "clause_template": "The balls arrived {d} days ago.",
+   "draft": "The shop also sells {d} kinds of rackets."
+  },
+  "77": {
+   "action": "keep",
+   "clause_template": "It is due in {d} days.",
+   "draft": "Her thesis has {d} chapters."
+  },
+  "78": {
+   "action": "keep",
+   "clause_template": "His school has {d} classrooms.",
+   "draft": "His school has {d} classrooms."
+  },
+  "79": {
+   "action": "keep",
+   "clause_template": "{d} of the pieces in the first puzzle were edge pieces.",
+   "draft": "{d} of the pieces in the first puzzle were edge pieces."
+  },
+  "80": {
+   "action": "keep",
+   "clause_template": "The vending machines also sell {d} kinds of candy.",
+   "draft": "The vending machines also sell {d} kinds of candy."
+  },
+  "81": {
+   "action": "rewrite",
+   "clause_template": "The park has {d} gates.",
+   "reviewed": "The twins arrived {d} minutes late.",
+   "reason": "joint verdict 'Accept' (proposal: R1: arriving late could mean fewer coins found, and the sentence read badly; no time)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the coins were shiny new ones."
+  },
+  "82": {
+   "action": "keep",
+   "clause_template": "The venue had {d} windows.",
+   "draft": "{d} of the engineers wore glasses."
+  },
+  "83": {
+   "action": "rewrite",
+   "clause_template": "The {flavor} costs ${d}.",
+   "reviewed": "They started baking {d} hours ago.",
+   "reason": "joint verdict 'Edit: The peanut butter costs $3.40'; flavour filled per instance (the 'some X' item); $3.40 -> ${d} (d is a whole number)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the lemon brownies have nuts on top."
+  },
+  "84": {
+   "action": "keep",
+   "clause_template": "The company that issued the stock has {d} offices.",
+   "draft": "The company that issued the stock has {d} offices."
+  },
+  "86": {
+   "action": "keep",
+   "clause_template": "Her team practices {d} hours a week.",
+   "draft": "The store had {d} other jerseys on display."
+  },
+  "87": {
+   "action": "keep",
+   "clause_template": "The park also has {d} smaller waterslides.",
+   "draft": "The park also has {d} smaller waterslides."
+  },
+  "88": {
+   "action": "keep",
+   "clause_template": "She owns {d} pairs of sneakers.",
+   "draft": "She owns {d} pairs of running shoes."
+  },
+  "89": {
+   "action": "keep",
+   "clause_template": "He drives {d} kilometers in that time.",
+   "draft": "The car has {d} seats."
+  },
+  "90": {
+   "action": "keep",
+   "clause_template": "Each of them posts {d} times a week.",
+   "draft": "Zahra has posted {d} times on LinkedIn this month."
+  },
+  "91": {
+   "action": "keep",
+   "clause_template": "He walks {d} minutes to get to the store.",
+   "draft": "{d} of the bananas were still a little green."
+  },
+  "92": {
+   "action": "rewrite",
+   "clause_template": "The nearby castle had {d} {weapon}s.",
+   "reviewed": "They fought for {d} hours.",
+   "reason": "joint verdict 'Edit: The nearby castle had 18 swords'; weapon filled per instance ('forgotten his X at home': sword/axe/hammer/mace); 18 -> {d}",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the goblins that Jin slew were wearing helmets."
+  },
+  "93": {
+   "action": "keep",
+   "clause_template": "The swimming spot is a {d}-minute bike ride from home.",
+   "draft": "The pool is {d} meters deep."
+  },
+  "94": {
+   "action": "rewrite",
+   "clause_template": "The company has {d} offices.",
+   "reviewed": "{d} of the applicants live in another city.",
+   "reason": "joint verdict 'Accept' (proposal: R2: applicants from another city might not accept; no people)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "{d} of the applicants live in another city."
+  },
+  "95": {
+   "action": "keep",
+   "clause_template": "The school employs {d} coaches.",
+   "draft": "{d} of the badminton players are left-handed."
+  },
+  "96": {
+   "action": "keep",
+   "clause_template": "The party venue is {d} kilometers away.",
+   "draft": "The party will last {d} hours."
+  },
+  "97": {
+   "action": "rewrite",
+   "clause_template": "The store has {d} aisles.",
+   "reviewed": "The store has {d} other cash registers.",
+   "reason": "joint verdict 'Accept' (proposal: R2: 'total weekly production' could include other registers; no registers or people)",
+   "auto_checks": "PASS (16/16 on all checks)",
+   "draft": "The store has {d} other cash registers."
+  },
+  "98": {
+   "action": "keep",
+   "clause_template": "It was first reported by a team of {d} scientists.",
+   "draft": "The virus was discovered by a team of {d} scientists."
+  },
+  "99": {
+   "action": "keep",
+   "clause_template": "The local farm has {d} hens.",
+   "draft": "{d} of the eggs she buys are brown."
+  }
+ },
+ "agreement": {
+  "items": 89,
+  "verdict": {
+   "kappa": 0.20094057289439934,
+   "percent_agreement": 0.7640449438202247,
+   "pabak": 0.5280898876404494,
+   "reviewer1_fix_or_no": 10,
+   "reviewer2_fix_or_no": 21
+  },
+  "is_noop": {
+   "kappa": 0.23171285779191317,
+   "percent_agreement": 0.7865168539325843,
+   "pabak": 0.5730337078651686,
+   "reviewer1_fix_or_no": 10,
+   "reviewer2_fix_or_no": 19
+  },
+  "grammatical": {
+   "kappa": -0.0171428571428573,
+   "percent_agreement": 0.9550561797752809,
+   "pabak": 0.9101123595505618,
+   "reviewer1_fix_or_no": 1,
+   "reviewer2_fix_or_no": 3
+  }
+ }
+}

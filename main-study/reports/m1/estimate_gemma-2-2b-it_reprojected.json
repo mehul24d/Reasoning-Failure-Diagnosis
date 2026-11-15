@@ -5,9 +5,9 @@
     "Tesla T4"
   ],
   "batch_size": 16,
-  "date": "2026-11-13",
+  "date": "2026-11-15",
   "commit": "b920121",
-  "reprojected_at_commit": "8201c8d",
+  "reprojected_at_commit": "304b4f7",
   "measured_on": {
     "date": "2026-11-12",
     "commit": "b920121",

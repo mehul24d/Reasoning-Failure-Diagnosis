@@ -35,8 +35,8 @@
    "source": "AI pre-screen"
   },
   "12": {
-   "rating": "PASS",
-   "source": "AI re-rating of the rewritten clause",
+   "rating": "DROPPED",
+   "source": "clause drop after the human review",
    "prescreen_rating_of_draft": "PASS"
   },
   "13": {
@@ -45,8 +45,9 @@
   },
   "14": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "WEAK"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "WEAK",
+   "clause_template": "The town has {d} schools."
   },
   "16": {
    "rating": "WEAK",
@@ -63,21 +64,24 @@
   },
   "20": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The farm has {d} tractors."
   },
   "21": {
    "rating": "WEAK",
    "source": "AI pre-screen"
   },
   "22": {
-   "rating": "UNSURE",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "Her house has {d} windows."
   },
   "23": {
-   "rating": "UNSURE",
-   "source": "AI pre-screen"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "clause_template": "Her house has {d} windows."
   },
   "24": {
    "rating": "WEAK",
@@ -89,13 +93,15 @@
    "prescreen_rating_of_draft": "WEAK"
   },
   "27": {
-   "rating": "PASS",
-   "source": "AI pre-screen"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "clause_template": "{name}'s office has {d} windows."
   },
   "28": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "WEAK"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "WEAK",
+   "clause_template": "The building has {d} elevators."
   },
   "29": {
    "rating": "PASS",
@@ -128,8 +134,9 @@
   },
   "35": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "WEAK"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "WEAK",
+   "clause_template": "The venue has {d} exits."
   },
   "36": {
    "rating": "WEAK",
@@ -137,9 +144,10 @@
    "prescreen_rating_of_draft": "PASS"
   },
   "37": {
-   "rating": "UNSURE",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The recipe calls for {d} ingredients."
   },
   "38": {
    "rating": "WEAK",
@@ -147,8 +155,8 @@
    "prescreen_rating_of_draft": "WEAK"
   },
   "39": {
-   "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
+   "rating": "DROPPED",
+   "source": "clause drop after the human review",
    "prescreen_rating_of_draft": "PASS"
   },
   "40": {
@@ -172,8 +180,8 @@
    "prescreen_rating_of_draft": "PASS"
   },
   "44": {
-   "rating": "PASS",
-   "source": "AI re-rating of the rewritten clause",
+   "rating": "DROPPED",
+   "source": "clause drop after the human review",
    "prescreen_rating_of_draft": "PASS"
   },
   "45": {
@@ -188,13 +196,15 @@
   },
   "47": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The yard has {d} trees."
   },
   "48": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "Her kitchen has {d} drawers."
   },
   "49": {
    "rating": "UNSURE",
@@ -207,13 +217,15 @@
   },
   "51": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The stand has {d} shelves."
   },
   "52": {
-   "rating": "UNSURE",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The shop has {d} aisles."
   },
   "53": {
    "rating": "WEAK",
@@ -230,8 +242,9 @@
   },
   "56": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "{name} is {d} years old."
   },
   "57": {
    "rating": "WEAK",
@@ -273,23 +286,27 @@
    "prescreen_rating_of_draft": "PASS"
   },
   "65": {
-   "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "WEAK"
+   "rating": "UNSURE",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "WEAK",
+   "clause_template": "The {helper} lives {d} miles away."
   },
   "67": {
-   "rating": "UNSURE",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "WEAK"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "WEAK",
+   "clause_template": "The street has {d} streetlights."
   },
   "68": {
-   "rating": "PASS",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "Her room has {d} posters on the wall."
   },
   "69": {
    "rating": "WEAK",
-   "source": "AI pre-screen"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "clause_template": "The gym has {d} parking spaces."
   },
   "70": {
    "rating": "UNSURE",
@@ -298,8 +315,9 @@
   },
   "71": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The barn has {d} windows."
   },
   "72": {
    "rating": "WEAK",
@@ -338,8 +356,9 @@
   },
   "81": {
    "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The park has {d} gates."
   },
   "82": {
    "rating": "WEAK",
@@ -347,9 +366,10 @@
    "prescreen_rating_of_draft": "PASS"
   },
   "83": {
-   "rating": "UNSURE",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "rating": "PASS",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The {flavor} costs ${d}."
   },
   "84": {
    "rating": "WEAK",
@@ -385,9 +405,10 @@
    "prescreen_rating_of_draft": "PASS"
   },
   "92": {
-   "rating": "WEAK",
-   "source": "AI re-rating of the rewritten clause",
-   "prescreen_rating_of_draft": "PASS"
+   "rating": "UNSURE",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "prescreen_rating_of_draft": "PASS",
+   "clause_template": "The nearby castle had {d} {weapon}s."
   },
   "93": {
    "rating": "PASS",
@@ -395,8 +416,9 @@
    "prescreen_rating_of_draft": "UNSURE"
   },
   "94": {
-   "rating": "PASS",
-   "source": "AI pre-screen"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "clause_template": "The company has {d} offices."
   },
   "95": {
    "rating": "PASS",
@@ -409,8 +431,9 @@
    "prescreen_rating_of_draft": "WEAK"
   },
   "97": {
-   "rating": "UNSURE",
-   "source": "AI pre-screen"
+   "rating": "WEAK",
+   "source": "AI re-rating of the clause agreed in the joint review",
+   "clause_template": "The store has {d} aisles."
   },
   "98": {
    "rating": "PASS",

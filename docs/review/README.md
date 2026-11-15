@@ -2,6 +2,8 @@
 
 **The sheet to fill in: `human_review_final.csv`** (one row per study template, 89 rows).
 The filled copies are `human_review_reviewer1.csv` and `human_review_reviewer2.csv` (2026-11-15).
+**Done 2026-11-15:** the joint decisions are in `clause_rewrites.csv`, and the result is in
+`main-study/reports/m1/distractor_review_agreement.md` (D43–D44).
 
 Each row shows one problem without and with its no-op clause (`original_problem`,
 `problem_with_clause`). `rewritten` says whether the clause was rewritten on 2026-11-13, before

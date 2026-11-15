@@ -1212,3 +1212,37 @@ the CIs stay template-clustered bootstrap CIs.
     `docs/review/clause_rewrites.csv`, and then `scripts/review_agreement.py` applies them and
     writes the reviewed table.
 - **Status:** S2 has not started and no GPU time has been used.
+
+## D44 (2026-11-15) Joint decisions on the 26 flagged clauses; clause slots; gate of 39 test templates (S2 A18 record, A21)
+
+- **Joint verdicts** (`docs/review/clause_rewrites.csv`, column `joint_verdict`, word for word).
+  The two reviewers reached them together, not independently:
+  - 18 Accept;
+  - 6 Edit (27, 39, 56, 65, 83, 92);
+  - 2 Drop (12, 44).
+- **Edits applied as written:** 56, 65, 83 and 92.
+  - The reviewers' numbers become {d}, under the unchanged d rule.
+  - A name, role, flavour or weapon that varies between instances is filled from each
+    instance's own text (`harness.distractor.CLAUSE_SLOTS`; patterns read text before the
+    insertion point).
+  - Examples: "Pavel is 23 years old" becomes "{name} is {d} years old", and "The nearby castle
+    had 18 swords" becomes "The nearby castle had {d} {weapon}s".
+- **Edits that could not be applied.** The PI decided these on 2026-11-15:
+  - **27**: "Sanjay works for 9 hours everyday" fails the no-forward-reference check ("work
+    week" appears only in the final question), and d = 17–19 gives implausible hours. It was
+    replaced by "{name}'s office has {d} windows."
+  - **39**: "The average age of maintenance workers is 45 years" cannot fit d in 2–19, and
+    "average" first appears in the final question. The template was dropped (train).
+  - **44 (Drop)**: dropping it leaves 39 test templates with a clause, below the 40 that the
+    `problems` gate required. The PI chose to keep the drop and lower that gate to 39
+    (`data.min_test_templates_with_clause`). The split (40 test) and `min_test_templates` are
+    unchanged. 44 keeps its clean condition.
+- **Report:** kappa, raw agreement and PABAK per question, under the union decision rule
+  (`reports/m1/distractor_review_agreement.md`). The 26 replacements are marked as reviewed
+  jointly.
+- **Re-check:** all 86 remaining clauses pass every automated check on instances 1–16, and 66
+  of them have the independent-solver check.
+- **Temptation:** the rewritten clauses were re-rated by the AI (D41 scale): 83 is PASS, 65
+  and 92 are UNSURE, and the other 20 are WEAK. Across all templates there are now 12 PASS, so
+  primary distractor failures may fall further below the pilot rate.
+- **Projection unchanged:** 10.43 T4-hours (13.04 with the safety factor), an upper bound.

@@ -1,5 +1,17 @@
 # Progress
 
+## 2026-11-15: Clause review reconciled (D44, S2 A18 record, A21); S2 binding
+
+No GPU time used before the S2 run.
+
+- **Agreement:** kappa / raw agreement / PABAK were 0.232 / 0.787 / 0.573 on is_noop,
+  −0.017 / 0.955 / 0.910 on grammatical, and 0.201 / 0.764 / 0.528 on the verdict. Decided by
+  the union rule.
+- **Joint verdicts on the 26 flagged clauses:** 23 rewritten and 3 dropped (12, 39, 44). 86
+  clauses pass every check on 16 instances.
+- **Gate:** at least 39 test templates with a clause (A21).
+- **Temptation:** 12 PASS, 60 WEAK, 14 UNSURE, 3 DROPPED.
+
 ## 2026-11-15: Human review answers in (D43); kappa 0.20 on the verdict; 26 clause changes proposed
 
 No GPU time used, and none of the 25-hour S2–S4 budget.

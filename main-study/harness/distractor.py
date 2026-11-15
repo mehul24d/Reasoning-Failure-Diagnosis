@@ -271,11 +271,45 @@ def forbidden_values(row: dict) -> list[float]:
     return [float(s.value) for s in sl] + [float(v) for st in prog.steps for v in (st.a, st.b, st.result)]
 
 
+# Instance words a reviewed clause may name (DECISIONS D44, S2 A18 review record). GSM-Symbolic
+# varies names, roles and items between instances, so a clause the reviewers wrote against
+# instance 1 ("Sanjay works ...") names each instance's own word instead. Every pattern reads
+# text that comes before the insertion point (the final sentence).
+CLAUSE_SLOTS: dict[int, dict[str, str]] = {
+    27: {"name": r"^(\w+) receives "},
+    56: {"name": r"\. (\w+) drinks "},
+    65: {"helper": r"hire one ([\w ]+?)\."},
+    83: {"flavor": r"and some ([\w ]+?) \w+\. How"},
+    92: {"weapon": r"forgotten his (\w+) at home"},
+}
+
+
+# AI temptation rating of the clauses agreed in the joint review (2026-11-15; D41 scale: PASS =
+# tempting, WEAK = little pull, UNSURE). A covariate only, never a filter (A19).
+POSTREVIEW_TEMPTATION_AI: dict[int, str] = {
+    14: "WEAK", 20: "WEAK", 22: "WEAK", 23: "WEAK", 27: "WEAK", 28: "WEAK", 35: "WEAK", 37: "WEAK",
+    47: "WEAK", 48: "WEAK", 51: "WEAK", 52: "WEAK", 56: "WEAK", 65: "UNSURE", 67: "WEAK", 68: "WEAK",
+    69: "WEAK", 71: "WEAK", 81: "WEAK", 83: "PASS", 92: "UNSURE", 94: "WEAK", 97: "WEAK",
+}
+
+
+def render_clause(template_id: int, clause_template: str, question: str, d: int) -> str:
+    """The clause with its number and any instance words (CLAUSE_SLOTS) filled in."""
+    slots = {}
+    for k, pat in CLAUSE_SLOTS.get(template_id, {}).items():
+        if "{" + k + "}" in clause_template:
+            m = re.search(pat, question)
+            if not m:
+                raise LookupError(f"template {template_id}: slot {k} not found in the question")
+            slots[k] = m.group(1)
+    return clause_template.format(d=d, **slots)
+
+
 def make_variant(template_id: int, instance: int, row: dict, clause_template: str) -> dict:
     """The distractor condition of one problem: question, d, rendered clause and its char span."""
     rng = np.random.default_rng(BASELINE_SEED * 1000 + template_id * 100 + instance)
     d = sample_distractor_value(forbidden_values(row), rng)
-    clause = clause_template.format(d=d)
+    clause = render_clause(template_id, clause_template, row["question"], d)
     q = insert_clause(row["question"], clause)
     start = q.index(clause)
     return {"question": q, "d": d, "clause": clause, "distractor_span": [start, start + len(clause)]}

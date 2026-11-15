@@ -471,9 +471,9 @@ def stage_problems(run: Run, **_) -> dict:
         raise RuntimeError(f"problems cover {n_t} templates, split has {len(templates)}")
     with_d = {r["template_id"] for r in rows if r["condition"] == "distractor"}
     test_d = len(with_d & set(sp["test"]))
-    if test_d < experiment_config()["data"]["min_test_templates"]:
-        raise RuntimeError(f"only {test_d} test templates have a reviewed clause; >= "
-                           f"{experiment_config()['data']['min_test_templates']} are required (A14)")
+    need = experiment_config()["data"]["min_test_templates_with_clause"]
+    if test_d < need:
+        raise RuntimeError(f"only {test_d} test templates have a reviewed clause; >= {need} are required (A14, A21)")
     return {"problems": len(rows), "templates": n_t, "instances_per_template": inst,
             "clean": sum(r["condition"] == "clean" for r in rows),
             "distractor": sum(r["condition"] == "distractor" for r in rows),

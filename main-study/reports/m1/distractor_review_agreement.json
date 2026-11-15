@@ -1,0 +1,248 @@
+{
+  "agreement": {
+    "items": 89,
+    "verdict": {
+      "kappa": 0.20094057289439934,
+      "percent_agreement": 0.7640449438202247,
+      "pabak": 0.5280898876404494,
+      "reviewer1_fix_or_no": 10,
+      "reviewer2_fix_or_no": 21
+    },
+    "is_noop": {
+      "kappa": 0.23171285779191317,
+      "percent_agreement": 0.7865168539325843,
+      "pabak": 0.5730337078651686,
+      "reviewer1_fix_or_no": 10,
+      "reviewer2_fix_or_no": 19
+    },
+    "grammatical": {
+      "kappa": -0.0171428571428573,
+      "percent_agreement": 0.9550561797752809,
+      "pabak": 0.9101123595505618,
+      "reviewer1_fix_or_no": 1,
+      "reviewer2_fix_or_no": 3
+    }
+  },
+  "decision_rule": "a clause is changed (rewritten or dropped) if EITHER reviewer marks it FIX, i.e. answers 'no' to is-it-a-no-op or to is-it-grammatical; agreement is reported, not used as a gate",
+  "flagged_fix_by_either": [
+    12,
+    14,
+    20,
+    22,
+    23,
+    27,
+    28,
+    35,
+    37,
+    39,
+    44,
+    47,
+    48,
+    51,
+    52,
+    56,
+    65,
+    67,
+    68,
+    69,
+    71,
+    81,
+    83,
+    92,
+    94,
+    97
+  ],
+  "changes": [
+    {
+      "template_id": 12,
+      "action": "drop",
+      "from": "He is expecting {d} guests tonight.",
+      "reason": "joint verdict 'Drop'"
+    },
+    {
+      "template_id": 14,
+      "action": "rewrite",
+      "from": "They pass {d} traffic lights on the way.",
+      "to": "The town has {d} schools.",
+      "reason": "joint verdict 'Accept' (proposal: R2: traffic lights could add walking time; nothing on the route)"
+    },
+    {
+      "template_id": 20,
+      "action": "rewrite",
+      "from": "He started this job {d} weeks ago.",
+      "to": "The farm has {d} tractors.",
+      "reason": "joint verdict 'Accept' (proposal: R1+R2: 19 weeks of the job is ambiguous with the fruit total; no time words)"
+    },
+    {
+      "template_id": 22,
+      "action": "rewrite",
+      "from": "She had invited {d} friends.",
+      "to": "Her house has {d} windows.",
+      "reason": "joint verdict 'Accept' (proposal: R2: invited friends relate to the cutlery count; windows do not)"
+    },
+    {
+      "template_id": 23,
+      "action": "rewrite",
+      "from": "She has knitted {d} scarves for other relatives in the past.",
+      "to": "Her house has {d} windows.",
+      "reason": "joint verdict 'Accept' (proposal: R2: scarves may share the wool; windows do not)"
+    },
+    {
+      "template_id": 27,
+      "action": "rewrite",
+      "from": "{d} of the emails that need a response come from the same client.",
+      "to": "{name}'s office has {d} windows.",
+      "reason": "joint verdict 'Edit: Sanjay works for 9 hours everyday'; user decision 2026-11-15: the edit fails the no-forward-reference check ('work week' first appears in the final question) and d=17-19 gives implausible hours; replaced by the instance's name + office windows"
+    },
+    {
+      "template_id": 28,
+      "action": "rewrite",
+      "from": "Each new patient waits about {d} minutes to be seen.",
+      "to": "The building has {d} elevators.",
+      "reason": "joint verdict 'Accept' (proposal: R2: patient waiting time could read as delayed admissions; no time or patients)"
+    },
+    {
+      "template_id": 35,
+      "action": "rewrite",
+      "from": "He started raising money {d} days ago.",
+      "to": "The venue has {d} exits.",
+      "reason": "joint verdict 'Accept' (proposal: R2: days of fundraising read as a rate; no time or money)"
+    },
+    {
+      "template_id": 37,
+      "action": "rewrite",
+      "from": "It was made {d} hours ago.",
+      "to": "The recipe calls for {d} ingredients.",
+      "reason": "joint verdict 'Accept' (proposal: R1+R2: hours since it was made could shorten how long it lasts; no time)"
+    },
+    {
+      "template_id": 39,
+      "action": "drop",
+      "from": "They have done this job for {d} years.",
+      "reason": "joint verdict 'Edit: The average age of maintainence workers is 45 years'; user decision 2026-11-15: the edit cannot fit d in 2-19 (an average age of 2-19 years) and 'average' first appears in the final question; dropped (train template)"
+    },
+    {
+      "template_id": 44,
+      "action": "drop",
+      "from": "There are also {d} parents watching.",
+      "reason": "joint verdict 'Drop'; joint verdict Drop; leaves 39 test templates with a clause, gate lowered to 39 (S2 A21, D44)"
+    },
+    {
+      "template_id": 47,
+      "action": "rewrite",
+      "from": "The hunt started {d} minutes ago.",
+      "to": "The yard has {d} trees.",
+      "reason": "joint verdict 'Accept' (proposal: R2: a hunt that started minutes ago is still going; no time)"
+    },
+    {
+      "template_id": 48,
+      "action": "rewrite",
+      "from": "She has been cooking for {d} years.",
+      "to": "Her kitchen has {d} drawers.",
+      "reason": "joint verdict 'Accept' (proposal: R2: years of cooking could change her speed; no time or skill)"
+    },
+    {
+      "template_id": 51,
+      "action": "rewrite",
+      "from": "He has run the stand for {d} years.",
+      "to": "The stand has {d} shelves.",
+      "reason": "joint verdict 'Accept' (proposal: R1: years running the stand; no time)"
+    },
+    {
+      "template_id": 52,
+      "action": "rewrite",
+      "from": "He has been saving for {d} weeks.",
+      "to": "The shop has {d} aisles.",
+      "reason": "joint verdict 'Accept' (proposal: R1+R2: weeks of saving suggest more money; no time or money)"
+    },
+    {
+      "template_id": 56,
+      "action": "rewrite",
+      "from": "He bought the drinks {d} days ago.",
+      "to": "{name} is {d} years old.",
+      "reason": "joint verdict 'Edit: Pavel is 23 years old'; name filled per instance (CLAUSE_SLOTS); 23 -> {d}"
+    },
+    {
+      "template_id": 65,
+      "action": "rewrite",
+      "from": "She has worked for herself for {d} years.",
+      "to": "The {helper} lives {d} miles away.",
+      "reason": "joint verdict 'Edit: The bookkeeper lives 10 miles away'; role filled per instance (bookkeeper/accountant/tax consultant/financial advisor); 10 -> {d}"
+    },
+    {
+      "template_id": 67,
+      "action": "rewrite",
+      "from": "He is {d} kilometers from home.",
+      "to": "The street has {d} streetlights.",
+      "reason": "joint verdict 'Accept' (proposal: R1: a distance from home could be read as work done pushing; no distance)"
+    },
+    {
+      "template_id": 68,
+      "action": "rewrite",
+      "from": "Her best friend played for {d} hours over the same period.",
+      "to": "Her room has {d} posters on the wall.",
+      "reason": "joint verdict 'Accept' (proposal: R2: the best friend is a new person and 'she' became ambiguous; hours were the answer's unit)"
+    },
+    {
+      "template_id": 69,
+      "action": "rewrite",
+      "from": "He listens to {d} songs while he exercises.",
+      "to": "The gym has {d} parking spaces.",
+      "reason": "joint verdict 'Accept' (proposal: R2: songs while exercising measure time; parking does not)"
+    },
+    {
+      "template_id": 71,
+      "action": "rewrite",
+      "from": "He has kept livestock for {d} years.",
+      "to": "The barn has {d} windows.",
+      "reason": "joint verdict 'Accept' (proposal: R1: years keeping livestock; no time)"
+    },
+    {
+      "template_id": 81,
+      "action": "rewrite",
+      "from": "The twins arrived {d} minutes late.",
+      "to": "The park has {d} gates.",
+      "reason": "joint verdict 'Accept' (proposal: R1: arriving late could mean fewer coins found, and the sentence read badly; no time)"
+    },
+    {
+      "template_id": 83,
+      "action": "rewrite",
+      "from": "They started baking {d} hours ago.",
+      "to": "The {flavor} costs ${d}.",
+      "reason": "joint verdict 'Edit: The peanut butter costs $3.40'; flavour filled per instance (the 'some X' item); $3.40 -> ${d} (d is a whole number)"
+    },
+    {
+      "template_id": 92,
+      "action": "rewrite",
+      "from": "They fought for {d} hours.",
+      "to": "The nearby castle had {d} {weapon}s.",
+      "reason": "joint verdict 'Edit: The nearby castle had 18 swords'; weapon filled per instance ('forgotten his X at home': sword/axe/hammer/mace); 18 -> {d}"
+    },
+    {
+      "template_id": 94,
+      "action": "rewrite",
+      "from": "{d} of the applicants live in another city.",
+      "to": "The company has {d} offices.",
+      "reason": "joint verdict 'Accept' (proposal: R2: applicants from another city might not accept; no people)"
+    },
+    {
+      "template_id": 97,
+      "action": "rewrite",
+      "from": "The store has {d} other cash registers.",
+      "to": "The store has {d} aisles.",
+      "reason": "joint verdict 'Accept' (proposal: R2: 'total weekly production' could include other registers; no registers or people)"
+    }
+  ],
+  "changes_reviewed": "jointly (both reviewers together), not independently",
+  "recheck": {
+    "templates": 86,
+    "instances_per_template": 16,
+    "with_solver_check": 66,
+    "all_pass": true
+  },
+  "sheets_sha256": [
+    "9754ab7f939bc754c776325c75185f9698a38aad127bee72fd4f8d64d096c9ad",
+    "174aaddb9befc3b6c026cc03b76046c346bf4fcbb354244aea49edea846bfe75"
+  ],
+  "kappa_min": 0.6
+}

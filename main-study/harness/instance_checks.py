@@ -203,7 +203,8 @@ def stem(w: str) -> str:
 
 
 def content_words(text: str) -> list[str]:
-    return [w for w in _WORD.findall(text.replace("{d}", "")) if w.lower() not in STOP]
+    # {d} and the instance-word slots (harness.distractor.CLAUSE_SLOTS) are filled per instance
+    return [w for w in _WORD.findall(re.sub(r"\{\w+\}", "", text)) if w.lower() not in STOP]
 
 
 def _stems(text: str) -> set[str]:

@@ -1,4 +1,4 @@
-# Compute estimate: gemma-2-2b-it (re-projected for the current design, 2026-11-13)
+# Compute estimate: gemma-2-2b-it (re-projected for the current design, 2026-11-15)
 
 Measured on **Tesla T4, Tesla T4**, code `b920121`, smoke test on 384 greedy traces (GSM8K train, never the study population).
 

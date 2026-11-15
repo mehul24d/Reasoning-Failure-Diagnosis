@@ -33,10 +33,13 @@ from pathlib import Path
 
 from analysis.stats import cohens_kappa
 from harness.config import REPO_ROOT, experiment_config
-from harness.distractor import DRAFT_CLAUSES, FINAL_CLAUSES, REVIEWED, TEMPTATION
+from harness.clause_solvers import SOLVERS
+from harness.distractor import DRAFT_CLAUSES, FINAL_CLAUSES, POSTREVIEW_TEMPTATION_AI, REVIEWED, TEMPTATION
 
 REVIEW = REPO_ROOT.parent / "docs" / "review"
 OUT_JSON = REPO_ROOT / "reports" / "m1" / "distractor_review_agreement.json"
+UNION_RULE = ("a clause is changed (rewritten or dropped) if EITHER reviewer marks it FIX, i.e. answers "
+              "'no' to is-it-a-no-op or to is-it-grammatical; agreement is reported, not used as a gate")
 YES, NO = {"yes", "y", "ok", "keep", "true", "1"}, {"no", "n", "fix", "false", "0"}
 
 
@@ -83,7 +86,9 @@ def agreement(r1: dict, r2: dict) -> dict:
     res = {"items": len(ts)}
     for k in ("verdict", "is_noop", "grammatical"):
         a, b = [r1[t][k] for t in ts], [r2[t][k] for t in ts]
-        res[k] = {"kappa": cohens_kappa(a, b), "percent_agreement": sum(x == y for x, y in zip(a, b)) / len(ts),
+        po = sum(x == y for x, y in zip(a, b)) / len(ts)
+        res[k] = {"kappa": cohens_kappa(a, b), "percent_agreement": po,
+                  "pabak": 2 * po - 1,                    # prevalence- and bias-adjusted kappa, two categories
                   "reviewer1_fix_or_no": sum(x in ("FIX", False) for x in a),
                   "reviewer2_fix_or_no": sum(x in ("FIX", False) for x in b)}
     return res
@@ -135,8 +140,23 @@ def main() -> None:
         else:
             clauses[str(t)] = {"action": "keep", "clause_template": FINAL_CLAUSES[t]}
         clauses[str(t)]["draft"] = DRAFT_CLAUSES[t]
+    # Re-run every automated check on instances 1-16 for EVERY clause that stays in the study
+    # (kept and rewritten), with the independent-solver check wherever a solver exists.
+    keep_or_rw = sorted(int(t) for t, c in clauses.items() if c["action"] != "drop")
+    allinst = {}
+    for r in gsm_symbolic("main", templates=keep_or_rw, instances=exp["clause_check_instances"]):
+        allinst.setdefault(int(r["template_id"].split("-")[1]), []).append(r)
+    recheck = {}
+    for t in keep_or_rw:
+        row, _ = dr.check_template(t, allinst[t], clauses[str(t)]["clause_template"], rewritten=t in SOLVERS)
+        recheck[t] = row["auto_pass"]
+        if row["auto_pass"] != "PASS":
+            raise SystemExit(f"template {t} fails the automated checks after the review: {row['auto_notes']}")
     ag = agreement(r1, r2)
-    rep = {"agreement": ag, "flagged_fix_by_either": flagged, "changes": changes,
+    rep = {"agreement": ag, "decision_rule": UNION_RULE, "flagged_fix_by_either": flagged, "changes": changes,
+           "changes_reviewed": "jointly (both reviewers together), not independently",
+           "recheck": {"templates": len(recheck), "instances_per_template": exp["clause_check_instances"],
+                       "with_solver_check": sum(t in SOLVERS for t in recheck), "all_pass": True},
            "sheets_sha256": [hashlib.sha256(Path(s).read_bytes()).hexdigest() for s in sheets],
            "kappa_min": experiment_config()["thresholds"]["kappa_min"]}
     REVIEWED.parent.mkdir(parents=True, exist_ok=True)
@@ -146,19 +166,32 @@ def main() -> None:
         tt = json.loads(TEMPTATION.read_text())
         for ch in changes:
             e = tt["templates"].setdefault(str(ch["template_id"]), {})
-            e.update({"rating": "UNRATED" if ch["action"] == "rewrite" else "DROPPED",
-                      "source": f"clause {ch['action']} after the human review"})
+            rated = ch["action"] == "rewrite" and ch["template_id"] in POSTREVIEW_TEMPTATION_AI
+            e.update({"rating": POSTREVIEW_TEMPTATION_AI[ch["template_id"]] if rated
+                      else "UNRATED" if ch["action"] == "rewrite" else "DROPPED",
+                      "source": "AI re-rating of the clause agreed in the joint review" if rated
+                      else f"clause {ch['action']} after the human review"})
+            if ch["action"] == "rewrite":
+                e["clause_template"] = ch["to"]
         TEMPTATION.write_text(json.dumps(tt, indent=1))
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(rep, indent=2))
     md = ["# Distractor-clause review: agreement and changes", "",
-          f"{ag['items']} final clauses (A18), two reviewers.", "",
-          "| Question | Cohen's kappa | agreement | reviewer 1 no/FIX | reviewer 2 no/FIX |", "|---|---|---|---|---|"]
+          f"{ag['items']} final clauses (A18), two reviewers who answered independently.", "",
+          f"**Decision rule (union):** {UNION_RULE}", "",
+          "| Question | Cohen's kappa | raw agreement | PABAK | reviewer 1 no/FIX | reviewer 2 no/FIX |",
+          "|---|---|---|---|---|---|"]
     for k in ("is_noop", "grammatical", "verdict"):
         kk = ag[k]["kappa"]
         md.append(f"| {k} | {'n/a' if kk is None else f'{kk:.3f}'} | {ag[k]['percent_agreement']:.3f} | "
+                  f"{ag[k]['pabak']:.3f} | "
                   f"{ag[k]['reviewer1_fix_or_no']} | {ag[k]['reviewer2_fix_or_no']} |")
-    md += ["", f"Marked FIX by either reviewer: {flagged or 'none'}.", ""]
+    md += ["", f"Marked FIX by either reviewer: {flagged or 'none'}.", "",
+           "The changes below were agreed by the two reviewers **jointly**, in one discussion; they were "
+           "not reviewed independently, so no agreement statistic applies to them.", "",
+           f"Re-check after the review: all {len(recheck)} clauses that stay in the study pass every automated "
+           f"check on instances 1-{exp['clause_check_instances']} "
+           f"({sum(t in SOLVERS for t in recheck)} with the independent-solver check).", ""]
     md += [f"* {c['template_id']}: {c['action']}" + (f": \"{c['from']}\" -> \"{c['to']}\"" if c["action"] == "rewrite"
            else "") + (f" ({c['reason']})" if c.get("reason") else "") for c in changes]
     OUT_JSON.with_suffix(".md").write_text("\n".join(md) + "\n")
