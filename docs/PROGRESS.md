@@ -1,5 +1,30 @@
 # Progress
 
+## 2026-11-15: S2 done on Kaggle (problems, generate, score, verify); verify gate passed
+
+Kaggle kernel `btp-minor-s2` v1, binding commit `a730993`, 2 × T4, 2.56 h session (**5.12 T4
+GPU-hours**). Records: `main-study/reports/m1/s2/` (stage status, session status, pip freeze)
+and `reports/m1/s2_equivalence_batched_gemma-2-2b-it.json`.
+- **Problems:** 1,400 (712 clean, 688 distractor); 86 templates with a clause, 39 of them test.
+- **Generation:** 8,400 greedy traces (HF batched), 148.6 new tokens on average. Stops: 7,977 at
+  the answer line, 372 at end of turn, 51 at the 512 cap (0.6%).
+- **Score:** accuracy 0.532 (clean 0.563, distractor 0.500), no answer 1.6%, char map failures 0.
+- **Verify gate (A2): passed.** TL reproduced the HF tokens on 267 of 267 sampled traces (40,230
+  tokens, threshold ≥ 0.99), max logit difference 3.3e-4. float16 storage max relative error
+  4.3e-4. No TL fallback.
+- **Primary population (distractor failures):** 498 failures, 242 on test templates, **225 with s0
+  on 29 test templates, against the target of 320** (70%). The study stays reported as
+  underpowered (A20). N* = max(320, ⌈213 × outcome deff⌉) needs the primary-outcome deff,
+  which comes after the annotation (S5). The failure-occurrence deff, which is descriptive only,
+  is 6.32 (ICC 0.37 on train+dev).
+- **Natural population:** 1,866 failures, 855 on test templates, 773 with s0 on 34 test
+  templates; failure-occurrence deff 17.19.
+- **Budget:** 5.12 of 25 T4 GPU-hours used, 19.88 left. Generation took 4.90 T4-h against 4.60
+  projected. The sampled runs come to 1,097 test failures × 5 = 5,485, fewer than the 7,610
+  projected, so the projection stays within budget.
+- **Next:** S4 (`cache`) as kernel `btp-minor-s4`, restoring from `btp-minor-s2`; then S3
+  (`sampled,report`).
+
 ## 2026-11-15: Clause review reconciled (D44, S2 A18 record, A21); S2 binding
 
 No GPU time used before the S2 run.

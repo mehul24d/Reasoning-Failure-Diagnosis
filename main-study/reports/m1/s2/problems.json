@@ -1,0 +1,15 @@
+{
+  "stage": "problems",
+  "status": "complete",
+  "time": "2026-11-15 10:33:14",
+  "problems": 1400,
+  "templates": 89,
+  "instances_per_template": 8,
+  "clean": 712,
+  "distractor": 688,
+  "templates_with_distractor": 86,
+  "test_templates_with_distractor": 39,
+  "reviewed_clauses_sha256": "5e8b725a0131ddc8be07b71c251caefdd9701c98e9bc053ec0a611a1089bac9b",
+  "sha256": "2664760ba63bdd70591822756391166606c2b157c83ec7e51510634f6b444419",
+  "stage_seconds": 1.8
+}

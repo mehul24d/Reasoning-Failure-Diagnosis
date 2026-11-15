@@ -1,0 +1,26 @@
+{
+  "stage": "verify",
+  "status": "complete",
+  "time": "2026-11-15 13:04:33",
+  "worker_codes": [
+    0,
+    0
+  ],
+  "n_workers": 2,
+  "seconds": 157.5,
+  "tl_n_devices": 1,
+  "pass": true,
+  "reproduction": 1.0,
+  "tokens": 40230,
+  "traces": 267,
+  "max_abs_logit_diff": 0.000331878662109375,
+  "traces_with_any_mismatch": 0,
+  "fp16_check": {
+    "traces": 32,
+    "max_abs_err": 0.4947509765625,
+    "max_rel_err": 0.00042559721623547375,
+    "max_abs_value": 1320.266357421875
+  },
+  "report": "/kaggle/working/btp/reports/m1/s2_equivalence_batched_gemma-2-2b-it.json",
+  "stage_seconds": 158.1
+}

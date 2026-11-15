@@ -1,0 +1,26 @@
+{
+  "stage": "generate",
+  "status": "complete",
+  "time": "2026-11-15 13:00:18",
+  "worker_codes": [
+    0,
+    0
+  ],
+  "n_workers": 2,
+  "seconds": 8820.0,
+  "lines": 8400,
+  "sha256": "bafe2c9afe754690b4c3269723b527b553218473b90522911679a9a66a0b78e7",
+  "file": "/kaggle/working/btp/data/generated/gemma-2-2b-it/s2_traces.jsonl",
+  "commit": "a730993",
+  "top2_lines": 8400,
+  "traces": 8400,
+  "stop_reasons": {
+    "answer_line": 7977,
+    "max_new_tokens": 51,
+    "eos": 372
+  },
+  "hit_max_tokens_fraction": 0.006071428571428571,
+  "mean_new_tokens": 148.5640476190476,
+  "max_new_tokens_seen": 512,
+  "stage_seconds": 8824.6
+}

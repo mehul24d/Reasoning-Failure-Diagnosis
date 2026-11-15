@@ -1,0 +1,59 @@
+{
+  "stage": "score",
+  "status": "complete",
+  "time": "2026-11-15 13:01:54",
+  "traces": 8400,
+  "accuracy": 0.5323809523809524,
+  "no_answer": 0.01630952380952381,
+  "hit_max_tokens_fraction": 0.006071428571428571,
+  "char_map_failed": 0,
+  "positions": 109879,
+  "unique_rows": 109854,
+  "rows_per_trace": 13.077857142857143,
+  "test_failures": 855,
+  "test_failures_with_s0": 773,
+  "test_templates_with_s0_failure": 34,
+  "populations": {
+    "primary": {
+      "failures": 498,
+      "test_failures": 242,
+      "test_failures_with_s0": 225,
+      "test_templates_with_s0_failure": 29
+    },
+    "natural": {
+      "failures": 1866,
+      "test_failures": 855,
+      "test_failures_with_s0": 773,
+      "test_templates_with_s0_failure": 34
+    }
+  },
+  "accuracy_by_condition": {
+    "clean": 0.5632022471910112,
+    "distractor": 0.500484496124031
+  },
+  "design_effect": {
+    "role": "descriptive (A15, A20): failure occurrence; reported with the primary-outcome deff",
+    "pilot_failure_deff": 19.76,
+    "primary": {
+      "icc_failure_train_dev": 0.36554792976270634,
+      "deff": 6.322377857345003,
+      "m_eff": 15.559999999999999,
+      "cv_cluster_size": 1.0027517694380355,
+      "test_failures_with_s0": 225,
+      "test_templates": 29,
+      "n_eff": 35.58787612458293
+    },
+    "natural": {
+      "icc_failure_train_dev": 0.5028621486993303,
+      "deff": 17.1943730009329,
+      "m_eff": 33.20439844760673,
+      "cv_cluster_size": 0.678585343819676,
+      "test_failures_with_s0": 773,
+      "test_templates": 34,
+      "n_eff": 44.95656805619257
+    }
+  },
+  "sha256_scored": "cb9df486b3acfbe5d26c0950ebd60a9bbbfa949c1f60d51de346614fb289b160",
+  "sha256_positions": "6fc8f54482ed5c3defa8e2de7a992b0e9b2c429f2c6942a01dbfd240b700a3b5",
+  "stage_seconds": 96.2
+}
