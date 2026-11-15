@@ -1246,3 +1246,36 @@ the CIs stay template-clustered bootstrap CIs.
   and 92 are UNSURE, and the other 20 are WEAK. Across all templates there are now 12 PASS, so
   primary distractor failures may fall further below the pilot rate.
 - **Projection unchanged:** 10.43 T4-hours (13.04 with the safety factor), an upper bound.
+
+## D45 (2026-11-15) S3 restored from the S2 output instead of S4's
+
+- **What happened:** the S3 kernel (`btp-minor-s3`, input: `btp-minor-s4`'s output, 13.67 GB
+  with the activation cache) stayed QUEUED on Kaggle from 19:18 to 21:31 IST and never started.
+  Kaggle gives no reason. The likely causes are T4×2 availability or the time needed to prepare
+  the 13.67 GB output as an input; neither is confirmed. The Kaggle API has no cancel call for a
+  queued run, so the never-run kernel was deleted, which rules out two S3 runs overlapping.
+- **Decision (PI, 2026-11-15):** S3 (`sampled`, `report`) runs in a new kernel,
+  `btp-minor-s3-from-s2`, restoring from `btp-minor-s2`'s output. The sampled runs read only the
+  scored greedy traces of S2; the activation cache is not an input to them, so nothing
+  pre-registered changes (k = 5, T = 0.7, test-template primary and natural failures, A5, A14).
+- **Guard:** before anything is generated, `scripts/check_s2_restore.py` checks that the restored
+  problems, traces, scored traces and positions hash to the values committed in
+  `reports/m1/s2/`, and that the restored S2 stage-status files equal the committed copies byte
+  for byte. Any difference stops the commit.
+- **Consequences:**
+  - The run summary written on Kaggle shows `cache` as pending and an activation store of 0 bytes,
+    because the S4 output was not attached. Its cache and store fields are filled in on CPU from the
+    committed S4 records (`reports/m1/s4/`), and the summary says so.
+  - The study outputs are split across two notebooks' outputs: the cache in `btp-minor-s4`, the
+    sampled runs in `btp-minor-s3-from-s2`.
+- **Kaggle quota found while switching:** this account's weekly GPU quota is 6 session-hours
+  (not about 30, as assumed earlier). 3.15 h had been used (S2 2.56 h, S4 0.58 h), leaving 2.85 h
+  until the refresh on 2026-11-21. The S3 session's deadline is therefore set to 2.75 h, so a run
+  that is cut short stops at the deadline with its status files written and resumes next commit,
+  instead of being killed when the quota runs out. The 25 T4-hour study budget is unchanged.
+- **Single-T4 contingency:** the PI allowed the sampled stage to run on one T4 if the new kernel
+  was still queued after 45 minutes. One worker gives the same pre-registered design, but the
+  sampling seed is derived from each batch's keys, so a different worker count draws different
+  (still recorded and reproducible) samples. It is also slower: about 3.45 h of wall time for
+  the projected 3.45 T4-hours, more than the 2.85 h of quota left this week. Whether it was used
+  is recorded below.
