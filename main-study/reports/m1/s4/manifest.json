@@ -1,0 +1,323 @@
+{
+ "model": "gemma-2-2b-it",
+ "hooks": [
+  "blocks.0.hook_resid_pre",
+  "blocks.0.hook_resid_post",
+  "blocks.1.hook_resid_post",
+  "blocks.2.hook_resid_post",
+  "blocks.3.hook_resid_post",
+  "blocks.4.hook_resid_post",
+  "blocks.5.hook_resid_post",
+  "blocks.6.hook_resid_post",
+  "blocks.7.hook_resid_post",
+  "blocks.8.hook_resid_post",
+  "blocks.9.hook_resid_post",
+  "blocks.10.hook_resid_post",
+  "blocks.11.hook_resid_post",
+  "blocks.12.hook_resid_post",
+  "blocks.13.hook_resid_post",
+  "blocks.14.hook_resid_post",
+  "blocks.15.hook_resid_post",
+  "blocks.16.hook_resid_post",
+  "blocks.17.hook_resid_post",
+  "blocks.18.hook_resid_post",
+  "blocks.19.hook_resid_post",
+  "blocks.20.hook_resid_post",
+  "blocks.21.hook_resid_post",
+  "blocks.22.hook_resid_post",
+  "blocks.23.hook_resid_post",
+  "blocks.24.hook_resid_post",
+  "blocks.25.hook_resid_post"
+ ],
+ "d_model": 2304,
+ "storage_dtype": "float16",
+ "compute_dtype": "float32",
+ "positions": [
+  "step_first",
+  "step_last",
+  "final_answer"
+ ],
+ "shards": {
+  "resid_w0_00000.npy": {
+   "rows": 1796,
+   "bytes": 223451264,
+   "index_entries": 1796
+  },
+  "resid_w0_00001.npy": {
+   "rows": 2064,
+   "bytes": 256794752,
+   "index_entries": 2064
+  },
+  "resid_w0_00002.npy": {
+   "rows": 2062,
+   "bytes": 256545920,
+   "index_entries": 2062
+  },
+  "resid_w0_00003.npy": {
+   "rows": 2059,
+   "bytes": 256172672,
+   "index_entries": 2060
+  },
+  "resid_w0_00004.npy": {
+   "rows": 2068,
+   "bytes": 257292416,
+   "index_entries": 2068
+  },
+  "resid_w0_00005.npy": {
+   "rows": 2059,
+   "bytes": 256172672,
+   "index_entries": 2059
+  },
+  "resid_w0_00006.npy": {
+   "rows": 2051,
+   "bytes": 255177344,
+   "index_entries": 2051
+  },
+  "resid_w0_00007.npy": {
+   "rows": 2062,
+   "bytes": 256545920,
+   "index_entries": 2062
+  },
+  "resid_w0_00008.npy": {
+   "rows": 2050,
+   "bytes": 255052928,
+   "index_entries": 2050
+  },
+  "resid_w0_00009.npy": {
+   "rows": 2055,
+   "bytes": 255675008,
+   "index_entries": 2056
+  },
+  "resid_w0_00010.npy": {
+   "rows": 2056,
+   "bytes": 255799424,
+   "index_entries": 2057
+  },
+  "resid_w0_00011.npy": {
+   "rows": 2053,
+   "bytes": 255426176,
+   "index_entries": 2055
+  },
+  "resid_w0_00012.npy": {
+   "rows": 2048,
+   "bytes": 254804096,
+   "index_entries": 2048
+  },
+  "resid_w0_00013.npy": {
+   "rows": 2063,
+   "bytes": 256670336,
+   "index_entries": 2063
+  },
+  "resid_w0_00014.npy": {
+   "rows": 2053,
+   "bytes": 255426176,
+   "index_entries": 2053
+  },
+  "resid_w0_00015.npy": {
+   "rows": 2058,
+   "bytes": 256048256,
+   "index_entries": 2058
+  },
+  "resid_w0_00016.npy": {
+   "rows": 2051,
+   "bytes": 255177344,
+   "index_entries": 2051
+  },
+  "resid_w0_00017.npy": {
+   "rows": 2063,
+   "bytes": 256670336,
+   "index_entries": 2064
+  },
+  "resid_w0_00018.npy": {
+   "rows": 2056,
+   "bytes": 255799424,
+   "index_entries": 2056
+  },
+  "resid_w0_00019.npy": {
+   "rows": 2053,
+   "bytes": 255426176,
+   "index_entries": 2054
+  },
+  "resid_w0_00020.npy": {
+   "rows": 2052,
+   "bytes": 255301760,
+   "index_entries": 2053
+  },
+  "resid_w0_00021.npy": {
+   "rows": 2058,
+   "bytes": 256048256,
+   "index_entries": 2063
+  },
+  "resid_w0_00022.npy": {
+   "rows": 2050,
+   "bytes": 255052928,
+   "index_entries": 2050
+  },
+  "resid_w0_00023.npy": {
+   "rows": 2053,
+   "bytes": 255426176,
+   "index_entries": 2053
+  },
+  "resid_w0_00024.npy": {
+   "rows": 2048,
+   "bytes": 254804096,
+   "index_entries": 2048
+  },
+  "resid_w0_00025.npy": {
+   "rows": 2060,
+   "bytes": 256297088,
+   "index_entries": 2060
+  },
+  "resid_w0_00026.npy": {
+   "rows": 2070,
+   "bytes": 257541248,
+   "index_entries": 2070
+  },
+  "resid_w0_00027.npy": {
+   "rows": 525,
+   "bytes": 65318528,
+   "index_entries": 525
+  },
+  "resid_w1_00000.npy": {
+   "rows": 1822,
+   "bytes": 226686080,
+   "index_entries": 1823
+  },
+  "resid_w1_00001.npy": {
+   "rows": 2069,
+   "bytes": 257416832,
+   "index_entries": 2069
+  },
+  "resid_w1_00002.npy": {
+   "rows": 2057,
+   "bytes": 255923840,
+   "index_entries": 2058
+  },
+  "resid_w1_00003.npy": {
+   "rows": 2072,
+   "bytes": 257790080,
+   "index_entries": 2073
+  },
+  "resid_w1_00004.npy": {
+   "rows": 2050,
+   "bytes": 255052928,
+   "index_entries": 2050
+  },
+  "resid_w1_00005.npy": {
+   "rows": 2063,
+   "bytes": 256670336,
+   "index_entries": 2063
+  },
+  "resid_w1_00006.npy": {
+   "rows": 2053,
+   "bytes": 255426176,
+   "index_entries": 2053
+  },
+  "resid_w1_00007.npy": {
+   "rows": 2051,
+   "bytes": 255177344,
+   "index_entries": 2051
+  },
+  "resid_w1_00008.npy": {
+   "rows": 2055,
+   "bytes": 255675008,
+   "index_entries": 2055
+  },
+  "resid_w1_00009.npy": {
+   "rows": 2055,
+   "bytes": 255675008,
+   "index_entries": 2055
+  },
+  "resid_w1_00010.npy": {
+   "rows": 2059,
+   "bytes": 256172672,
+   "index_entries": 2060
+  },
+  "resid_w1_00011.npy": {
+   "rows": 2062,
+   "bytes": 256545920,
+   "index_entries": 2066
+  },
+  "resid_w1_00012.npy": {
+   "rows": 2068,
+   "bytes": 257292416,
+   "index_entries": 2068
+  },
+  "resid_w1_00013.npy": {
+   "rows": 2052,
+   "bytes": 255301760,
+   "index_entries": 2052
+  },
+  "resid_w1_00014.npy": {
+   "rows": 2049,
+   "bytes": 254928512,
+   "index_entries": 2049
+  },
+  "resid_w1_00015.npy": {
+   "rows": 2056,
+   "bytes": 255799424,
+   "index_entries": 2056
+  },
+  "resid_w1_00016.npy": {
+   "rows": 2050,
+   "bytes": 255052928,
+   "index_entries": 2052
+  },
+  "resid_w1_00017.npy": {
+   "rows": 2048,
+   "bytes": 254804096,
+   "index_entries": 2048
+  },
+  "resid_w1_00018.npy": {
+   "rows": 2057,
+   "bytes": 255923840,
+   "index_entries": 2057
+  },
+  "resid_w1_00019.npy": {
+   "rows": 2060,
+   "bytes": 256297088,
+   "index_entries": 2060
+  },
+  "resid_w1_00020.npy": {
+   "rows": 2049,
+   "bytes": 254928512,
+   "index_entries": 2049
+  },
+  "resid_w1_00021.npy": {
+   "rows": 2048,
+   "bytes": 254804096,
+   "index_entries": 2050
+  },
+  "resid_w1_00022.npy": {
+   "rows": 2062,
+   "bytes": 256545920,
+   "index_entries": 2062
+  },
+  "resid_w1_00023.npy": {
+   "rows": 2052,
+   "bytes": 255301760,
+   "index_entries": 2052
+  },
+  "resid_w1_00024.npy": {
+   "rows": 2050,
+   "bytes": 255052928,
+   "index_entries": 2050
+  },
+  "resid_w1_00025.npy": {
+   "rows": 2053,
+   "bytes": 255426176,
+   "index_entries": 2053
+  },
+  "resid_w1_00026.npy": {
+   "rows": 836,
+   "bytes": 104011904,
+   "index_entries": 836
+  }
+ },
+ "orphan_shards": [],
+ "n_rows": 109854,
+ "n_index_entries": 109879,
+ "traces": 8400,
+ "bytes": 13667602304,
+ "index_sha256": "b6057e9735fb8bfddc4da131e8e75c74288cbf541bac871a9d66220c998b17da"
+}

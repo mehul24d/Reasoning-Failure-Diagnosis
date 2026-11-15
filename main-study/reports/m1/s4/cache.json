@@ -1,0 +1,19 @@
+{
+  "stage": "cache",
+  "status": "complete",
+  "time": "2026-11-15 13:45:30",
+  "worker_codes": [
+    0,
+    0
+  ],
+  "n_workers": 2,
+  "seconds": 1969.6,
+  "tl_n_devices": 1,
+  "store_bytes": 13667602304,
+  "store_gb": 13.668,
+  "rows": 109854,
+  "orphan_shards": 0,
+  "all_traces_reproduction": 1.0,
+  "all_traces_max_abs_logit_diff": 0.0012502670288085938,
+  "stage_seconds": 1972.8
+}

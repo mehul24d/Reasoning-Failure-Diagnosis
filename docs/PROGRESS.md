@@ -1,5 +1,18 @@
 # Progress
 
+## 2026-11-15: S4 done on Kaggle (activation cache)
+
+Kaggle kernel `btp-minor-s4` v1 (commit `6df4e68`, which differs from the binding commit
+`a730993` only in reports and docs). It restored S2's outputs from `btp-minor-s2`; the S2
+stage records came back byte-identical. 2 × T4, 0.58 h session (**1.16 T4 GPU-hours**). Records:
+`main-study/reports/m1/s4/` (cache stage status, session status, store manifest).
+- **Store:** 109,854 rows (109,879 index entries) for 8,400 traces, 27 hooks, d_model 2304,
+  positions step_first, step_last and final_answer. 13.67 GB in float16 storage (float32 compute),
+  55 shards, no orphan shards.
+- **Every trace re-checked while caching:** TL reproduction 1.0, max logit difference 1.3e-3.
+- **Budget:** 6.28 of 25 T4 GPU-hours used (S2 5.12 + S4 1.16), 18.72 left.
+- **Next:** S3 (`sampled,report`) as kernel `btp-minor-s3`, restoring from `btp-minor-s4`.
+
 ## 2026-11-15: S2 done on Kaggle (problems, generate, score, verify); verify gate passed
 
 Kaggle kernel `btp-minor-s2` v1, binding commit `a730993`, 2 × T4, 2.56 h session (**5.12 T4
