@@ -1,5 +1,30 @@
 # Progress
 
+## 2026-11-16: Kaggle outputs downloaded and checked against the committed records
+
+All three notebook outputs were downloaded to `main-study/data/generated/kaggle_outputs/`
+(gitignored), one folder per notebook:
+- `btp-minor-s2`: 104 files, 0.78 GB.
+- `btp-minor-s3-from-s2`: 113 files, 0.82 GB.
+- `btp-minor-s4`: 161 files, 14.04 GB.
+
+Until then the notebook outputs were the only copy.
+
+The download was checked with `scripts/verify_kaggle_backup.py`. All 39 checks pass
+(`reports/m1/backup/verify_local_download.json`):
+- **Every notebook:** problems, traces, scored traces and positions hash to the S2 records, and
+  the S2 status files are byte-identical.
+- **S3:** the sampled runs hash to `sampled.json`. The status, session, run-summary and
+  restore-check files equal the committed copies.
+- **S4:** `manifest.json` equals the committed one, and `index.jsonl` matches `index_sha256`.
+  All 55 shards are present with the manifest's byte sizes and row counts, in float16, with no
+  unlisted shards (13,667,602,304 bytes).
+
+The committed S4 records have no per-shard hashes. So the sha256 of every downloaded file is now
+committed (`reports/m1/backup/kaggle_outputs_sha256.json`), and any later copy can be checked
+exactly with `--against`.
+- **Next:** an off-site copy in a private Hugging Face dataset, checked against that file.
+
 ## 2026-11-15: S3 done on Kaggle (sampled runs, report); restored from S2 (D45)
 
 Kaggle kernel `btp-minor-s3-from-s2` v1, commit `d490ce4`, 2 × T4, 1.65 h session (**3.30 T4
@@ -23,8 +48,11 @@ status, pip freeze, the restore check, the run summary).
 - **Primary population unchanged by S3:** **225 test distractor failures with s0, against the
   target of 320** (70%). N* waits for the outcome deff (S5).
 - **Budget:** 9.58 of 25 T4 GPU-hours used (S2 5.12 + S4 1.16 + S3 3.30), 15.42 left. Kaggle's
-  weekly GPU quota on this account is 6 session-hours; 4.80 h have been used, 1.20 h are left
-  until it refreshes on 2026-11-21.
+  weekly GPU quota on this account is **30 session-hours** (a 2 × T4 session counts once).
+  4.80 h have been used this week, so 25.20 h are left until it refreshes on 2026-11-21.
+  - *Correction:* an earlier version of this entry said 6 session-hours. That figure came from
+    the Kaggle API (`get_accelerator_quota_statistics` returns `totalTimeAllowed = 21600s`), not
+    from the account page, which shows 30 h. The account page is authoritative. See D45.
 - **Next:** S5 onward on CPU.
 
 ## 2026-11-15: S4 done on Kaggle (activation cache)

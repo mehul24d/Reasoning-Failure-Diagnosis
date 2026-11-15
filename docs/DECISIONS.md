@@ -1268,16 +1268,27 @@ the CIs stay template-clustered bootstrap CIs.
     committed S4 records (`reports/m1/s4/`), and the summary says so.
   - The study outputs are split across two notebooks' outputs: the cache in `btp-minor-s4`, the
     sampled runs in `btp-minor-s3-from-s2`.
-- **Kaggle quota found while switching:** this account's weekly GPU quota is 6 session-hours
-  (not about 30, as assumed earlier). 3.15 h had been used (S2 2.56 h, S4 0.58 h), leaving 2.85 h
-  until the refresh on 2026-11-21. The S3 session's deadline is therefore set to 2.75 h, so a run
-  that is cut short stops at the deadline with its status files written and resumes next commit,
-  instead of being killed when the quota runs out. The 25 T4-hour study budget is unchanged.
+- **Kaggle quota (corrected 2026-11-15):** this account's weekly GPU quota is **30 session-hours**,
+  as shown on the account page. A 2 × T4 session counts once: a 1-hour session on T4 × 2 uses 1 h
+  of quota but 2 of the study's T4-hours. The quota is reported in session hours. The 25
+  T4-hour study budget is a separate, stricter count and is unchanged.
+  - **Where the wrong 6 h came from:** while switching, I read the quota through the Kaggle API
+    (`kagglesdk` `get_accelerator_quota_statistics`, the call behind `kaggle quota`). It returned
+    `gpu_quota.totalTimeAllowed = 21600s` and `minimumTimeAllowed = 21600s`, i.e. 6 h. A
+    re-query later that day returned the same values (TPU: 72000 s). I took the API value as
+    the quota without checking the account page. The account page is authoritative. Why the API
+    reports 21600 s is not known. The API's `timeUsed` does agree with the session times: 3.15 h
+    before S3, 4.80 h after it.
+  - **Effect of the wrong figure:** the S3 session's deadline was set to 2.75 h instead of the
+    notebook's usual 11.5 h. That was a cap on a ~1.6 h run, so it never bound. The single-T4
+    projection below was also compared against 2.85 h of quota left, instead of 26.85 h. No run
+    was changed or cut short by it.
 - **Single-T4 contingency:** the PI allowed the sampled stage to run on one T4 if the new kernel
   was still queued after 45 minutes. One worker gives the same pre-registered design, but the
   sampling seed is derived from each batch's keys, so a different worker count draws different
   (still recorded and reproducible) samples. It is also slower: about 3.45 h of wall time for
-  the projected 3.45 T4-hours, more than the 2.85 h of quota left this week. Whether it was used
+  the projected 3.45 T4-hours. At the time this was compared against 2.85 h of weekly quota, which was
+  wrong (see the quota note above). With the correct 30 h, 26.85 h were left. Whether it was used
   is recorded below.
 - **Outcome:** `btp-minor-s3-from-s2` started within 20 seconds of being pushed, at 21:38 IST,
   so the single-T4 contingency was not used. The run used 2 workers, as planned. The restore
