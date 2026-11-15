@@ -1,0 +1,252 @@
+{
+  "model": "gemma-2-2b-it",
+  "commit": "d490ce4",
+  "files": {
+    "s2_gsms_pairs_i8.jsonl": {
+      "bytes": 1117487,
+      "sha256": "2664760ba63bdd70591822756391166606c2b157c83ec7e51510634f6b444419",
+      "lines": 1400
+    },
+    "s2_traces.jsonl": {
+      "bytes": 22211304,
+      "sha256": "bafe2c9afe754690b4c3269723b527b553218473b90522911679a9a66a0b78e7",
+      "lines": 8400
+    },
+    "s2_top2.jsonl": {
+      "bytes": 66287816,
+      "sha256": "275653bd2ec272330ed1ddaea7dacb33af073b51bd8ad6a21896eaa13830d2cb",
+      "lines": 8400
+    },
+    "s2_traces_scored.jsonl": {
+      "bytes": 24172818,
+      "sha256": "cb9df486b3acfbe5d26c0950ebd60a9bbbfa949c1f60d51de346614fb289b160",
+      "lines": 8400
+    },
+    "s2_positions.jsonl": {
+      "bytes": 9584689,
+      "sha256": "6fc8f54482ed5c3defa8e2de7a992b0e9b2c429f2c6942a01dbfd240b700a3b5",
+      "lines": 8400
+    },
+    "s2_sampled.jsonl": {
+      "bytes": 15554233,
+      "sha256": "9292bd6fc11575333fcc3258a3b732a2d789702e357b9583c92c51c9f94a3736",
+      "lines": 5485
+    }
+  },
+  "disk_bytes": {
+    "traces_dir": 242423297,
+    "activation_store": 13667602304,
+    "total": 13910025601
+  },
+  "stages": {
+    "problems": {
+      "stage": "problems",
+      "status": "complete",
+      "time": "2026-11-15 10:33:14",
+      "problems": 1400,
+      "templates": 89,
+      "instances_per_template": 8,
+      "clean": 712,
+      "distractor": 688,
+      "templates_with_distractor": 86,
+      "test_templates_with_distractor": 39,
+      "reviewed_clauses_sha256": "5e8b725a0131ddc8be07b71c251caefdd9701c98e9bc053ec0a611a1089bac9b",
+      "sha256": "2664760ba63bdd70591822756391166606c2b157c83ec7e51510634f6b444419",
+      "stage_seconds": 1.8
+    },
+    "generate": {
+      "stage": "generate",
+      "status": "complete",
+      "time": "2026-11-15 13:00:18",
+      "worker_codes": [
+        0,
+        0
+      ],
+      "n_workers": 2,
+      "seconds": 8820.0,
+      "lines": 8400,
+      "sha256": "bafe2c9afe754690b4c3269723b527b553218473b90522911679a9a66a0b78e7",
+      "file": "/kaggle/working/btp/data/generated/gemma-2-2b-it/s2_traces.jsonl",
+      "commit": "a730993",
+      "top2_lines": 8400,
+      "traces": 8400,
+      "stop_reasons": {
+        "answer_line": 7977,
+        "max_new_tokens": 51,
+        "eos": 372
+      },
+      "hit_max_tokens_fraction": 0.006071428571428571,
+      "mean_new_tokens": 148.5640476190476,
+      "max_new_tokens_seen": 512,
+      "stage_seconds": 8824.6
+    },
+    "score": {
+      "stage": "score",
+      "status": "complete",
+      "time": "2026-11-15 13:01:54",
+      "traces": 8400,
+      "accuracy": 0.5323809523809524,
+      "no_answer": 0.01630952380952381,
+      "hit_max_tokens_fraction": 0.006071428571428571,
+      "char_map_failed": 0,
+      "positions": 109879,
+      "unique_rows": 109854,
+      "rows_per_trace": 13.077857142857143,
+      "test_failures": 855,
+      "test_failures_with_s0": 773,
+      "test_templates_with_s0_failure": 34,
+      "populations": {
+        "primary": {
+          "failures": 498,
+          "test_failures": 242,
+          "test_failures_with_s0": 225,
+          "test_templates_with_s0_failure": 29
+        },
+        "natural": {
+          "failures": 1866,
+          "test_failures": 855,
+          "test_failures_with_s0": 773,
+          "test_templates_with_s0_failure": 34
+        }
+      },
+      "accuracy_by_condition": {
+        "clean": 0.5632022471910112,
+        "distractor": 0.500484496124031
+      },
+      "design_effect": {
+        "role": "descriptive (A15, A20): failure occurrence; reported with the primary-outcome deff",
+        "pilot_failure_deff": 19.76,
+        "primary": {
+          "icc_failure_train_dev": 0.36554792976270634,
+          "deff": 6.322377857345003,
+          "m_eff": 15.559999999999999,
+          "cv_cluster_size": 1.0027517694380355,
+          "test_failures_with_s0": 225,
+          "test_templates": 29,
+          "n_eff": 35.58787612458293
+        },
+        "natural": {
+          "icc_failure_train_dev": 0.5028621486993303,
+          "deff": 17.1943730009329,
+          "m_eff": 33.20439844760673,
+          "cv_cluster_size": 0.678585343819676,
+          "test_failures_with_s0": 773,
+          "test_templates": 34,
+          "n_eff": 44.95656805619257
+        }
+      },
+      "sha256_scored": "cb9df486b3acfbe5d26c0950ebd60a9bbbfa949c1f60d51de346614fb289b160",
+      "sha256_positions": "6fc8f54482ed5c3defa8e2de7a992b0e9b2c429f2c6942a01dbfd240b700a3b5",
+      "stage_seconds": 96.2
+    },
+    "verify": {
+      "stage": "verify",
+      "status": "complete",
+      "time": "2026-11-15 13:04:33",
+      "worker_codes": [
+        0,
+        0
+      ],
+      "n_workers": 2,
+      "seconds": 157.5,
+      "tl_n_devices": 1,
+      "pass": true,
+      "reproduction": 1.0,
+      "tokens": 40230,
+      "traces": 267,
+      "max_abs_logit_diff": 0.000331878662109375,
+      "traces_with_any_mismatch": 0,
+      "fp16_check": {
+        "traces": 32,
+        "max_abs_err": 0.4947509765625,
+        "max_rel_err": 0.00042559721623547375,
+        "max_abs_value": 1320.266357421875
+      },
+      "report": "/kaggle/working/btp/reports/m1/s2_equivalence_batched_gemma-2-2b-it.json",
+      "stage_seconds": 158.1
+    },
+    "cache": {
+      "stage": "cache",
+      "status": "complete",
+      "time": "2026-11-15 13:45:30",
+      "worker_codes": [
+        0,
+        0
+      ],
+      "n_workers": 2,
+      "seconds": 1969.6,
+      "tl_n_devices": 1,
+      "store_bytes": 13667602304,
+      "store_gb": 13.668,
+      "rows": 109854,
+      "orphan_shards": 0,
+      "all_traces_reproduction": 1.0,
+      "all_traces_max_abs_logit_diff": 0.0012502670288085938,
+      "stage_seconds": 1972.8
+    },
+    "sampled": {
+      "stage": "sampled",
+      "status": "complete",
+      "time": "2026-11-15 17:47:30",
+      "worker_codes": [
+        0,
+        0
+      ],
+      "n_workers": 2,
+      "seconds": 5682.6,
+      "lines": 5485,
+      "sha256": "9292bd6fc11575333fcc3258a3b732a2d789702e357b9583c92c51c9f94a3736",
+      "file": "/kaggle/working/btp/data/generated/gemma-2-2b-it/s2_sampled.jsonl",
+      "commit": "d490ce4",
+      "traces": 5485,
+      "stop_reasons": {
+        "answer_line": 5182,
+        "eos": 298,
+        "max_new_tokens": 5
+      },
+      "hit_max_tokens_fraction": 0.0009115770282588879,
+      "mean_new_tokens": 163.95970829535096,
+      "max_new_tokens_seen": 512,
+      "stage_seconds": 5683.7
+    }
+  },
+  "activation_store": {
+    "model": "gemma-2-2b-it",
+    "n_rows": 109854,
+    "n_index_entries": 109879,
+    "traces": 8400,
+    "d_model": 2304,
+    "storage_dtype": "float16",
+    "compute_dtype": "float32",
+    "positions": [
+      "step_first",
+      "step_last",
+      "final_answer"
+    ],
+    "index_sha256": "b6057e9735fb8bfddc4da131e8e75c74288cbf541bac871a9d66220c998b17da",
+    "bytes": 13667602304,
+    "n_hooks": 27,
+    "n_shards": 55,
+    "orphan_shards": 0
+  },
+  "cpu_fill": {
+    "decision": "D45: S3 restored from the S2 output, so the S4 cache was not attached",
+    "fields": [
+      "stages.cache",
+      "disk_bytes.activation_store",
+      "disk_bytes.total",
+      "activation_store"
+    ],
+    "kaggle_values": {
+      "stages.cache": {
+        "status": "pending"
+      },
+      "disk_bytes.activation_store": 560871680
+    },
+    "activation_store_bytes": "manifest.json `bytes`: all 55 shards of the S4 store, which include the shards S2's verify stage wrote. The index, the manifest and the fp32 reference arrays of the fp16 check are not included. The Kaggle value is the size of the partial store restored from S2 (verify-stage shards, reference arrays, index), not of the full store.",
+    "sources": {
+      "reports/m1/s4/cache.json": "6163d9a313fa947ecb53150d7e36aef699330dd8dc733b3adcdc5bc768393de2",
+      "reports/m1/s4/manifest.json": "b17af6da9f8fadc02d9eca75a08ea2f550234783bac018a8a13d881f75405b5c"
+    }
+  }
+}

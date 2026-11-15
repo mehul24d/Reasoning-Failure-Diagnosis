@@ -1,5 +1,32 @@
 # Progress
 
+## 2026-11-15: S3 done on Kaggle (sampled runs, report); restored from S2 (D45)
+
+Kaggle kernel `btp-minor-s3-from-s2` v1, commit `d490ce4`, 2 × T4, 1.65 h session (**3.30 T4
+GPU-hours**). Records: `main-study/reports/m1/s3/` (sampled and report stage status, session
+status, pip freeze, the restore check, the run summary).
+- **Why a new kernel (D45):** the first S3 kernel, `btp-minor-s3` (input: S4's 13.67 GB output),
+  stayed queued from 19:18 to 21:31 IST. It was deleted without ever running, since a queued run
+  cannot be cancelled through the API. The new kernel restores from `btp-minor-s2` and started
+  within 20 seconds of being pushed.
+- **Restore check passed** before any generation: problems, traces, scored traces and positions
+  hash to the committed S2 records, and the four S2 status files are byte-identical
+  (`s3_restore_check_gemma-2-2b-it.json`).
+- **Sampled runs:** 5,485 = 1,097 test-template failures (242 primary, 855 natural) × k = 5 at
+  T = 0.7, as pre-registered. 164.0 new tokens on average. Stops: 5,182 at the answer line, 298
+  at end of turn, 5 at the 512 cap (0.09%). The stage took 1.58 h on 2 workers (3.16 T4-h
+  against 3.45 projected).
+- **Run summary:** the copy written on Kaggle (`s2_run_summary_gemma-2-2b-it_kaggle.json`) shows
+  `cache` pending and only S2's partial store (0.56 GB). The cache and store fields of
+  `s2_run_summary_gemma-2-2b-it.json` were filled on CPU from the committed S4 records
+  (`scripts/fill_run_summary_from_s4.py`): cache complete, store 13.67 GB, total 13.91 GB.
+- **Primary population unchanged by S3:** **225 test distractor failures with s0, against the
+  target of 320** (70%). N* waits for the outcome deff (S5).
+- **Budget:** 9.58 of 25 T4 GPU-hours used (S2 5.12 + S4 1.16 + S3 3.30), 15.42 left. Kaggle's
+  weekly GPU quota on this account is 6 session-hours; 4.80 h have been used, 1.20 h are left
+  until it refreshes on 2026-11-21.
+- **Next:** S5 onward on CPU.
+
 ## 2026-11-15: S4 done on Kaggle (activation cache)
 
 Kaggle kernel `btp-minor-s4` v1 (commit `6df4e68`, which differs from the binding commit

@@ -1,0 +1,48 @@
+{
+  "records": "/tmp/Reasoning-Failure-Diagnosis/main-study/reports/m1/s2",
+  "files": {
+    "s2_gsms_pairs_i8.jsonl": {
+      "committed": "2664760ba63bdd70591822756391166606c2b157c83ec7e51510634f6b444419",
+      "restored": "2664760ba63bdd70591822756391166606c2b157c83ec7e51510634f6b444419",
+      "match": true
+    },
+    "s2_traces.jsonl": {
+      "committed": "bafe2c9afe754690b4c3269723b527b553218473b90522911679a9a66a0b78e7",
+      "restored": "bafe2c9afe754690b4c3269723b527b553218473b90522911679a9a66a0b78e7",
+      "match": true
+    },
+    "s2_traces_scored.jsonl": {
+      "committed": "cb9df486b3acfbe5d26c0950ebd60a9bbbfa949c1f60d51de346614fb289b160",
+      "restored": "cb9df486b3acfbe5d26c0950ebd60a9bbbfa949c1f60d51de346614fb289b160",
+      "match": true
+    },
+    "s2_positions.jsonl": {
+      "committed": "6fc8f54482ed5c3defa8e2de7a992b0e9b2c429f2c6942a01dbfd240b700a3b5",
+      "restored": "6fc8f54482ed5c3defa8e2de7a992b0e9b2c429f2c6942a01dbfd240b700a3b5",
+      "match": true
+    }
+  },
+  "status_files": {
+    "problems": {
+      "committed": "f23393773e2e805e000687d50fbca0a0d3dbc5ba7f5f1397eb9ca2db08167aef",
+      "restored": "f23393773e2e805e000687d50fbca0a0d3dbc5ba7f5f1397eb9ca2db08167aef",
+      "match": true
+    },
+    "generate": {
+      "committed": "72760bf4d94ad340dc512373f0ef6081ffbbc501c08e5d8499a00a078ebdf403",
+      "restored": "72760bf4d94ad340dc512373f0ef6081ffbbc501c08e5d8499a00a078ebdf403",
+      "match": true
+    },
+    "score": {
+      "committed": "347367bddb1f7f9b95ac9f313bbaef48d7510ef1a09a3c8d3a09ca11a0a284db",
+      "restored": "347367bddb1f7f9b95ac9f313bbaef48d7510ef1a09a3c8d3a09ca11a0a284db",
+      "match": true
+    },
+    "verify": {
+      "committed": "466dae7f034dd61c227ea3e9539d9c95a3ef05c43487d88336a1207a6be166cc",
+      "restored": "466dae7f034dd61c227ea3e9539d9c95a3ef05c43487d88336a1207a6be166cc",
+      "match": true
+    }
+  },
+  "all_match": true
+}

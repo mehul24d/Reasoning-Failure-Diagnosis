@@ -50,3 +50,18 @@ def test_committed_s2_records_have_the_hashes():
     for s, k in (("problems", "sha256"), ("generate", "sha256"), ("score", "sha256_scored"),
                  ("score", "sha256_positions")):
         assert len(json.loads((recs / f"{s}.json").read_text())[k]) == 64
+
+
+def test_run_summary_fill_from_committed_s4():
+    spec = importlib.util.spec_from_file_location("fill", REPO_ROOT / "scripts" / "fill_run_summary_from_s4.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    kaggle = {"files": {}, "stages": {"cache": {"status": "pending"}, "sampled": {"status": "complete"}},
+              "disk_bytes": {"traces_dir": 1000, "activation_store": 0, "total": 1000}}
+    out = m.fill(kaggle, REPO_ROOT / "reports" / "m1" / "s4")
+    assert out["stages"]["cache"]["status"] == "complete" and out["stages"]["sampled"]["status"] == "complete"
+    assert out["disk_bytes"]["activation_store"] == 13667602304
+    assert out["disk_bytes"]["total"] == 13667602304 + 1000
+    assert out["activation_store"]["n_rows"] == 109854 and out["activation_store"]["n_shards"] == 55
+    assert out["cpu_fill"]["kaggle_values"]["disk_bytes.activation_store"] == 0
+    assert kaggle["stages"]["cache"]["status"] == "pending"          # the Kaggle summary is not changed

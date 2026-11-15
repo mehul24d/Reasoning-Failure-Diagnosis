@@ -1279,3 +1279,7 @@ the CIs stay template-clustered bootstrap CIs.
   (still recorded and reproducible) samples. It is also slower: about 3.45 h of wall time for
   the projected 3.45 T4-hours, more than the 2.85 h of quota left this week. Whether it was used
   is recorded below.
+- **Outcome:** `btp-minor-s3-from-s2` started within 20 seconds of being pushed, at 21:38 IST,
+  so the single-T4 contingency was not used. The run used 2 workers, as planned. The restore
+  check passed, and S3 completed in 1.65 h (3.30 T4-hours). The quick start points to the large
+  S4 input as the cause of the earlier queueing, though this is not confirmed.
