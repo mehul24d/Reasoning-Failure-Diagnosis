@@ -1175,3 +1175,40 @@ the CIs stay template-clustered bootstrap CIs.
 - **Reported either way:** the template-clustered deff of the primary outcomes (E3
   decodability; paired repair differences) next to the failure-rate ICC and deff (19.76
   descriptive). Neither triggers anything.
+
+## D43 (2026-11-15) Human review of the final clauses: answers in, agreement low, changes proposed (S2 A18)
+
+- **Answers:** both reviewers filled their copies independently.
+  - `docs/review/human_review_reviewer1.csv`: reviewer 1, no notes.
+  - `docs/review/human_review_reviewer2.csv`: reviewer 2. The reasons written after "no" were
+    moved to `reviewer2_notes`, and the answers were kept as given.
+  - The text columns come from the committed sheet, matched by template id. The 89 ids and
+    the `rewritten` flags match.
+- **Agreement** (Cohen's kappa, 89 clauses):
+
+  | Question | kappa | % agreement | R1 no | R2 no |
+  |---|---|---|---|---|
+  | is_noop | 0.232 | 78.7 | 10 | 19 |
+  | grammatical | −0.017 | 95.5 | 1 | 3 |
+  | verdict | 0.201 | 76.4 | 10 | 21 |
+
+  - Agreement is low. A17 reports kappa but has no kappa gate: every clause either reviewer
+    flags is changed. Low agreement therefore means more changes, not fewer.
+  - `thresholds.kappa_min` (0.6) belongs to the failure annotation, not this review.
+- **Flagged by either reviewer:** 26 templates.
+  - Flagged by both: 20, 27, 37, 52 and 92.
+  - Flagged by reviewer 1 only: 51, 65, 67, 71 and 81.
+  - Flagged by reviewer 2 only: 12, 14, 22, 23, 28, 35, 39, 44, 47, 48, 56, 68, 69, 83, 94 and
+    97.
+- **The common reason:** a duration ("for 18 hours", "started 16 hours ago") can be read as a
+  rate or as time already used. A new person can be read as joining the counted group.
+- **Proposed changes:** `docs/review/clause_rewrites_proposed.csv`, for the joint discussion.
+  - Each flagged clause becomes a static, unrelated fact: no time words, no new people, and
+    nothing of the asked quantity or unit.
+  - All 26 proposals pass every automated check on instances 1–16, including the
+    independent-solver check.
+  - Solvers were added for 23, 27, 69, 94 and 97.
+  - The proposals are not agreed changes. The reviewers accept or edit them in
+    `docs/review/clause_rewrites.csv`, and then `scripts/review_agreement.py` applies them and
+    writes the reviewed table.
+- **Status:** S2 has not started and no GPU time has been used.

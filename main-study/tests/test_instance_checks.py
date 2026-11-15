@@ -105,3 +105,26 @@ def test_new_sheet_columns_are_read():
              "reviewer2_is_noop": "no", "reviewer2_grammatical": "yes", "notes": ""}]
     assert ra.reviewer_labels(rows, 1)[1]["verdict"] == "OK"
     assert ra.reviewer_labels(rows, 2)[1]["verdict"] == "FIX"
+
+
+@pytest.mark.parametrize("t,q,ans", [
+    (23, "Amelia is knitting winter wear for her 2 grandchildren. They're twins, so they're all the same size. She wants to make a vest, shawl, beanie, socks, and leg warmers for each of them. It takes 17 skeins of wool to make a vest, 11 for a shawl, 18 for a beanie, 12 for a pair of socks, and 6 for a pair of leg warmers. How many skeins of wool will she need to buy?", 128),
+    (27, "Sanjay receives 150 emails a day. 32% of those emails don't require any response. Sanjay responds to the rest of them. How many emails does Sanjay respond to in a 6 day work week?", 612),
+    (69, "On Tuesday, Ibrahim wants to exercise for seven times the amount of time he did on Monday and Sunday combined. On Sunday he exercised for 23 minutes. On Monday he exercised for 55 minutes. How many minutes does he have to exercise on Tuesday to reach his goal?", 546),
+    (94, "1000 people apply for a job at Amazon. Of the people that apply, only 40% receive interviews. Of those who receive interviews, 49% receive a job offer. Of those who receive a job offer, two-fourths of the people accept the position. How many people accept the position?", 98),
+    (97, "Nia operates the cash register exactly three times as fast as her less-experienced colleague Sakura. Daily, Sakura processes 55 customers. What is the total weekly production for the two if they work all days of the week?", 1540),
+])
+def test_post_review_solvers(t, q, ans):
+    assert solve(t, q) == ans
+    assert solve(t, hd.insert_clause(q, "The store has 11 aisles.")) == ans
+
+
+def test_review_copies_and_proposals():
+    rev = REPO_ROOT.parent / "docs" / "review"
+    ra = _ra()
+    r1 = ra.reviewer_labels(list(csv.DictReader(open(rev / "human_review_reviewer1.csv"))), 1, True)
+    r2 = ra.reviewer_labels(list(csv.DictReader(open(rev / "human_review_reviewer2.csv"))), 2, True)
+    flagged = sorted(t for t in r1 if "FIX" in (r1[t]["verdict"], r2[t]["verdict"]))
+    props = {int(r["template_id"]): r for r in csv.DictReader(open(rev / "clause_rewrites_proposed.csv"))}
+    assert sorted(props) == flagged and len(flagged) == 26
+    assert set(props) <= set(SOLVERS)                           # every proposed rewrite can be solver-checked

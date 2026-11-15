@@ -251,6 +251,16 @@ SOLVERS = {
     98: lambda q: gn(q, rf"infects {D} people") * (1 + gn(q, rf"infects {D} others")) ** int(gn(q, rf"after {D} days")),
     99: lambda q: (lambda a, d1, b, d2: (a * d1 + b * d2) / 12)(
         *gn(q, rf"eats {D} eggs a day for {D} days", 1, 2), *gn(q, rf"to {D} eggs a day for {D} days", 1, 2)),
+    # Templates whose clause may change after the human review (review_agreement.py, A18).
+    23: lambda q: num(g(q, rf"for her {NW} grandchildren")) * sum(
+        num(x) for x in re.findall(rf"{D} (?:skeins of \w+ to make|for) an? ", q)),
+    27: lambda q: (gn(q, rf"receives {D} \w+ a day") * (1 - gn(q, rf"\. {D}% of those") / 100)
+                   * gn(q, rf"in an? {D} day work week")),
+    69: lambda q: ratio(g(q, r"wants to exercise for ([\w ]+?) the amount")) * sum(
+        num(x) for x in re.findall(rf"exercised for {D} minutes", q)),
+    94: lambda q: (gn(q, rf"^{D} people apply") * gn(q, rf"only {D}% receive") / 100
+                   * gn(q, rf"interviews, {D}% receive") / 100 * ratio(g(q, rf"offer, {FR} of the people accept"))),
+    97: lambda q: 7 * gn(q, rf"processes {D} customers") * (1 + ratio(g(q, r"exactly ([\w ]+?) as fast"))),
 }
 
 

@@ -1,5 +1,17 @@
 # Progress
 
+## 2026-11-15: Human review answers in (D43); kappa 0.20 on the verdict; 26 clause changes proposed
+
+No GPU time used, and none of the 25-hour S2–S4 budget.
+
+- **Kappa:** 0.23 on is_noop, −0.02 on grammatical, 0.20 on the verdict.
+- **Flagged:** reviewer 1 flagged 10 clauses and reviewer 2 flagged 21; 26 differ.
+- **Proposals:** `docs/review/clause_rewrites_proposed.csv`. All pass every check on 16
+  instances.
+- **Next:** the reviewers agree the changes in `docs/review/clause_rewrites.csv`. Then
+  `scripts/review_agreement.py` runs, the A18 review record is filled in, and the binding
+  commit is made.
+
 ## 2026-11-13: Clause generator fix and pre-review rewrites (D40–D42, S2 A18–A20); human review of the final clauses pending
 
 No GPU time used, and none of the 25-hour S2–S4 budget.

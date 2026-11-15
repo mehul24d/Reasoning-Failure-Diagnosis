@@ -1,6 +1,7 @@
 # Human review of the distractor clauses (DECISIONS D34, D40)
 
 **The sheet to fill in: `human_review_final.csv`** (one row per study template, 89 rows).
+The filled copies are `human_review_reviewer1.csv` and `human_review_reviewer2.csv` (2026-11-15).
 
 Each row shows one problem without and with its no-op clause (`original_problem`,
 `problem_with_clause`). `rewritten` says whether the clause was rewritten on 2026-11-13, before
@@ -45,6 +46,9 @@ to settle disagreements.
 1. For every row where either reviewer wrote `no`, agree a change in the joint discussion. Put
    it in `clause_rewrites.csv` with the columns `template_id,action,new_clause_template,reason`:
    `action` is `rewrite` (keep `{d}` where the number goes) or `drop`.
+   On 2026-11-15 a proposal for every flagged row was written to `clause_rewrites_proposed.csv`
+   (D43). Each proposal passes all checks. Copy the rows you agree with into
+   `clause_rewrites.csv` (the first four columns are enough), and edit or replace the others.
 2. Run `PYTHONPATH=. python scripts/review_agreement.py` from `main-study/`, or with
    `--sheets A.csv B.csv` for separate copies. It does three things:
    - computes Cohen's kappa per question;
