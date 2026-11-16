@@ -21,7 +21,8 @@ Checks, per notebook (exit 1 if any fails):
   byte size and a float16 .npy header whose row count matches; no unlisted shards.
 The committed records have no per-shard sha256, so `--sha-out` writes the sha256 of every
 downloaded file. Committing that file lets any later copy (e.g. an off-site backup) be checked
-exactly with `--against`.
+exactly with `--against`; add `--hf-repo <user>/<repo>` to check the off-site Hugging Face copy
+against the same file without downloading it.
 """
 import argparse
 import hashlib
@@ -147,13 +148,59 @@ def sha_manifest(backup: Path) -> dict:
     return out
 
 
+def git_blob_sha1(path: Path) -> str:
+    data = Path(path).read_bytes()
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def hf_check(repo: str, backup: Path, want: dict, tree=None) -> dict:
+    """Check an off-site copy in a Hugging Face dataset repo against the committed sha256 file.
+
+    The Hub reports a sha256 for LFS files, and only a git blob id (sha1 of "blob <size>\\0" +
+    content) for small files. LFS files are compared with the committed sha256 directly. A
+    small file is compared through the local copy: its sha256 must be the committed one (checked
+    here) and its git blob id must be the remote one. Nothing is downloaded."""
+    if tree is None:
+        from huggingface_hub import HfApi
+        tree = [f for f in HfApi().list_repo_tree(repo, repo_type="dataset", recursive=True, expand=True)
+                if hasattr(f, "size")]                                   # files, not folders
+    remote = {f.path: f for f in tree if f.path != ".gitattributes"}
+    out = {}
+    for k in KERNELS:
+        w = want.get(k, {})
+        missing, changed, n_lfs = [], [], 0
+        for rel, rec in w.items():
+            f = remote.pop(f"{k}/{rel}", None)
+            if f is None:
+                missing.append(rel)
+                continue
+            lfs = getattr(f, "lfs", None)
+            if f.size != rec["bytes"]:
+                changed.append({"file": rel, "problem": "size", "remote": f.size, "want": rec["bytes"]})
+            elif lfs is not None:
+                n_lfs += 1
+                if lfs.sha256 != rec["sha256"]:
+                    changed.append({"file": rel, "problem": "lfs sha256"})
+            else:
+                local = backup / k / rel
+                if not local.exists() or sha(local) != rec["sha256"] or git_blob_sha1(local) != f.blob_id:
+                    changed.append({"file": rel, "problem": "git blob id"})
+        out[k] = {"files": len(w), "lfs_files": n_lfs, "missing": missing[:20], "n_missing": len(missing),
+                  "changed": changed[:20], "n_changed": len(changed), "match": not missing and not changed}
+    out["unexpected"] = {"files": sorted(remote)[:20], "n": len(remote), "match": not remote}
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("backup", help="folder holding one sub-folder per notebook output")
     ap.add_argument("--out")
     ap.add_argument("--sha-out", help="write the sha256 of every downloaded file here")
     ap.add_argument("--against", help="a committed --sha-out file: check this copy file by file against it")
+    ap.add_argument("--hf-repo", help="with --against: also check this Hugging Face dataset repo (the off-site copy)")
     a = ap.parse_args(argv)
+    if a.hf_repo and not a.against:
+        ap.error("--hf-repo needs --against")
     backup = Path(a.backup)
     rep = {"backup": str(backup), "kernels": {}}
     for k in KERNELS:
@@ -170,6 +217,8 @@ def main(argv=None) -> int:
                                      "missing": sorted(set(w) - set(m))[:20],
                                      "unexpected": sorted(set(m) - set(w))[:20],
                                      "changed": sorted(f for f in set(m) & set(w) if m[f] != w[f])[:20]}
+            if a.hf_repo:
+                rep["hf"] = {"repo": a.hf_repo, **hf_check(a.hf_repo, backup, want)}
         if a.sha_out:
             Path(a.sha_out).parent.mkdir(parents=True, exist_ok=True)
             Path(a.sha_out).write_text(json.dumps(
@@ -178,7 +227,8 @@ def main(argv=None) -> int:
                  "totals": {k: {"files": len(v), "bytes": sum(x["bytes"] for x in v.values())}
                             for k, v in man.items()},
                  "files": man}, indent=1))
-    rep["failures"] = failures(rep["kernels"]) + failures(rep.get("against", {}))
+    rep["failures"] = (failures(rep["kernels"]) + failures(rep.get("against", {}))
+                       + [f"hf/{x}" for x in failures({k: v for k, v in rep.get("hf", {}).items() if k != "repo"})])
     rep["all_match"] = not rep["failures"]
     txt = json.dumps(rep, indent=2)
     if a.out:

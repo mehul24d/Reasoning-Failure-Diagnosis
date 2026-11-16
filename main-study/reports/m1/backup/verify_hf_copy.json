@@ -1,0 +1,252 @@
+{
+  "backup": "data/generated/kaggle_outputs",
+  "kernels": {
+    "btp-minor-s2": {
+      "s2_data": {
+        "s2_gsms_pairs_i8.jsonl": {
+          "match": true
+        },
+        "s2_traces.jsonl": {
+          "match": true
+        },
+        "s2_traces_scored.jsonl": {
+          "match": true
+        },
+        "s2_positions.jsonl": {
+          "match": true
+        },
+        "status/problems.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s2/btp/data/generated/gemma-2-2b-it/status/problems.json",
+          "committed": "reports/m1/s2/problems.json",
+          "match": true
+        },
+        "status/generate.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s2/btp/data/generated/gemma-2-2b-it/status/generate.json",
+          "committed": "reports/m1/s2/generate.json",
+          "match": true
+        },
+        "status/score.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s2/btp/data/generated/gemma-2-2b-it/status/score.json",
+          "committed": "reports/m1/s2/score.json",
+          "match": true
+        },
+        "status/verify.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s2/btp/data/generated/gemma-2-2b-it/status/verify.json",
+          "committed": "reports/m1/s2/verify.json",
+          "match": true
+        }
+      },
+      "records": {
+        "session_status.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s2/btp/session_status.json",
+          "committed": "reports/m1/s2/session_status.json",
+          "match": true
+        },
+        "pip_freeze.txt": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s2/btp/pip_freeze.txt",
+          "committed": "reports/m1/s2/pip_freeze.txt",
+          "match": true
+        }
+      }
+    },
+    "btp-minor-s3-from-s2": {
+      "s2_data": {
+        "s2_gsms_pairs_i8.jsonl": {
+          "match": true
+        },
+        "s2_traces.jsonl": {
+          "match": true
+        },
+        "s2_traces_scored.jsonl": {
+          "match": true
+        },
+        "s2_positions.jsonl": {
+          "match": true
+        },
+        "status/problems.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/data/generated/gemma-2-2b-it/status/problems.json",
+          "committed": "reports/m1/s2/problems.json",
+          "match": true
+        },
+        "status/generate.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/data/generated/gemma-2-2b-it/status/generate.json",
+          "committed": "reports/m1/s2/generate.json",
+          "match": true
+        },
+        "status/score.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/data/generated/gemma-2-2b-it/status/score.json",
+          "committed": "reports/m1/s2/score.json",
+          "match": true
+        },
+        "status/verify.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/data/generated/gemma-2-2b-it/status/verify.json",
+          "committed": "reports/m1/s2/verify.json",
+          "match": true
+        }
+      },
+      "records": {
+        "s2_sampled.jsonl": {
+          "match": true
+        },
+        "status/sampled.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/data/generated/gemma-2-2b-it/status/sampled.json",
+          "committed": "reports/m1/s3/sampled.json",
+          "match": true
+        },
+        "status/report.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/data/generated/gemma-2-2b-it/status/report.json",
+          "committed": "reports/m1/s3/report.json",
+          "match": true
+        },
+        "session_status.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/session_status.json",
+          "committed": "reports/m1/s3/session_status.json",
+          "match": true
+        },
+        "sessions.jsonl": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/sessions.jsonl",
+          "committed": "reports/m1/s3/sessions.jsonl",
+          "match": true
+        },
+        "pip_freeze.txt": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/pip_freeze.txt",
+          "committed": "reports/m1/s3/pip_freeze.txt",
+          "match": true
+        },
+        "run_summary": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/reports/m1/s2_run_summary_gemma-2-2b-it.json",
+          "committed": "reports/m1/s3/s2_run_summary_gemma-2-2b-it_kaggle.json",
+          "match": true
+        },
+        "restore_check": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s3-from-s2/btp/reports/m1/s3_restore_check_gemma-2-2b-it.json",
+          "committed": "reports/m1/s3/s3_restore_check_gemma-2-2b-it.json",
+          "match": true
+        }
+      }
+    },
+    "btp-minor-s4": {
+      "s2_data": {
+        "s2_gsms_pairs_i8.jsonl": {
+          "match": true
+        },
+        "s2_traces.jsonl": {
+          "match": true
+        },
+        "s2_traces_scored.jsonl": {
+          "match": true
+        },
+        "s2_positions.jsonl": {
+          "match": true
+        },
+        "status/problems.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s4/btp/data/generated/gemma-2-2b-it/status/problems.json",
+          "committed": "reports/m1/s2/problems.json",
+          "match": true
+        },
+        "status/generate.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s4/btp/data/generated/gemma-2-2b-it/status/generate.json",
+          "committed": "reports/m1/s2/generate.json",
+          "match": true
+        },
+        "status/score.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s4/btp/data/generated/gemma-2-2b-it/status/score.json",
+          "committed": "reports/m1/s2/score.json",
+          "match": true
+        },
+        "status/verify.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s4/btp/data/generated/gemma-2-2b-it/status/verify.json",
+          "committed": "reports/m1/s2/verify.json",
+          "match": true
+        }
+      },
+      "records": {
+        "status/cache.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s4/btp/data/generated/gemma-2-2b-it/status/cache.json",
+          "committed": "reports/m1/s4/cache.json",
+          "match": true
+        },
+        "session_status.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s4/btp/session_status.json",
+          "committed": "reports/m1/s4/session_status.json",
+          "match": true
+        }
+      },
+      "store": {
+        "manifest.json": {
+          "file": "data/generated/kaggle_outputs/btp-minor-s4/btp/cache/store/gemma-2-2b-it/manifest.json",
+          "committed": "reports/m1/s4/manifest.json",
+          "match": true
+        },
+        "index.jsonl": {
+          "match": true
+        },
+        "shards": {
+          "n": 55,
+          "bytes": 13667602304,
+          "want_bytes": 13667602304,
+          "bad": [],
+          "unlisted": [],
+          "match": true
+        }
+      }
+    }
+  },
+  "against": {
+    "btp-minor-s2": {
+      "match": true,
+      "missing": [],
+      "unexpected": [],
+      "changed": []
+    },
+    "btp-minor-s3-from-s2": {
+      "match": true,
+      "missing": [],
+      "unexpected": [],
+      "changed": []
+    },
+    "btp-minor-s4": {
+      "match": true,
+      "missing": [],
+      "unexpected": [],
+      "changed": []
+    }
+  },
+  "hf": {
+    "repo": "MehulD24/btp-minor-kaggle-outputs",
+    "btp-minor-s2": {
+      "files": 104,
+      "lfs_files": 42,
+      "missing": [],
+      "n_missing": 0,
+      "changed": [],
+      "n_changed": 0,
+      "match": true
+    },
+    "btp-minor-s3-from-s2": {
+      "files": 113,
+      "lfs_files": 43,
+      "missing": [],
+      "n_missing": 0,
+      "changed": [],
+      "n_changed": 0,
+      "match": true
+    },
+    "btp-minor-s4": {
+      "files": 161,
+      "lfs_files": 96,
+      "missing": [],
+      "n_missing": 0,
+      "changed": [],
+      "n_changed": 0,
+      "match": true
+    },
+    "unexpected": {
+      "files": [],
+      "n": 0,
+      "match": true
+    }
+  },
+  "failures": [],
+  "all_match": true
+}

@@ -1,5 +1,21 @@
 # Progress
 
+## 2026-11-16: Off-site copy of the Kaggle outputs in a private Hugging Face dataset
+
+All three notebook outputs, 378 files and 15.6 GB, were uploaded to the **private** dataset
+`MehulD24/btp-minor-kaggle-outputs` (Hub commit `0d3b817`). The upload used
+`hf upload-large-folder` from the checked local download and took 37 min.
+- **Check:** `scripts/verify_kaggle_backup.py --against reports/m1/backup/kaggle_outputs_sha256.json
+  --hf-repo MehulD24/btp-minor-kaggle-outputs` passes (`reports/m1/backup/verify_hf_copy.json`).
+  - All 378 files are present on the Hub with the committed byte sizes, and there are no
+    unexpected files.
+  - The 181 LFS files (all 55 cache shards among them) match the committed sha256 exactly.
+  - The 197 small files match through their git blob ids, computed from the local copy, whose
+    sha256 is the committed one.
+  - Nothing was downloaded for the check.
+- There are now three copies: the Kaggle notebook outputs, the local download (gitignored) and
+  the Hub dataset.
+
 ## 2026-11-16: S5 failure-annotation sheets ready (D46)
 
 Two-annotator sheets for the human failure annotation, built by

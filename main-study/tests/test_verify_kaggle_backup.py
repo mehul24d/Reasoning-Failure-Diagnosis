@@ -49,3 +49,26 @@ def test_missing_notebook_output_fails(tmp_path):
     for k in m.KERNELS:
         (tmp_path / k).mkdir()
     assert m.main([str(tmp_path)]) == 1
+
+
+def test_hf_check_compares_lfs_sha256_and_git_blob_ids(tmp_path):
+    from types import SimpleNamespace as NS
+    m = _mod()
+    k = m.KERNELS[0]
+    (tmp_path / k / "btp").mkdir(parents=True)
+    small = tmp_path / k / "btp" / "a.json"
+    small.write_text('{"x": 1}')
+    want = {k: {"btp/a.json": {"bytes": small.stat().st_size, "sha256": m.sha(small)},
+                "btp/big.npy": {"bytes": 10, "sha256": "f" * 64}}}
+    good = [NS(path=".gitattributes", size=5, lfs=None, blob_id="0"),
+            NS(path=f"{k}/btp/a.json", size=small.stat().st_size, lfs=None, blob_id=m.git_blob_sha1(small)),
+            NS(path=f"{k}/btp/big.npy", size=10, lfs=NS(sha256="f" * 64), blob_id="1")]
+    rep = m.hf_check("u/r", tmp_path, want, tree=good)
+    assert m.all_match(rep) and rep[k]["lfs_files"] == 1
+    bad = [good[1], NS(path=f"{k}/btp/big.npy", size=10, lfs=NS(sha256="e" * 64), blob_id="1"),
+           NS(path="extra.txt", size=1, lfs=None, blob_id="2")]
+    rep = m.hf_check("u/r", tmp_path, want, tree=bad)
+    assert rep[k]["n_changed"] == 1 and rep["unexpected"]["n"] == 1
+    assert set(m.failures(rep)) == {k, "unexpected"}
+    small.write_text('{"x": 2}')                                 # local copy no longer the committed one
+    assert m.hf_check("u/r", tmp_path, want, tree=good)[k]["n_changed"] == 1
