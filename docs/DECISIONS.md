@@ -1294,3 +1294,48 @@ the CIs stay template-clustered bootstrap CIs.
   so the single-T4 contingency was not used. The run used 2 workers, as planned. The restore
   check passed, and S3 completed in 1.65 h (3.30 T4-hours). The quick start points to the large
   S4 input as the cause of the earlier queueing, though this is not confirmed.
+
+## D46 (2026-11-16) S5 failure-annotation sample, sheets and decision rules
+
+- **Population ("study failures"):** S2 greedy traces in a failure population (A14: primary and
+  natural), with a gold program and not stopped at max_new_tokens. That gives 2,329 traces.
+  Failures without a parser s0 (228) are kept, so that the human sample does not depend on the
+  parser.
+- **Sample:** 20% (`annotation.fraction`), stratified by split × template × population. Each
+  stratum gets floor(0.2 n); the remainder in each split goes to the largest remainders. Seed
+  20261116, fixed in `scripts/build_annotation_sheets.py` before drawing. Result: **466 items**
+  from 75 templates: 216 test (part 1, labelled first), 250 train and dev (part 2). By
+  population: 99 primary, 367 natural. Record: `main-study/reports/m1/s5_annotation/sample.json`.
+- **Practice:** 10 train-split failures outside the sample, chosen by hand so that each error type
+  occurs at least twice (the composition is in the private key, not here). They come first in both
+  sheets, in the same order, and are excluded from kappa. The answer key is written only to
+  `docs/annotation/private/practice_key.csv`, which is gitignored and not pushed. Its sha256 is in
+  the record, so the key that was used can be verified later. The build script holds only the
+  practice trace ids, never their labels.
+- **Sheets:** `docs/annotation/annotator_{A,B}.csv`, UTF-8 with every field quoted. They hold the
+  same items; parts 1 and 2 are each in a different random order per annotator. There are no
+  parser labels, model scores, population, condition or split. The model's steps are the
+  parser's step segmentation (`parsing.steps.segment`; step [n] = parser step n−1), so the human
+  labels can be compared with s0. The build checks that every character of the model's text
+  appears in the sheet.
+- **Labels added beyond the request:** `first_wrong_step` may also be `answer`, meaning only the
+  answer line is wrong. Without it, solutions whose steps are all right, or have no calculation,
+  have no valid label.
+- **Decision rules:** the request's own definitions and rules did not arrive with it, so the
+  guide (`docs/annotation/ANNOTATION_GUIDE.md`) uses the pre-registered error types: Algorithm 1
+  precedence of planning, then binding, then arithmetic, plus "other". Its rules R1–R12 were
+  written to match the parser where the parser has a rule. The rule most likely to be
+  disputed is R7: a wrong number caused by a skipped step counts as binding, as in Algorithm 1.
+  To be confirmed by the PI before the practice session.
+- **Agreement:** `scripts/annotation_agreement.py` computes:
+  - on non-practice items only: Cohen's kappa, raw agreement and PABAK for first_wrong_step
+    (exact match), and for error_type on items where both gave the same step;
+  - PABAK = (k p_o − 1)/(k − 1);
+  - 95% CIs from the pre-registered template-clustered bootstrap (10,000 resamples);
+  - the threshold kappa ≥ 0.6 (`thresholds.kappa_min`).
+
+  It refuses to run until every analysed item is labelled in both sheets.
+- **Found while choosing practice items:** in 7 of the 2,329 failures, the answer line states the
+  gold answer but the scorer read another number. An example is "4320 people are infected after
+  3 days", read as 3. Three of them are in the sample, and annotators label these `none` (R10).
+  Scoring is not changed here.

@@ -1,5 +1,26 @@
 # Progress
 
+## 2026-11-16: S5 failure-annotation sheets ready (D46)
+
+Two-annotator sheets for the human failure annotation, built by
+`main-study/scripts/build_annotation_sheets.py` from the checked S2 download. The build refuses
+to run if the scored traces or problems do not hash to the committed S2 records.
+- **Sample:** 466 of the 2,329 study failures (20%), stratified by split × template ×
+  population, seed 20261116. Part 1 is the 216 test items, labelled first; part 2 is the 250
+  train and dev items. Record: `main-study/reports/m1/s5_annotation/sample.json`.
+- **Practice:** 10 items, excluded from kappa. The answer key stays local and gitignored
+  (`docs/annotation/private/`); its sha256 is in the record.
+- **Files:** `docs/annotation/annotator_A.csv` and `annotator_B.csv` (same items, different order,
+  no automatic labels), and `docs/annotation/ANNOTATION_GUIDE.md`, which has the definitions,
+  rules R1–R12 and 9 worked examples.
+- **Time estimate:** about 3.1 min per item, so about 26.5 h per annotator in all (practice
+  0.4 h, part 1 12.1 h, part 2 14.0 h). This is a reading-speed estimate, to be replaced by the
+  practice timings.
+- **Agreement:** `main-study/scripts/annotation_agreement.py` computes kappa, raw agreement and
+  PABAK with clustered 95% CIs against kappa ≥ 0.6. It runs only when both sheets are back.
+- **Waiting on:** the PI's decision rules, which did not come through with the request, and
+  confirmation of rule R7. Then the practice session, then the two returned sheets.
+
 ## 2026-11-16: Kaggle outputs downloaded and checked against the committed records
 
 All three notebook outputs were downloaded to `main-study/data/generated/kaggle_outputs/`

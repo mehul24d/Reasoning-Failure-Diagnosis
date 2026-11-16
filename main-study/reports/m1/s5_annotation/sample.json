@@ -1,0 +1,4347 @@
+{
+ "note": "S5 failure-annotation sample (scripts/build_annotation_sheets.py). The sheets show no parser output; do not read the item -> trace map while annotating.",
+ "seed": 20261116,
+ "fraction": 0.2,
+ "population_rule": "population in {primary, natural}, gold_ok, not hit_max_tokens",
+ "strata": "split x template x population; largest remainder within split",
+ "scored_sha256": "cb9df486b3acfbe5d26c0950ebd60a9bbbfa949c1f60d51de346614fb289b160",
+ "eligible": {
+  "n": 2329,
+  "by": {
+   "dev/natural": 268,
+   "dev/primary": 76,
+   "test/natural": 842,
+   "test/primary": 239,
+   "train/natural": 727,
+   "train/primary": 177
+  }
+ },
+ "sample": {
+  "n": 466,
+  "part1_test": 216,
+  "part2_train_dev": 250,
+  "by": {
+   "dev/natural": 54,
+   "dev/primary": 15,
+   "test/natural": 169,
+   "test/primary": 47,
+   "train/natural": 144,
+   "train/primary": 37
+  },
+  "templates": 75,
+  "words_per_trace_median": 79.0
+ },
+ "time_estimate": {
+  "rule": "0.75 min + words/120 wpm + 0.15 min per numbered model step (problem, gold and model words); a planning figure until the practice session is timed",
+  "minutes_per_item_median": 3.13,
+  "minutes_per_item_mean": 3.35,
+  "hours_per_annotator": {
+   "practice": 0.4,
+   "part1_test": 12.1,
+   "part2_train_dev": 14.0,
+   "all": 26.5
+  }
+ },
+ "practice": {
+  "n": 10,
+  "excluded_from_kappa": true,
+  "key_sha256": "4ec0fea120992c23695dc0ca583d9358c0269a4617e556922a87fcbf8974ace5",
+  "key_file": "docs/annotation/private/practice_key.csv (not committed)"
+ },
+ "sheets": {
+  "A": {
+   "file": "docs/annotation/annotator_A.csv",
+   "sha256": "35bef0980b0ae799e5cf718e3051ea7f9770a1d88c828a711bc7e93238f05383"
+  },
+  "B": {
+   "file": "docs/annotation/annotator_B.csv",
+   "sha256": "4f2314530a92ba5a1f32278a90f11e39fddd0cc8e11bb6b338da885ceae79f5e"
+  }
+ },
+ "items": [
+  {
+   "item_id": "P01",
+   "trace_id": "gsms-main-54-3|marked_p0|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 0
+  },
+  {
+   "item_id": "P02",
+   "trace_id": "gsms-noop-20-7|marked_p2|0",
+   "template_id": "gsms-20",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 0
+  },
+  {
+   "item_id": "P03",
+   "trace_id": "gsms-main-81-4|marked_p2|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 0
+  },
+  {
+   "item_id": "P04",
+   "trace_id": "gsms-main-83-3|terse_p1|0",
+   "template_id": "gsms-83",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 0
+  },
+  {
+   "item_id": "P05",
+   "trace_id": "gsms-noop-8-2|marked_p2|0",
+   "template_id": "gsms-8",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 0
+  },
+  {
+   "item_id": "P06",
+   "trace_id": "gsms-main-81-3|marked_p2|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 0
+  },
+  {
+   "item_id": "P07",
+   "trace_id": "gsms-main-55-2|marked_p0|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 0
+  },
+  {
+   "item_id": "P08",
+   "trace_id": "gsms-noop-13-6|terse_p1|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 0
+  },
+  {
+   "item_id": "P09",
+   "trace_id": "gsms-main-89-6|marked_p2|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 0
+  },
+  {
+   "item_id": "P10",
+   "trace_id": "gsms-noop-98-2|terse_p0|0",
+   "template_id": "gsms-98",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 0
+  },
+  {
+   "item_id": "F0375",
+   "trace_id": "gsms-main-16-0|terse_p1|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0243",
+   "trace_id": "gsms-main-16-0|terse_p2|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0088",
+   "trace_id": "gsms-main-16-1|marked_p0|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0432",
+   "trace_id": "gsms-main-16-1|terse_p1|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0357",
+   "trace_id": "gsms-main-16-2|terse_p2|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0057",
+   "trace_id": "gsms-main-16-4|terse_p2|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0327",
+   "trace_id": "gsms-main-16-6|terse_p1|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0267",
+   "trace_id": "gsms-main-16-7|marked_p2|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0376",
+   "trace_id": "gsms-main-16-7|terse_p0|0",
+   "template_id": "gsms-16",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0070",
+   "trace_id": "gsms-main-28-1|marked_p0|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0233",
+   "trace_id": "gsms-main-28-1|terse_p1|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0232",
+   "trace_id": "gsms-main-28-3|terse_p1|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0236",
+   "trace_id": "gsms-main-28-3|terse_p2|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0281",
+   "trace_id": "gsms-main-28-6|marked_p2|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0176",
+   "trace_id": "gsms-main-28-7|marked_p2|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0386",
+   "trace_id": "gsms-noop-28-4|marked_p2|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0241",
+   "trace_id": "gsms-noop-28-7|terse_p0|0",
+   "template_id": "gsms-28",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0086",
+   "trace_id": "gsms-main-29-1|marked_p2|0",
+   "template_id": "gsms-29",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0136",
+   "trace_id": "gsms-main-29-1|terse_p0|0",
+   "template_id": "gsms-29",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0126",
+   "trace_id": "gsms-main-29-3|marked_p0|0",
+   "template_id": "gsms-29",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0101",
+   "trace_id": "gsms-main-29-5|terse_p0|0",
+   "template_id": "gsms-29",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0007",
+   "trace_id": "gsms-main-29-7|terse_p0|0",
+   "template_id": "gsms-29",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0214",
+   "trace_id": "gsms-noop-29-5|marked_p1|0",
+   "template_id": "gsms-29",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0288",
+   "trace_id": "gsms-main-34-0|terse_p1|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0177",
+   "trace_id": "gsms-main-34-1|marked_p2|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0196",
+   "trace_id": "gsms-main-34-2|terse_p0|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0044",
+   "trace_id": "gsms-main-34-2|terse_p1|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0373",
+   "trace_id": "gsms-main-34-3|terse_p1|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0462",
+   "trace_id": "gsms-main-34-4|marked_p0|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0120",
+   "trace_id": "gsms-main-34-4|terse_p1|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0445",
+   "trace_id": "gsms-main-34-5|terse_p2|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0458",
+   "trace_id": "gsms-main-34-6|terse_p2|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0239",
+   "trace_id": "gsms-main-34-7|terse_p2|0",
+   "template_id": "gsms-34",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0219",
+   "trace_id": "gsms-main-43-6|terse_p1|0",
+   "template_id": "gsms-43",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0039",
+   "trace_id": "gsms-main-57-7|terse_p2|0",
+   "template_id": "gsms-57",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0372",
+   "trace_id": "gsms-noop-57-1|marked_p2|0",
+   "template_id": "gsms-57",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0102",
+   "trace_id": "gsms-noop-57-7|marked_p0|0",
+   "template_id": "gsms-57",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0270",
+   "trace_id": "gsms-main-7-1|marked_p2|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0173",
+   "trace_id": "gsms-main-7-1|terse_p0|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0028",
+   "trace_id": "gsms-main-7-2|terse_p1|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0337",
+   "trace_id": "gsms-main-7-4|marked_p0|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0444",
+   "trace_id": "gsms-main-7-5|marked_p1|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0138",
+   "trace_id": "gsms-main-7-6|marked_p1|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0437",
+   "trace_id": "gsms-main-7-6|terse_p2|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0143",
+   "trace_id": "gsms-main-7-7|marked_p2|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0287",
+   "trace_id": "gsms-noop-7-3|marked_p0|0",
+   "template_id": "gsms-7",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0061",
+   "trace_id": "gsms-main-73-2|marked_p2|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0064",
+   "trace_id": "gsms-main-73-3|marked_p0|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0160",
+   "trace_id": "gsms-main-73-4|terse_p0|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0027",
+   "trace_id": "gsms-main-73-4|terse_p2|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0414",
+   "trace_id": "gsms-main-73-5|terse_p1|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0336",
+   "trace_id": "gsms-main-73-5|terse_p2|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0447",
+   "trace_id": "gsms-main-73-6|marked_p1|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0185",
+   "trace_id": "gsms-noop-73-3|marked_p1|0",
+   "template_id": "gsms-73",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0319",
+   "trace_id": "gsms-main-95-1|terse_p1|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0125",
+   "trace_id": "gsms-main-95-6|terse_p2|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0299",
+   "trace_id": "gsms-main-95-7|terse_p2|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0384",
+   "trace_id": "gsms-noop-95-1|terse_p0|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0278",
+   "trace_id": "gsms-noop-95-2|marked_p2|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0056",
+   "trace_id": "gsms-noop-95-3|marked_p1|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0326",
+   "trace_id": "gsms-noop-95-4|marked_p0|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0378",
+   "trace_id": "gsms-noop-95-4|marked_p1|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0298",
+   "trace_id": "gsms-noop-95-5|marked_p1|0",
+   "template_id": "gsms-95",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0022",
+   "trace_id": "gsms-main-97-3|marked_p0|0",
+   "template_id": "gsms-97",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0032",
+   "trace_id": "gsms-main-97-3|marked_p2|0",
+   "template_id": "gsms-97",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0316",
+   "trace_id": "gsms-noop-97-4|terse_p2|0",
+   "template_id": "gsms-97",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0308",
+   "trace_id": "gsms-main-99-0|terse_p1|0",
+   "template_id": "gsms-99",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0448",
+   "trace_id": "gsms-main-99-6|terse_p0|0",
+   "template_id": "gsms-99",
+   "split": "dev",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0229",
+   "trace_id": "gsms-noop-99-2|marked_p2|0",
+   "template_id": "gsms-99",
+   "split": "dev",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0433",
+   "trace_id": "gsms-main-1-1|marked_p1|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0186",
+   "trace_id": "gsms-main-1-1|marked_p2|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0395",
+   "trace_id": "gsms-main-1-2|marked_p0|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0049",
+   "trace_id": "gsms-main-1-3|marked_p2|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0067",
+   "trace_id": "gsms-main-1-4|terse_p1|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0294",
+   "trace_id": "gsms-main-1-6|terse_p1|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0387",
+   "trace_id": "gsms-main-1-7|terse_p2|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0333",
+   "trace_id": "gsms-noop-1-6|terse_p0|0",
+   "template_id": "gsms-1",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0356",
+   "trace_id": "gsms-main-18-1|terse_p0|0",
+   "template_id": "gsms-18",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0103",
+   "trace_id": "gsms-main-18-1|terse_p2|0",
+   "template_id": "gsms-18",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0087",
+   "trace_id": "gsms-main-18-7|terse_p2|0",
+   "template_id": "gsms-18",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0415",
+   "trace_id": "gsms-noop-18-6|marked_p1|0",
+   "template_id": "gsms-18",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0460",
+   "trace_id": "gsms-noop-18-6|marked_p2|0",
+   "template_id": "gsms-18",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0380",
+   "trace_id": "gsms-noop-18-6|terse_p0|0",
+   "template_id": "gsms-18",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0439",
+   "trace_id": "gsms-main-22-0|marked_p0|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0424",
+   "trace_id": "gsms-main-22-0|terse_p1|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0431",
+   "trace_id": "gsms-main-22-0|terse_p2|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0257",
+   "trace_id": "gsms-main-22-1|terse_p1|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0201",
+   "trace_id": "gsms-main-22-4|terse_p2|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0159",
+   "trace_id": "gsms-main-22-5|marked_p0|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0203",
+   "trace_id": "gsms-noop-22-4|marked_p0|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0091",
+   "trace_id": "gsms-noop-22-7|marked_p1|0",
+   "template_id": "gsms-22",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0081",
+   "trace_id": "gsms-main-3-0|marked_p1|0",
+   "template_id": "gsms-3",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0332",
+   "trace_id": "gsms-main-3-1|marked_p1|0",
+   "template_id": "gsms-3",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0179",
+   "trace_id": "gsms-main-3-1|marked_p2|0",
+   "template_id": "gsms-3",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0016",
+   "trace_id": "gsms-main-3-3|terse_p2|0",
+   "template_id": "gsms-3",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0194",
+   "trace_id": "gsms-main-3-4|marked_p2|0",
+   "template_id": "gsms-3",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0106",
+   "trace_id": "gsms-main-3-5|marked_p2|0",
+   "template_id": "gsms-3",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0170",
+   "trace_id": "gsms-noop-3-5|marked_p1|0",
+   "template_id": "gsms-3",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0345",
+   "trace_id": "gsms-main-30-3|terse_p0|0",
+   "template_id": "gsms-30",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0360",
+   "trace_id": "gsms-main-31-5|marked_p0|0",
+   "template_id": "gsms-31",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0465",
+   "trace_id": "gsms-noop-31-7|terse_p1|0",
+   "template_id": "gsms-31",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0313",
+   "trace_id": "gsms-main-33-1|marked_p2|0",
+   "template_id": "gsms-33",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0273",
+   "trace_id": "gsms-noop-33-0|terse_p0|0",
+   "template_id": "gsms-33",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0076",
+   "trace_id": "gsms-noop-33-0|terse_p2|0",
+   "template_id": "gsms-33",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0223",
+   "trace_id": "gsms-noop-33-2|marked_p1|0",
+   "template_id": "gsms-33",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0052",
+   "trace_id": "gsms-noop-33-6|marked_p1|0",
+   "template_id": "gsms-33",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0208",
+   "trace_id": "gsms-noop-33-7|marked_p2|0",
+   "template_id": "gsms-33",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0178",
+   "trace_id": "gsms-main-35-0|terse_p0|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0315",
+   "trace_id": "gsms-main-35-0|terse_p2|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0148",
+   "trace_id": "gsms-main-35-1|terse_p0|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0097",
+   "trace_id": "gsms-main-35-2|terse_p2|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0014",
+   "trace_id": "gsms-main-35-5|marked_p0|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0166",
+   "trace_id": "gsms-main-35-5|marked_p1|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0355",
+   "trace_id": "gsms-main-35-5|terse_p1|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0379",
+   "trace_id": "gsms-main-35-6|marked_p2|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0140",
+   "trace_id": "gsms-main-35-6|terse_p0|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0228",
+   "trace_id": "gsms-main-35-7|marked_p0|0",
+   "template_id": "gsms-35",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0344",
+   "trace_id": "gsms-main-4-0|terse_p0|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0124",
+   "trace_id": "gsms-main-4-0|terse_p1|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0041",
+   "trace_id": "gsms-main-4-1|terse_p1|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0213",
+   "trace_id": "gsms-main-4-2|terse_p2|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0284",
+   "trace_id": "gsms-main-4-3|marked_p0|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0094",
+   "trace_id": "gsms-main-4-4|terse_p0|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0146",
+   "trace_id": "gsms-main-4-5|marked_p0|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0114",
+   "trace_id": "gsms-noop-4-3|marked_p2|0",
+   "template_id": "gsms-4",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0305",
+   "trace_id": "gsms-main-40-0|marked_p1|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0430",
+   "trace_id": "gsms-main-40-0|marked_p2|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0290",
+   "trace_id": "gsms-main-40-1|marked_p2|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0408",
+   "trace_id": "gsms-main-40-1|terse_p2|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0310",
+   "trace_id": "gsms-main-40-2|marked_p0|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0189",
+   "trace_id": "gsms-main-40-4|terse_p2|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0029",
+   "trace_id": "gsms-main-40-7|terse_p0|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0112",
+   "trace_id": "gsms-main-40-7|terse_p1|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0134",
+   "trace_id": "gsms-noop-40-2|terse_p0|0",
+   "template_id": "gsms-40",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0058",
+   "trace_id": "gsms-main-42-4|marked_p2|0",
+   "template_id": "gsms-42",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0212",
+   "trace_id": "gsms-noop-42-0|terse_p1|0",
+   "template_id": "gsms-42",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0035",
+   "trace_id": "gsms-noop-42-1|terse_p2|0",
+   "template_id": "gsms-42",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0217",
+   "trace_id": "gsms-main-44-1|marked_p1|0",
+   "template_id": "gsms-44",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0104",
+   "trace_id": "gsms-main-44-1|terse_p1|0",
+   "template_id": "gsms-44",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0046",
+   "trace_id": "gsms-main-45-3|terse_p2|0",
+   "template_id": "gsms-45",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0224",
+   "trace_id": "gsms-main-45-6|marked_p1|0",
+   "template_id": "gsms-45",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0453",
+   "trace_id": "gsms-main-45-7|terse_p2|0",
+   "template_id": "gsms-45",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0151",
+   "trace_id": "gsms-noop-45-4|terse_p1|0",
+   "template_id": "gsms-45",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0245",
+   "trace_id": "gsms-main-47-6|marked_p1|0",
+   "template_id": "gsms-47",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0361",
+   "trace_id": "gsms-main-48-0|marked_p0|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0301",
+   "trace_id": "gsms-main-48-0|terse_p1|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0237",
+   "trace_id": "gsms-main-48-2|marked_p0|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0265",
+   "trace_id": "gsms-main-48-2|marked_p1|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0255",
+   "trace_id": "gsms-main-48-3|terse_p2|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0396",
+   "trace_id": "gsms-main-48-4|marked_p1|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0317",
+   "trace_id": "gsms-main-48-4|terse_p2|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0295",
+   "trace_id": "gsms-main-48-5|terse_p0|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0225",
+   "trace_id": "gsms-main-48-6|marked_p0|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0227",
+   "trace_id": "gsms-noop-48-3|marked_p2|0",
+   "template_id": "gsms-48",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0300",
+   "trace_id": "gsms-main-5-0|terse_p2|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0389",
+   "trace_id": "gsms-main-5-1|terse_p1|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0421",
+   "trace_id": "gsms-main-5-2|terse_p2|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0218",
+   "trace_id": "gsms-main-5-3|terse_p1|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0182",
+   "trace_id": "gsms-main-5-4|terse_p1|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0251",
+   "trace_id": "gsms-main-5-5|marked_p2|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0025",
+   "trace_id": "gsms-main-5-5|terse_p0|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0464",
+   "trace_id": "gsms-main-5-6|terse_p2|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0358",
+   "trace_id": "gsms-main-5-7|marked_p0|0",
+   "template_id": "gsms-5",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0282",
+   "trace_id": "gsms-noop-50-2|terse_p1|0",
+   "template_id": "gsms-50",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0123",
+   "trace_id": "gsms-noop-50-5|terse_p1|0",
+   "template_id": "gsms-50",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0199",
+   "trace_id": "gsms-main-51-0|marked_p2|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0050",
+   "trace_id": "gsms-main-51-1|terse_p2|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0001",
+   "trace_id": "gsms-main-51-2|marked_p0|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0100",
+   "trace_id": "gsms-main-51-2|marked_p2|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0240",
+   "trace_id": "gsms-main-51-2|terse_p1|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0443",
+   "trace_id": "gsms-main-51-4|terse_p1|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0080",
+   "trace_id": "gsms-main-51-5|marked_p2|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0033",
+   "trace_id": "gsms-main-51-5|terse_p1|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0051",
+   "trace_id": "gsms-noop-51-6|marked_p0|0",
+   "template_id": "gsms-51",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0188",
+   "trace_id": "gsms-main-53-0|marked_p1|0",
+   "template_id": "gsms-53",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0011",
+   "trace_id": "gsms-main-53-0|terse_p2|0",
+   "template_id": "gsms-53",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0162",
+   "trace_id": "gsms-noop-53-3|marked_p0|0",
+   "template_id": "gsms-53",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0172",
+   "trace_id": "gsms-noop-53-7|marked_p1|0",
+   "template_id": "gsms-53",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0268",
+   "trace_id": "gsms-main-6-1|marked_p0|0",
+   "template_id": "gsms-6",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0030",
+   "trace_id": "gsms-main-6-2|terse_p1|0",
+   "template_id": "gsms-6",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0231",
+   "trace_id": "gsms-main-6-6|marked_p0|0",
+   "template_id": "gsms-6",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0425",
+   "trace_id": "gsms-noop-6-0|terse_p2|0",
+   "template_id": "gsms-6",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0405",
+   "trace_id": "gsms-noop-6-3|marked_p1|0",
+   "template_id": "gsms-6",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0412",
+   "trace_id": "gsms-noop-6-7|terse_p2|0",
+   "template_id": "gsms-6",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0238",
+   "trace_id": "gsms-main-61-1|marked_p1|0",
+   "template_id": "gsms-61",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0364",
+   "trace_id": "gsms-noop-61-0|terse_p2|0",
+   "template_id": "gsms-61",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0321",
+   "trace_id": "gsms-noop-61-1|marked_p0|0",
+   "template_id": "gsms-61",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0063",
+   "trace_id": "gsms-noop-61-4|marked_p0|0",
+   "template_id": "gsms-61",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0351",
+   "trace_id": "gsms-noop-61-5|marked_p1|0",
+   "template_id": "gsms-61",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0249",
+   "trace_id": "gsms-noop-61-6|terse_p1|0",
+   "template_id": "gsms-61",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0141",
+   "trace_id": "gsms-noop-61-7|terse_p1|0",
+   "template_id": "gsms-61",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0197",
+   "trace_id": "gsms-main-67-0|terse_p0|0",
+   "template_id": "gsms-67",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0325",
+   "trace_id": "gsms-main-67-2|terse_p1|0",
+   "template_id": "gsms-67",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0438",
+   "trace_id": "gsms-main-67-4|terse_p1|0",
+   "template_id": "gsms-67",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0350",
+   "trace_id": "gsms-noop-67-4|marked_p2|0",
+   "template_id": "gsms-67",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0234",
+   "trace_id": "gsms-main-70-0|marked_p2|0",
+   "template_id": "gsms-70",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0302",
+   "trace_id": "gsms-main-70-0|terse_p1|0",
+   "template_id": "gsms-70",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0187",
+   "trace_id": "gsms-main-70-1|marked_p2|0",
+   "template_id": "gsms-70",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0409",
+   "trace_id": "gsms-main-70-4|terse_p1|0",
+   "template_id": "gsms-70",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0340",
+   "trace_id": "gsms-noop-70-0|terse_p0|0",
+   "template_id": "gsms-70",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0293",
+   "trace_id": "gsms-main-71-3|marked_p0|0",
+   "template_id": "gsms-71",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0309",
+   "trace_id": "gsms-main-71-7|marked_p2|0",
+   "template_id": "gsms-71",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0084",
+   "trace_id": "gsms-main-72-0|terse_p0|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0002",
+   "trace_id": "gsms-main-72-2|marked_p2|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0153",
+   "trace_id": "gsms-main-72-3|marked_p2|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0048",
+   "trace_id": "gsms-main-72-4|marked_p1|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0450",
+   "trace_id": "gsms-main-72-5|marked_p0|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0289",
+   "trace_id": "gsms-main-72-5|terse_p0|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0311",
+   "trace_id": "gsms-main-72-6|terse_p1|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0381",
+   "trace_id": "gsms-main-72-7|marked_p0|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0174",
+   "trace_id": "gsms-main-72-7|marked_p2|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0371",
+   "trace_id": "gsms-noop-72-6|marked_p1|0",
+   "template_id": "gsms-72",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0429",
+   "trace_id": "gsms-main-74-1|marked_p2|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0399",
+   "trace_id": "gsms-main-74-1|terse_p0|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0419",
+   "trace_id": "gsms-main-74-1|terse_p2|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0012",
+   "trace_id": "gsms-main-74-6|marked_p0|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0128",
+   "trace_id": "gsms-main-74-6|terse_p0|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0207",
+   "trace_id": "gsms-main-74-7|marked_p0|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0434",
+   "trace_id": "gsms-noop-74-0|marked_p0|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0108",
+   "trace_id": "gsms-noop-74-1|marked_p1|0",
+   "template_id": "gsms-74",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0369",
+   "trace_id": "gsms-main-78-0|marked_p1|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0266",
+   "trace_id": "gsms-main-78-0|marked_p2|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0323",
+   "trace_id": "gsms-main-78-1|terse_p0|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0193",
+   "trace_id": "gsms-main-78-1|terse_p2|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0133",
+   "trace_id": "gsms-main-78-2|terse_p2|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0339",
+   "trace_id": "gsms-main-78-3|terse_p1|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0175",
+   "trace_id": "gsms-main-78-3|terse_p2|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0122",
+   "trace_id": "gsms-main-78-6|marked_p2|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0314",
+   "trace_id": "gsms-main-78-6|terse_p0|0",
+   "template_id": "gsms-78",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0417",
+   "trace_id": "gsms-main-79-4|marked_p1|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0110",
+   "trace_id": "gsms-main-79-7|marked_p0|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0034",
+   "trace_id": "gsms-noop-79-0|marked_p0|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0129",
+   "trace_id": "gsms-noop-79-0|marked_p2|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0261",
+   "trace_id": "gsms-noop-79-1|marked_p0|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0077",
+   "trace_id": "gsms-noop-79-2|terse_p1|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0422",
+   "trace_id": "gsms-noop-79-3|marked_p1|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0117",
+   "trace_id": "gsms-noop-79-3|marked_p2|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0320",
+   "trace_id": "gsms-noop-79-5|terse_p1|0",
+   "template_id": "gsms-79",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0393",
+   "trace_id": "gsms-main-80-0|marked_p0|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0149",
+   "trace_id": "gsms-main-80-1|marked_p0|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0042",
+   "trace_id": "gsms-main-80-2|marked_p0|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0167",
+   "trace_id": "gsms-main-80-4|terse_p2|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0060",
+   "trace_id": "gsms-main-80-5|terse_p2|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0256",
+   "trace_id": "gsms-main-80-6|terse_p0|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0059",
+   "trace_id": "gsms-main-80-6|terse_p1|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0005",
+   "trace_id": "gsms-main-80-7|marked_p0|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0353",
+   "trace_id": "gsms-main-80-7|terse_p0|0",
+   "template_id": "gsms-80",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0037",
+   "trace_id": "gsms-main-82-1|marked_p0|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0342",
+   "trace_id": "gsms-main-82-3|terse_p2|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0072",
+   "trace_id": "gsms-main-82-4|terse_p0|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0452",
+   "trace_id": "gsms-main-82-5|marked_p0|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0312",
+   "trace_id": "gsms-main-82-5|terse_p1|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0157",
+   "trace_id": "gsms-main-82-6|marked_p2|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0235",
+   "trace_id": "gsms-main-82-6|terse_p0|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0335",
+   "trace_id": "gsms-main-82-7|marked_p1|0",
+   "template_id": "gsms-82",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0074",
+   "trace_id": "gsms-main-84-1|terse_p2|0",
+   "template_id": "gsms-84",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0248",
+   "trace_id": "gsms-main-84-6|terse_p0|0",
+   "template_id": "gsms-84",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0096",
+   "trace_id": "gsms-main-84-6|terse_p2|0",
+   "template_id": "gsms-84",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0026",
+   "trace_id": "gsms-main-86-0|marked_p1|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0252",
+   "trace_id": "gsms-main-86-0|terse_p2|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0258",
+   "trace_id": "gsms-main-86-1|terse_p2|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0401",
+   "trace_id": "gsms-main-86-2|terse_p0|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0066",
+   "trace_id": "gsms-main-86-3|marked_p2|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0274",
+   "trace_id": "gsms-main-86-4|marked_p2|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0113",
+   "trace_id": "gsms-main-86-4|terse_p1|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0283",
+   "trace_id": "gsms-main-86-7|marked_p0|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0388",
+   "trace_id": "gsms-noop-86-0|terse_p0|0",
+   "template_id": "gsms-86",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0098",
+   "trace_id": "gsms-main-88-1|terse_p1|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0410",
+   "trace_id": "gsms-main-88-3|marked_p1|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0043",
+   "trace_id": "gsms-main-88-3|marked_p2|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0397",
+   "trace_id": "gsms-main-88-6|marked_p0|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0171",
+   "trace_id": "gsms-main-88-6|terse_p0|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0075",
+   "trace_id": "gsms-main-88-6|terse_p2|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0365",
+   "trace_id": "gsms-main-88-7|terse_p1|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0222",
+   "trace_id": "gsms-noop-88-1|marked_p2|0",
+   "template_id": "gsms-88",
+   "split": "test",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 1
+  },
+  {
+   "item_id": "F0168",
+   "trace_id": "gsms-main-96-0|marked_p0|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0276",
+   "trace_id": "gsms-main-96-0|marked_p1|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0089",
+   "trace_id": "gsms-main-96-1|marked_p1|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0254",
+   "trace_id": "gsms-main-96-1|terse_p0|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0246",
+   "trace_id": "gsms-main-96-2|marked_p1|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0250",
+   "trace_id": "gsms-main-96-4|terse_p1|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0385",
+   "trace_id": "gsms-main-96-5|marked_p2|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0204",
+   "trace_id": "gsms-main-96-5|terse_p1|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0099",
+   "trace_id": "gsms-main-96-6|terse_p2|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0069",
+   "trace_id": "gsms-main-96-7|marked_p2|0",
+   "template_id": "gsms-96",
+   "split": "test",
+   "population": "natural",
+   "condition": "clean",
+   "part": 1
+  },
+  {
+   "item_id": "F0297",
+   "trace_id": "gsms-main-13-0|marked_p0|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0003",
+   "trace_id": "gsms-main-13-2|marked_p2|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0377",
+   "trace_id": "gsms-main-13-3|marked_p2|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0296",
+   "trace_id": "gsms-main-13-4|marked_p2|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0211",
+   "trace_id": "gsms-main-13-6|marked_p1|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0347",
+   "trace_id": "gsms-main-13-7|marked_p1|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0109",
+   "trace_id": "gsms-main-13-7|marked_p2|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0418",
+   "trace_id": "gsms-noop-13-1|terse_p0|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0329",
+   "trace_id": "gsms-noop-13-3|terse_p0|0",
+   "template_id": "gsms-13",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0466",
+   "trace_id": "gsms-main-19-0|marked_p2|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0021",
+   "trace_id": "gsms-main-19-1|marked_p1|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0391",
+   "trace_id": "gsms-main-19-1|terse_p2|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0031",
+   "trace_id": "gsms-main-19-2|marked_p1|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0269",
+   "trace_id": "gsms-main-19-2|marked_p2|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0367",
+   "trace_id": "gsms-main-19-3|terse_p1|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0330",
+   "trace_id": "gsms-main-19-7|marked_p1|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0195",
+   "trace_id": "gsms-main-19-7|terse_p2|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0346",
+   "trace_id": "gsms-noop-19-2|terse_p1|0",
+   "template_id": "gsms-19",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0017",
+   "trace_id": "gsms-noop-20-6|marked_p2|0",
+   "template_id": "gsms-20",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0165",
+   "trace_id": "gsms-main-21-1|marked_p0|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0020",
+   "trace_id": "gsms-main-21-2|marked_p2|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0359",
+   "trace_id": "gsms-main-21-4|marked_p2|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0446",
+   "trace_id": "gsms-main-21-5|terse_p0|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0065",
+   "trace_id": "gsms-main-21-6|marked_p1|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0307",
+   "trace_id": "gsms-main-21-6|terse_p1|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0090",
+   "trace_id": "gsms-main-21-7|marked_p2|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0068",
+   "trace_id": "gsms-main-21-7|terse_p2|0",
+   "template_id": "gsms-21",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0015",
+   "trace_id": "gsms-main-23-0|terse_p1|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0244",
+   "trace_id": "gsms-main-23-0|terse_p2|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0200",
+   "trace_id": "gsms-main-23-1|marked_p1|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0382",
+   "trace_id": "gsms-main-23-4|terse_p0|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0459",
+   "trace_id": "gsms-main-23-6|terse_p2|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0006",
+   "trace_id": "gsms-noop-23-1|terse_p2|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0093",
+   "trace_id": "gsms-noop-23-2|terse_p0|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0111",
+   "trace_id": "gsms-noop-23-7|terse_p0|0",
+   "template_id": "gsms-23",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0036",
+   "trace_id": "gsms-main-24-1|terse_p1|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0242",
+   "trace_id": "gsms-main-24-2|marked_p2|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0210",
+   "trace_id": "gsms-main-24-2|terse_p1|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0144",
+   "trace_id": "gsms-main-24-4|marked_p0|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0264",
+   "trace_id": "gsms-main-24-4|marked_p2|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0328",
+   "trace_id": "gsms-main-24-5|marked_p2|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0279",
+   "trace_id": "gsms-main-24-5|terse_p1|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0181",
+   "trace_id": "gsms-main-24-6|terse_p0|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0435",
+   "trace_id": "gsms-main-24-7|terse_p1|0",
+   "template_id": "gsms-24",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0285",
+   "trace_id": "gsms-main-32-5|terse_p2|0",
+   "template_id": "gsms-32",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0107",
+   "trace_id": "gsms-main-32-7|marked_p0|0",
+   "template_id": "gsms-32",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0322",
+   "trace_id": "gsms-main-36-1|marked_p2|0",
+   "template_id": "gsms-36",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0054",
+   "trace_id": "gsms-main-36-7|terse_p2|0",
+   "template_id": "gsms-36",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0127",
+   "trace_id": "gsms-main-37-0|terse_p0|0",
+   "template_id": "gsms-37",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0280",
+   "trace_id": "gsms-main-37-1|marked_p0|0",
+   "template_id": "gsms-37",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0461",
+   "trace_id": "gsms-main-37-6|marked_p0|0",
+   "template_id": "gsms-37",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0416",
+   "trace_id": "gsms-noop-37-6|terse_p1|0",
+   "template_id": "gsms-37",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0230",
+   "trace_id": "gsms-main-39-0|terse_p1|0",
+   "template_id": "gsms-39",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0206",
+   "trace_id": "gsms-main-39-2|terse_p0|0",
+   "template_id": "gsms-39",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0334",
+   "trace_id": "gsms-main-39-2|terse_p2|0",
+   "template_id": "gsms-39",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0004",
+   "trace_id": "gsms-main-39-5|terse_p1|0",
+   "template_id": "gsms-39",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0220",
+   "trace_id": "gsms-main-39-6|marked_p2|0",
+   "template_id": "gsms-39",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0139",
+   "trace_id": "gsms-main-39-7|marked_p2|0",
+   "template_id": "gsms-39",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0038",
+   "trace_id": "gsms-main-41-0|marked_p1|0",
+   "template_id": "gsms-41",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0370",
+   "trace_id": "gsms-main-41-5|marked_p2|0",
+   "template_id": "gsms-41",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0205",
+   "trace_id": "gsms-main-46-1|marked_p0|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0331",
+   "trace_id": "gsms-main-46-2|terse_p0|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0073",
+   "trace_id": "gsms-main-46-4|terse_p1|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0137",
+   "trace_id": "gsms-main-46-6|terse_p0|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0105",
+   "trace_id": "gsms-main-46-6|terse_p2|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0449",
+   "trace_id": "gsms-noop-46-0|marked_p1|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0008",
+   "trace_id": "gsms-noop-46-0|terse_p1|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0071",
+   "trace_id": "gsms-noop-46-2|marked_p0|0",
+   "template_id": "gsms-46",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0306",
+   "trace_id": "gsms-main-49-2|marked_p2|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0209",
+   "trace_id": "gsms-main-49-2|terse_p2|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0426",
+   "trace_id": "gsms-main-49-3|marked_p2|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0463",
+   "trace_id": "gsms-main-49-3|terse_p0|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0082",
+   "trace_id": "gsms-main-49-4|marked_p1|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0013",
+   "trace_id": "gsms-main-49-6|marked_p0|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0023",
+   "trace_id": "gsms-main-49-6|terse_p2|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0390",
+   "trace_id": "gsms-noop-49-5|marked_p2|0",
+   "template_id": "gsms-49",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0402",
+   "trace_id": "gsms-noop-52-3|marked_p1|0",
+   "template_id": "gsms-52",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0428",
+   "trace_id": "gsms-main-54-3|terse_p1|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0010",
+   "trace_id": "gsms-main-54-5|marked_p2|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0394",
+   "trace_id": "gsms-main-54-7|marked_p1|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0404",
+   "trace_id": "gsms-noop-54-0|marked_p1|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0019",
+   "trace_id": "gsms-noop-54-0|terse_p1|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0260",
+   "trace_id": "gsms-noop-54-2|terse_p2|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0147",
+   "trace_id": "gsms-noop-54-5|terse_p1|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0142",
+   "trace_id": "gsms-noop-54-6|terse_p0|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0383",
+   "trace_id": "gsms-noop-54-7|terse_p2|0",
+   "template_id": "gsms-54",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0436",
+   "trace_id": "gsms-main-55-0|marked_p2|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0131",
+   "trace_id": "gsms-main-55-0|terse_p1|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0040",
+   "trace_id": "gsms-main-55-1|marked_p0|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0442",
+   "trace_id": "gsms-main-55-1|terse_p0|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0121",
+   "trace_id": "gsms-main-55-2|marked_p1|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0155",
+   "trace_id": "gsms-main-55-3|marked_p1|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0406",
+   "trace_id": "gsms-main-55-4|marked_p1|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0374",
+   "trace_id": "gsms-main-55-4|terse_p2|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0338",
+   "trace_id": "gsms-main-55-6|terse_p0|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0045",
+   "trace_id": "gsms-main-55-7|terse_p1|0",
+   "template_id": "gsms-55",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0352",
+   "trace_id": "gsms-main-58-2|marked_p0|0",
+   "template_id": "gsms-58",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0366",
+   "trace_id": "gsms-main-58-3|marked_p0|0",
+   "template_id": "gsms-58",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0349",
+   "trace_id": "gsms-main-58-5|marked_p1|0",
+   "template_id": "gsms-58",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0303",
+   "trace_id": "gsms-main-58-7|marked_p1|0",
+   "template_id": "gsms-58",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0169",
+   "trace_id": "gsms-main-58-7|terse_p2|0",
+   "template_id": "gsms-58",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0156",
+   "trace_id": "gsms-noop-58-0|marked_p1|0",
+   "template_id": "gsms-58",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0083",
+   "trace_id": "gsms-noop-58-3|marked_p1|0",
+   "template_id": "gsms-58",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0135",
+   "trace_id": "gsms-main-59-1|marked_p0|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0163",
+   "trace_id": "gsms-main-59-3|marked_p0|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0150",
+   "trace_id": "gsms-main-59-3|marked_p2|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0398",
+   "trace_id": "gsms-main-59-4|terse_p1|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0047",
+   "trace_id": "gsms-main-59-4|terse_p2|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0363",
+   "trace_id": "gsms-main-59-5|marked_p0|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0277",
+   "trace_id": "gsms-main-59-5|marked_p1|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0407",
+   "trace_id": "gsms-main-59-5|terse_p2|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0247",
+   "trace_id": "gsms-main-59-7|marked_p1|0",
+   "template_id": "gsms-59",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0343",
+   "trace_id": "gsms-main-60-0|terse_p0|0",
+   "template_id": "gsms-60",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0226",
+   "trace_id": "gsms-main-60-2|terse_p0|0",
+   "template_id": "gsms-60",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0318",
+   "trace_id": "gsms-main-60-5|marked_p1|0",
+   "template_id": "gsms-60",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0132",
+   "trace_id": "gsms-main-60-5|terse_p1|0",
+   "template_id": "gsms-60",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0116",
+   "trace_id": "gsms-main-60-5|terse_p2|0",
+   "template_id": "gsms-60",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0413",
+   "trace_id": "gsms-main-60-6|marked_p2|0",
+   "template_id": "gsms-60",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0221",
+   "trace_id": "gsms-noop-60-3|terse_p1|0",
+   "template_id": "gsms-60",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0202",
+   "trace_id": "gsms-main-62-0|marked_p0|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0191",
+   "trace_id": "gsms-main-62-1|terse_p2|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0085",
+   "trace_id": "gsms-main-62-4|terse_p1|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0145",
+   "trace_id": "gsms-main-62-4|terse_p2|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0215",
+   "trace_id": "gsms-main-62-6|terse_p2|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0130",
+   "trace_id": "gsms-main-62-7|marked_p1|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0180",
+   "trace_id": "gsms-main-62-7|terse_p1|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0304",
+   "trace_id": "gsms-noop-62-3|terse_p0|0",
+   "template_id": "gsms-62",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0262",
+   "trace_id": "gsms-noop-64-4|terse_p1|0",
+   "template_id": "gsms-64",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0427",
+   "trace_id": "gsms-main-65-0|marked_p2|0",
+   "template_id": "gsms-65",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0354",
+   "trace_id": "gsms-main-65-2|marked_p0|0",
+   "template_id": "gsms-65",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0454",
+   "trace_id": "gsms-main-65-5|marked_p0|0",
+   "template_id": "gsms-65",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0275",
+   "trace_id": "gsms-main-65-6|marked_p1|0",
+   "template_id": "gsms-65",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0292",
+   "trace_id": "gsms-noop-65-5|marked_p1|0",
+   "template_id": "gsms-65",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0079",
+   "trace_id": "gsms-main-77-1|marked_p0|0",
+   "template_id": "gsms-77",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0341",
+   "trace_id": "gsms-noop-77-3|marked_p1|0",
+   "template_id": "gsms-77",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0392",
+   "trace_id": "gsms-noop-77-4|marked_p1|0",
+   "template_id": "gsms-77",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0192",
+   "trace_id": "gsms-noop-8-0|terse_p2|0",
+   "template_id": "gsms-8",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0457",
+   "trace_id": "gsms-noop-8-1|terse_p1|0",
+   "template_id": "gsms-8",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0198",
+   "trace_id": "gsms-noop-8-1|terse_p2|0",
+   "template_id": "gsms-8",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0411",
+   "trace_id": "gsms-main-81-1|terse_p1|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0400",
+   "trace_id": "gsms-main-81-2|marked_p0|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0348",
+   "trace_id": "gsms-main-81-2|terse_p1|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0018",
+   "trace_id": "gsms-main-81-2|terse_p2|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0078",
+   "trace_id": "gsms-main-81-3|terse_p1|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0456",
+   "trace_id": "gsms-main-81-5|marked_p2|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0119",
+   "trace_id": "gsms-main-81-5|terse_p2|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0154",
+   "trace_id": "gsms-noop-81-7|marked_p2|0",
+   "template_id": "gsms-81",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0440",
+   "trace_id": "gsms-main-83-6|terse_p2|0",
+   "template_id": "gsms-83",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0423",
+   "trace_id": "gsms-noop-83-0|marked_p2|0",
+   "template_id": "gsms-83",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0263",
+   "trace_id": "gsms-noop-83-1|marked_p2|0",
+   "template_id": "gsms-83",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0152",
+   "trace_id": "gsms-main-89-1|terse_p1|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0190",
+   "trace_id": "gsms-main-89-2|marked_p0|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0403",
+   "trace_id": "gsms-main-89-2|terse_p1|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0062",
+   "trace_id": "gsms-main-89-2|terse_p2|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0053",
+   "trace_id": "gsms-main-89-3|terse_p1|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0183",
+   "trace_id": "gsms-main-89-4|marked_p0|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0362",
+   "trace_id": "gsms-main-89-4|terse_p0|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0095",
+   "trace_id": "gsms-main-89-4|terse_p2|0",
+   "template_id": "gsms-89",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0118",
+   "trace_id": "gsms-main-91-1|terse_p1|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0324",
+   "trace_id": "gsms-main-91-3|marked_p0|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0164",
+   "trace_id": "gsms-main-91-3|marked_p1|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0161",
+   "trace_id": "gsms-main-91-3|terse_p0|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0420",
+   "trace_id": "gsms-main-91-3|terse_p2|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0451",
+   "trace_id": "gsms-main-91-4|marked_p2|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0253",
+   "trace_id": "gsms-main-91-4|terse_p0|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0055",
+   "trace_id": "gsms-main-91-5|marked_p0|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0216",
+   "trace_id": "gsms-main-91-6|terse_p0|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0291",
+   "trace_id": "gsms-main-91-7|terse_p1|0",
+   "template_id": "gsms-91",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0259",
+   "trace_id": "gsms-main-93-1|terse_p1|0",
+   "template_id": "gsms-93",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0286",
+   "trace_id": "gsms-main-93-2|marked_p2|0",
+   "template_id": "gsms-93",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0009",
+   "trace_id": "gsms-main-93-3|marked_p2|0",
+   "template_id": "gsms-93",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0158",
+   "trace_id": "gsms-main-93-3|terse_p1|0",
+   "template_id": "gsms-93",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0115",
+   "trace_id": "gsms-main-93-4|terse_p0|0",
+   "template_id": "gsms-93",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0455",
+   "trace_id": "gsms-noop-93-0|marked_p1|0",
+   "template_id": "gsms-93",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0271",
+   "trace_id": "gsms-noop-93-7|terse_p1|0",
+   "template_id": "gsms-93",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0272",
+   "trace_id": "gsms-main-98-2|terse_p1|0",
+   "template_id": "gsms-98",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0024",
+   "trace_id": "gsms-main-98-6|marked_p0|0",
+   "template_id": "gsms-98",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0184",
+   "trace_id": "gsms-main-98-6|marked_p1|0",
+   "template_id": "gsms-98",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0441",
+   "trace_id": "gsms-main-98-6|marked_p2|0",
+   "template_id": "gsms-98",
+   "split": "train",
+   "population": "natural",
+   "condition": "clean",
+   "part": 2
+  },
+  {
+   "item_id": "F0368",
+   "trace_id": "gsms-noop-98-1|marked_p1|0",
+   "template_id": "gsms-98",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  },
+  {
+   "item_id": "F0092",
+   "trace_id": "gsms-noop-98-5|marked_p1|0",
+   "template_id": "gsms-98",
+   "split": "train",
+   "population": "primary",
+   "condition": "distractor",
+   "part": 2
+  }
+ ]
+}
