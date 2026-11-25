@@ -1452,3 +1452,26 @@ Pre-registrations `main-study/prereg/E1.md` and `E2.md`, committed before any E1
   position.
 - Every E1/E2 number is a development result: automatic labels, S5 kappa pending, dev templates
   only.
+
+## D50 (2026-11-26) E3 (RQ3) and E4 (RQ4) analysis code, ready before the test unlock
+
+Draft pre-registrations `main-study/prereg/E3.md` and `E4.md`, and the scripts
+`main-study/analysis/e3.py` and `e4.py` (tests: `main-study/tests/test_e3_e4.py`). They are
+committed before any E3/E4 number exists.
+- **The drafts are not binding.** The group signs them off before `prereg/UNLOCK_TEST.md` is
+  created. The plan's own E3/E4 text is not in this repository.
+  - **E3:** D_V is read as the gold top-1 rate at s0, and G_V as the gold-over-bound rate. G_shuf
+    comes from E1's 100 shuffled-label probes. G_prior is the train class frequency at the same
+    step position; for the binary variable this is the majority-class baseline that the October
+    pilot lacked. The criterion is D_V ≥ 0.20 and both paired-difference CIs above 0. The group
+    must confirm this reading.
+  - **E4:** the share of content-attributable failures, and a typology-only classifier for that
+    label, with the criterion "AUROC CI above 0.5". s0's error type is left out of the primary
+    classifier because it partly defines the label.
+- **Test is refused twice over.** Both scripts refuse `--split test` without
+  `prereg/UNLOCK_TEST.md`. E4 also refuses it unless the S5 agreement record
+  (`reports/m1/s5_annotation/agreement.json`) meets kappa ≥ 0.6 for both the step and the type. E3
+  stops on test anyway, because the local activation cache holds train and dev rows only.
+- **Dev runs check the code only:** labelled DEVELOPMENT, and they decide no gate.
+- **Reuse.** E3 reuses E1's subsample, layer, λ and shuffles, and the R1 stability samples for
+  the stable/borderline split on dev. It generates no new traces.
