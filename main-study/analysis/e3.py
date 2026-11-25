@@ -46,6 +46,14 @@ def guard(split: str) -> None:
 
 
 # ---------------------------------------------------------------- population
+def population(s: dict) -> str:
+    """S2 population of a failed trace: primary (clean twin solved), natural (clean condition),
+    or a distractor failure whose clean twin failed as well (S2 leaves it unlabelled)."""
+    if s["population"]:
+        return s["population"]
+    return "distractor, clean also failed" if s["condition"] == "distractor" else "unlabelled"
+
+
 def failures(steps: list[dict], split: str, rix: dict) -> list[dict]:
     """Content-attributable s0 rows of failed traces on `split`, with gold and bound class."""
     out = []
@@ -60,7 +68,7 @@ def failures(steps: list[dict], split: str, rix: dict) -> list[dict]:
         else:
             var, gold, bound = "content/4-class", OPS.index(s["gold_op"]), OPS.index(s["op"])
         out.append({"trace_id": s["trace_id"], "template_id": s["template_id"],
-                    "population": s["population"] or "none", "step": s["step"],
+                    "population": population(s), "step": s["step"],
                     "step_pos": s["step_pos"], "variable": var, "gold": gold, "bound": bound,
                     "ri": rix[k]})
     return out

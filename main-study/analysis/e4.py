@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 
 from analysis.e1 import boot, boot_diff
-from analysis.e3 import mean_ci
+from analysis.e3 import mean_ci, population
 from harness.config import REPO_ROOT, experiment_config
 from probes import fit
 from probes.labels import ERROR_TYPES, _guard, _traces, step_rows, test_unlocked
@@ -64,7 +64,7 @@ def failure_rows(splits: tuple, allow_test: bool = False) -> list[dict]:
         et = s["error_type"] if s["error_type"] in S0_TYPES else "non-computational"
         out.append({
             "trace_id": s["trace_id"], "template_id": s["template_id"], "split": s["split"],
-            "population": s["population"] or "none", "y": int(bool(s["content_attributable"])),
+            "population": population(s), "y": int(bool(s["content_attributable"])),
             "s0_error_type": et,
             "x": {"distractor_condition": float(s["condition"] == "distractor"),
                   "n_steps": float(s["n_steps"]), "s0_index": float(s["step"]),
