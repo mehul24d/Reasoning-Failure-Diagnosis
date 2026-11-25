@@ -19,17 +19,17 @@ RQ3 feasibility gate is re-checked on 9B before any 9B repair experiment. The re
 the design and every threshold are unchanged. See `docs/PLAN_AMENDMENT_2026-11-13.md` and
 `prereg/S2.md` (A1–A7).
 
-## Status (2026-11-13)
+## Status (2026-11-26)
 
 | Step | Milestone | What | Status |
 |---|---|---|---|
 | S1 | M0 | Equivalence checks, SAE validation, E0 sparsity check | **Done (Gemma-2-2B-IT).** 9B and Qwen-7B: Semester 8 |
-| S2 | M1 | Full-scale generation on Gemma-2-2B-IT; equivalence gate; step parsing | Pipeline built and tested; parser v4 frozen; `prereg/S2.md` amended, still a draft; run pending |
-| S3 | M1 | Sampled subset (T = 0.7, k = 5, test failures); gold extraction | Built into the same pipeline; run pending |
-| S4 | M1 | Activation caching (residuals, float16, pre-registered positions) | Built into the verified TL pass; run pending |
-| S5–S6 | M2 | E1 directions and probes; E2 readout map; gate G1 | Not started |
-| S7–S8 | M3 | E3 self-sourced feasibility (RQ3); gate G2 | Not started |
-| S9–S11 | M4 | E4 attribution and typology (RQ4); report | Not started |
+| S2 | M1 | Full-scale generation on Gemma-2-2B-IT; equivalence gate; step parsing | **Done** on Kaggle (2026-11-15); verify gate passed |
+| S3 | M1 | Sampled subset (T = 0.7, k = 5, test failures); gold extraction | **Done** on Kaggle (2026-11-15) |
+| S4 | M1 | Activation caching (residuals, float16, pre-registered positions) | **Done** on Kaggle (2026-11-15) |
+| S5–S6 | M2 | E1 directions and probes; E2 readout map; gate G1 | Development runs on dev done (`reports/m2/`; automatic labels, S5 kappa pending); test and G1 wait for the unlock |
+| S7–S8 | M3 | E3 self-sourced feasibility (RQ3); gate G2 | Draft prereg and script, dev code check only (D50); sign-off and test pending |
+| S9–S11 | M4 | E4 attribution and typology (RQ4); report | Draft prereg and script, dev code check only (D50); S5 kappa, sign-off and test pending |
 
 The detailed tracker is `docs/STEPS.md`.
 

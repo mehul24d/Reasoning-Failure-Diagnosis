@@ -1,5 +1,44 @@
 # Progress
 
+## 2026-11-26: Work that does not need the S5 labels (D47–D50); test templates untouched
+
+The annotators are labelling the S5 sheets. Everything below uses the 33 train and 16 dev
+templates only, and every probe result uses automatic labels (parser v4; S5 kappa pending).
+Nothing in `docs/annotation/` or `docs/review/` was read or changed.
+- **A. Records (D47).**
+  - The October pilot deviation is logged: 7 solved items for 15 failures.
+  - Baseline A, Baseline B and pilot run dates are exact, from the VM's run.log. The D20
+    diagnostics are approximate, from file and commit times.
+  - GCP is checked read-only. The VM `rfd-gemma` is TERMINATED. Its 200 GB pd-balanced disk
+    costs about $22/month, and the bucket about $0.10/month. Nothing was deleted.
+- **E1 (dev): no variable is readable by the pre-registered rule** (`reports/m2/e1_dev.md`).
+
+  | variable | dev metric [CI] | probe − shuffled [CI] |
+  |---|---|---|
+  | content/binary | AUROC 0.810 [0.523, 0.967] | +0.254 [−0.017, +0.417] |
+  | content/4-class | balanced accuracy 0.624 [0.491, 0.759] | +0.294 [+0.175, +0.419] (below 0.75) |
+  | evaluation/binary | AUROC 0.664 [0.542, 0.769] | +0.051 [−0.036, +0.129] |
+  | evaluation/4-class | balanced accuracy 0.338 [0.264, 0.416] | +0.066 [−0.009, +0.143] |
+
+  - The binary content and evaluation directions have cosine −0.74 to −0.92 at every layer:
+    "distractor used" and "step wrong" are close to one direction.
+  - 78 of the fits hit lbfgs's 1,000-iteration limit. They are reported, not rerun.
+- **E2 (dev)** (`reports/m2/e2_dev.md`, `e2_map.png`).
+  - Readability rises at `step_last` and at later steps. The best dev layers are optimistic.
+  - The content/4-class probe beats all three baselines; content/binary and evaluation/binary
+    do not beat the text-only baseline.
+  - **RQ2 development verdict: unsupported.** The evaluation alarm fires on steps before s0 more
+    often than on correct traces (+0.125 [+0.024, +0.234]).
+- **E3 / E4.** Draft preregs (not binding until the group signs them off) and scripts, both of
+  which refuse test.
+  - E3 dev code check: primary D_V 0.341 [0.159, 0.900]. The probe reads the written (bound)
+    value in 63% of failures. It falls below the shuffled (0.818) and prior (0.902) baselines,
+    so the criterion is not met.
+  - E4 dev code check: 23.6% [8.1, 47.8] of dev failures are content-attributable at s0. The
+    typology-only classifier has AUROC 0.654 [0.409, 0.881], so the criterion is not met.
+- **R1 (redesigned repair pilot; GPU):** running on Kaggle, 2 × T4, cap 8 T4-h (see below when
+  done).
+
 ## 2026-11-16: Off-site copy of the Kaggle outputs in a private Hugging Face dataset
 
 All three notebook outputs, 378 files and 15.6 GB, were uploaded to the **private** dataset

@@ -14,15 +14,15 @@ for them and the RQ3 gate G2 is re-checked on 9B first.
 | S1b | M0 | Six TL–HF equivalence checks (Table 5) | [x] 2B: 6/6 pass · 9B, Qwen: Semester 8 |
 | S1c | M0 | SAE validation (FVU ≤ 0.40, ΔCE ≤ 0.20) and E0 sparsity check; pre-register E0 | [x] 2B: 24/26 layers, E0 done · 9B: Semester 8 |
 | S2 | M1 | Full-scale generation on Gemma-2-2B-IT (batched HF, equivalence gate); step parsing | [~] parser v4 frozen (`e559c46`); pipeline `harness/pipeline.py` built and tested; `prereg/S2.md` signed off 2026-11-13 (A8–A13; binding at the first study data) · [x] Phase 0 on the Kaggle weights (7/7) · [x] `make estimate` (6.0 T4-h, 7.5 with safety) · [x] distractor auto-checks · [ ] human review of the clauses · [ ] run |
-| S3 | M1 | Sampled subset (test failures); gold extraction and alignment; pre-register E1–E2 | [~] sampled stage and gold s0 built into the pipeline · [ ] run · [ ] E1–E2 prereg |
+| S3 | M1 | Sampled subset (test failures); gold extraction and alignment; pre-register E1–E2 | [~] sampled stage and gold s0 built into the pipeline · [ ] run · [x] E1–E2 prereg (dev runs; 2026-11-26) |
 | S4 | M1 | Activation caching (residuals, float16, pre-registered positions) | [~] built into the verified TL pass (`cache/`) · [ ] run |
-| S5 | M2 | E1: directions and probes, 5 seeds, shuffled nulls | [ ] |
-| S6 | M2 | E2: readout map, baselines, RQ2 paired test | [ ] |
+| S5 | M2 | E1: directions and probes, 5 seeds, shuffled nulls | [~] dev run done (prereg/E1.md, reports/m2/e1_dev.md; automatic labels) · [ ] test |
+| S6 | M2 | E2: readout map, baselines, RQ2 paired test | [~] dev run done (prereg/E2.md, reports/m2/e2_dev.md) · [ ] test |
 | G1 | M2 | Gate: RQ1 and RQ2 criteria | [ ] |
-| S7 | M3 | Pre-register E3; gold-labelled content probes | [ ] |
+| S7 | M3 | Pre-register E3; gold-labelled content probes | [~] DRAFT prereg + analysis/e3.py, dev code check (D50) · [ ] group sign-off |
 | S8 | M3 | E3 on test templates (2B; 9B and Qwen in Semester 8) | [ ] |
 | G2 | M3 | Gate: RQ3 criterion | [ ] |
-| S9 | M4 | Pre-register E4; attribution labels; 20% two-annotator check | [ ] |
+| S9 | M4 | Pre-register E4; attribution labels; 20% two-annotator check | [~] DRAFT prereg + analysis/e4.py, dev code check (D50) · [ ] S5 kappa · [ ] sign-off |
 | S10 | M4 | Typology features; RQ4 classifier | [ ] |
 | S11 | M4 | Report and release | [ ] |
 
