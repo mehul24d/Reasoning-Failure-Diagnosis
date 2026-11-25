@@ -1339,3 +1339,116 @@ the CIs stay template-clustered bootstrap CIs.
   gold answer but the scorer read another number. An example is "4320 people are infected after
   3 days", read as 3. Three of them are in the sample, and annotators label these `none` (R10).
   Scoring is not changed here.
+
+---
+
+# 2026-11-26: work done while the S5 annotators label (D47–D50)
+
+Made on the user's instruction of 2026-11-26: progress on everything that does not depend on the
+S5 labels, with **no analysis of the 40 test templates** (all work below uses the 33 train and
+16 dev templates), a pre-registration committed before each run, Kaggle T4s only, and a cap of
+8 T4-hours for all GPU work. `docs/annotation/` and `docs/review/` were not opened.
+
+## D47 (2026-11-26) Records for the October run: pilot deviation, run dates, GCP resources
+
+**Pilot deviation (not recorded before).** `docs/prereg/pilot.md` §Population says the matched
+solved set has *one* solved NoOp trace from the same template *for each failure*. The code
+(`rfd.experiments.pilot`, "matched solved set") drew, per template, at most
+min(#failures, #solved NoOp traces of that template) traces, without replacement and with no
+fallback. On the 10 test templates:
+- templates 12, 36 and 68 (7 of the 15 failures) had no solved NoOp trace at all;
+- template 79 had 1 solved trace for its 2 failures;
+- the other 6 templates had one per failure.
+
+So the repair test used **7 solved items for 15 failures** (22 items, 6 templates for damage),
+not 15. The damage estimate and its CI rest on 7 items. The reported numbers do not change (every
+condition changed 0 of 22 items), but this is a deviation from the pre-registration and the
+pilot's damage and net-gain figures must be read with it. Nothing is re-run. The redesigned
+pilot (D48) pre-registers a fallback for templates without enough solved traces.
+
+**Run dates of the October run** (reduced scale, GCP VM `rfd-gemma`, one L4). Source: the
+runner's log `gs://icl-failure-rfd-results/logs/run.log` (the `=== make <target> <UTC time>`
+lines) and the upload times of the result files in the same bucket. These are exact, not
+approximate. Times in UTC, with IST in brackets.
+
+| Run | Start | End (last result uploaded) | Code commit on the VM |
+|---|---|---|---|
+| Phase 0 | 2026-10-22 19:27 (23 Oct 00:57) | 19:28:45 (00:58) | f1d648b |
+| Baseline A | 2026-10-22 19:28 (23 Oct 00:58); resumed 20:00 after a runner restart | 20:58:21 (02:28) | f1d648b |
+| Traces (776) | 2026-10-22 20:58 (02:28) | 21:18:49 (02:48), generation; labelling and activations done before Baseline B started at 21:23 | f1d648b |
+| Baseline B | 2026-10-22 21:23 (02:53) | 23:37:58 (05:07) | f1d648b |
+| Pilot (readability, repair) | 2026-10-22 23:38 (05:08) | 23:56:38 (05:26) | f1d648b |
+| Pilot stability samples | 2026-10-22 23:56 (05:26) | 2026-10-23 00:06:56 (05:36) | f1d648b |
+
+The results were committed in `ecc4d66` (2026-10-23 05:42 IST). The exploratory 64× and 512×
+checks (D20) are not in the bucket. Their dates are **approximate, from file timestamps and
+commit times**: their configs were committed in `102f862` (2026-10-23 05:42 IST), the local result
+files are dated 2026-10-23 05:57–06:08 IST, and they were committed in `b8fdcd0` (08:18 IST).
+
+**GCP resources, checked read-only on 2026-11-26** (`gcloud compute instances|disks|addresses|
+snapshots|images list`, `gcloud storage du`, Cloud Billing Catalog list prices). Nothing was
+started, stopped or deleted.
+- VM `rfd-gemma` (g2-standard-8 with one L4, asia-southeast1-c) still exists, **TERMINATED**
+  since 2026-10-22 19:47 PDT. A stopped VM is not billed for vCPU, memory or GPU.
+- Its boot disk `rfd-gemma` (200 GB pd-balanced, asia-southeast1) still exists. List price
+  $0.11 per GiB-month in Singapore, so **about $22.00 a month**, about $25 since 2026-10-22.
+- Bucket `gs://icl-failure-rfd-results` (US-CENTRAL1, Standard): 4.84 GiB, about **$0.10 a
+  month**.
+- No static IPs, snapshots or custom images.
+- Deleting the disk would delete the VM's data; everything in `results/` is already in git and in
+  the bucket. That decision is the user's.
+
+**Research plan text.** The Detailed Research Plan PDF that the main-study code cites by section
+number is not on this machine. The E1–E4 pre-registrations below (D48–D50) take their criteria
+from the group's internal evaluation report (GP099, Chapter 3: Table 3.2 variables, Table 3.3
+RQ1–RQ4 criteria, the post-pilot RQ3 amendment) and from `main-study/configs/experiment.yaml`
+(Appendix E thresholds). Where these leave a choice open, the pre-registrations take the
+conservative option and say so.
+
+## D48 (2026-11-26) Redesigned pilot of the repair test (R1), on train and dev templates
+
+Pre-registration: `main-study/prereg/R1.md`, committed before any R1 data. Code:
+`main-study/repair/` (engine, inputs, worker, analysis) and `notebooks/repair_r1_kaggle.ipynb`.
+- **Why a redesign first.** The October pilot changed 0 of 22 items at 1–8× (single-token edit),
+  and 64× was needed to change anything (D20). Repeating it at full size would only show the same
+  floor.
+- **Decisions in R1** (each with its reason in the prereg):
+  - edit over every token of the first deviating step, at a fixed absolute window;
+  - strength calibrated on the dev items: m* is the smallest multiple of r_v on
+    {0.25, …, 16} at which the oracle edit changes ≥ 20% of dev failures' answers with ≤ 10% broken;
+    otherwise the pilot stops and the calibration curve is the finding;
+  - all conditions at the content variable's layer, the evaluation direction included;
+  - layer and λ by the E1 procedure; train items cross-fitted by template fold;
+  - the matched solved set with fallbacks (D47);
+  - population: the main study's primary distractor failures that are content-attributable at s0
+    (107: 66 train, 41 dev, 24 templates), 8 instances per template from S2.
+- **Reuse.** Traces and activations come from S2 and the S4 cache (`probes/activations.py` reads
+  only train and dev rows). **Regenerated:** the T = 0.7 stability samples, because S3 sampled only
+  test failures (A5); and the edited continuations themselves, which are new by definition.
+- **The engine** (`repair/engine.py`) ports the October divergence shortcut. It adds a shared
+  prefix KV cache and an unedited reference row in every batch. It equals brute-force edited
+  generation on tiny random Qwen2 and Gemma-2 models (`tests/test_repair_engine.py`).
+- **Not part of the minor project's confirmatory design.** E1–E4 only read the model. R1 is a
+  development pilot for Semester VIII (E10), and its dev items serve both calibration and
+  evaluation, which is stated with the results.
+
+## D49 (2026-11-26) E1 and E2 development runs: conservative choices
+
+Pre-registrations `main-study/prereg/E1.md` and `E2.md`, committed before any E1/E2 data.
+- **Fit on train, select on train (grouped CV), report on dev.** The user asked for "fit on
+  train, tune on dev, report dev". Selecting the layer on dev and reporting dev would bias the
+  dev numbers upward, so the primary numbers use train-CV selection. The dev-tuned layer is
+  reported as well, labelled optimistic.
+- **Two-stage selection** (layer at λ = 1, then λ), to bound the CPU cost of 26 layers × 7 λ ×
+  5 folds × 5 seeds.
+- `extra_valid` steps are excluded from the evaluation variables, because their label is
+  ambiguous.
+- **No RQ1 verdict:** RQ1 needs three content variables, and the third (bound operand) is E3's.
+- **E2 controls.** The question-only control and the entropy control become a question-text
+  TF-IDF control and top-2 logit-margin features. The cache has no question-end activation, and
+  S2 recorded top-2 logits, not entropy.
+- **RQ2 timing test:** an alarm at FPR 0.10 (`rq2_alarm_fpr`), set on correct train traces.
+  The pre-s0 alarm rate in dev failures is compared with the correct-trace rate at the same step
+  position.
+- Every E1/E2 number is a development result: automatic labels, S5 kappa pending, dev templates
+  only.
