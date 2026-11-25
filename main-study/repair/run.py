@@ -123,7 +123,7 @@ def stage_edit(a, items, vecs, model, tok) -> dict:
                              device=dev)
             t0 = time.time()
             divs, info = scan(model, seq, it["start"], it["end"], it["layer"], V, batch=a.batch)
-            torch.cuda.synchronize() if torch.cuda.is_available() else None
+            torch.cuda.synchronize(dev) if dev.type == "cuda" else None
             t["scan_s"] += time.time() - t0
             t["scan_rows"] += len(todo)
             t["reference_reproduces_recorded"].append(info["reference_reproduces_recorded"])
@@ -144,7 +144,7 @@ def stage_edit(a, items, vecs, model, tok) -> dict:
             for b0 in range(0, len(jobs), a.gen_batch):
                 t0 = time.time()
                 res = regenerate(model, tok, jobs[b0:b0 + a.gen_batch], it["layer"], gen_cfg, 512)
-                torch.cuda.synchronize() if torch.cuda.is_available() else None
+                torch.cuda.synchronize(dev) if dev.type == "cuda" else None
                 t["regen_s"] += time.time() - t0
                 t["regen_rows"] += len(res)
                 for (c, m, p), r, j in zip(idx[b0:b0 + a.gen_batch], res, jobs[b0:b0 + a.gen_batch]):

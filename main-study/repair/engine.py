@@ -76,7 +76,7 @@ def lm_logits(model, hidden: torch.Tensor) -> torch.Tensor:
     return logits
 
 
-def _argmax(model, hidden: torch.Tensor, chunk: int = 64) -> torch.Tensor:
+def _argmax(model, hidden: torch.Tensor, chunk: int = 16) -> torch.Tensor:
     out = []
     for s in range(0, hidden.shape[1], chunk):
         out.append(lm_logits(model, hidden[:, s:s + chunk]).argmax(-1))
