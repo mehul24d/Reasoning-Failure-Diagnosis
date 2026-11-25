@@ -1,0 +1,283 @@
+{
+ "split": "dev",
+ "status": "DEVELOPMENT CHECK of the E4 code on dev (prereg/E4.md is a DRAFT)",
+ "labels": "automatic (parser v4); S5 kappa pending (no agreement record)",
+ "kappa": {
+  "met": false,
+  "status": "S5 kappa pending (no agreement record)"
+ },
+ "criterion": "template-bootstrap CI of the dev/test AUROC lies above 0.5",
+ "attribution_rates": {
+  "train": {
+   "overall": {
+    "estimate": 0.28772189349112426,
+    "ci_low": 0.13122390839484036,
+    "ci_high": 0.46271028656090474,
+    "p": 0.0,
+    "n_clusters": 32,
+    "n_valid_resamples": 10000,
+    "clustering": {
+     "n_units": 1352,
+     "n_templates": 32,
+     "icc": 0.6657422752942066,
+     "m_bar": 42.25,
+     "cv_cluster_size": 0.7183197991959289,
+     "deff": 42.975247422469934,
+     "n_eff": 31.459970124409256
+    },
+    "n": 1352
+   },
+   "population=distractor, clean also failed": {
+    "estimate": 0.2953271028037383,
+    "ci_low": 0.10329465796470874,
+    "ci_high": 0.5,
+    "p": 0.0,
+    "n_clusters": 25,
+    "n_valid_resamples": 10000,
+    "n": 535
+   },
+   "population=natural": {
+    "estimate": 0.25152439024390244,
+    "ci_low": 0.08484848484848485,
+    "ci_high": 0.4334241997279213,
+    "p": 0.0,
+    "n_clusters": 29,
+    "n_valid_resamples": 10000,
+    "n": 656
+   },
+   "population=primary": {
+    "estimate": 0.40993788819875776,
+    "ci_low": 0.23931623931623933,
+    "ci_high": 0.5652224705404306,
+    "p": 0.0,
+    "n_clusters": 26,
+    "n_valid_resamples": 10000,
+    "n": 161
+   },
+   "s0_error_type=arithmetic": {
+    "estimate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "p": 1.0,
+    "n_clusters": 20,
+    "n_valid_resamples": 10000,
+    "n": 153
+   },
+   "s0_error_type=binding": {
+    "estimate": 0.022068965517241378,
+    "ci_low": 0.0,
+    "ci_high": 0.07142857142857142,
+    "p": 0.2436,
+    "n_clusters": 22,
+    "n_valid_resamples": 10000,
+    "n": 725
+   },
+   "s0_error_type=planning": {
+    "estimate": 0.7869198312236287,
+    "ci_low": 0.527326204541489,
+    "ci_high": 0.9386208856356136,
+    "p": 0.0,
+    "n_clusters": 24,
+    "n_valid_resamples": 10000,
+    "n": 474
+   }
+  },
+  "dev": {
+   "overall": {
+    "estimate": 0.23588709677419356,
+    "ci_low": 0.08053620179729269,
+    "ci_high": 0.4780708020050125,
+    "p": 0.0,
+    "n_clusters": 12,
+    "n_valid_resamples": 10000,
+    "clustering": {
+     "n_units": 496,
+     "n_templates": 12,
+     "icc": 0.519426024054543,
+     "m_bar": 41.333333333333336,
+     "cv_cluster_size": 0.7816758724784746,
+     "deff": 35.06848269060966,
+     "n_eff": 14.143754218736547
+    },
+    "n": 496
+   },
+   "population=distractor, clean also failed": {
+    "estimate": 0.1717171717171717,
+    "ci_low": 0.05015282131661445,
+    "ci_high": 0.41936203917050685,
+    "p": 0.0,
+    "n_clusters": 11,
+    "n_valid_resamples": 10000,
+    "n": 198
+   },
+   "population=natural": {
+    "estimate": 0.17573221757322174,
+    "ci_low": 0.03478176934698675,
+    "ci_high": 0.4271693862224344,
+    "p": 0.0006,
+    "n_clusters": 11,
+    "n_valid_resamples": 10000,
+    "n": 239
+   },
+   "population=primary": {
+    "estimate": 0.6949152542372882,
+    "ci_low": 0.3125,
+    "ci_high": 0.8780487804878049,
+    "p": 0.0,
+    "n_clusters": 11,
+    "n_valid_resamples": 10000,
+    "n": 59
+   },
+   "s0_error_type=arithmetic": {
+    "estimate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "p": 1.0,
+    "n_clusters": 8,
+    "n_valid_resamples": 10000,
+    "n": 218
+   },
+   "s0_error_type=binding": {
+    "estimate": 0.006944444444444444,
+    "ci_low": 0.0,
+    "ci_high": 0.046875,
+    "p": 0.677,
+    "n_clusters": 6,
+    "n_valid_resamples": 10000,
+    "n": 144
+   },
+   "s0_error_type=planning": {
+    "estimate": 0.8656716417910447,
+    "ci_low": 0.65,
+    "ci_high": 0.9728267017509344,
+    "p": 0.0,
+    "n_clusters": 9,
+    "n_valid_resamples": 10000,
+    "n": 134
+   }
+  }
+ },
+ "classifier": {
+  "typology (primary)": {
+   "features": [
+    "distractor_condition",
+    "n_steps",
+    "s0_index",
+    "s0_relative",
+    "question_words",
+    "question_numerals",
+    "s0_compound"
+   ],
+   "lambda": 0.0001,
+   "cv_by_lambda": {
+    "0.0001": 0.33370972779472885,
+    "0.001": 0.3336963804734028,
+    "0.01": 0.33364833011662887,
+    "0.1": 0.3336056186883854,
+    "1.0": 0.33361095761691584,
+    "10.0": 0.33208135459294674,
+    "100.0": 0.33319185172727683
+   },
+   "n_train": 1352,
+   "n_eval": 496,
+   "eval_templates": 12,
+   "eval_positive": 117,
+   "auroc": {
+    "estimate": 0.6541393230047584,
+    "ci_low": 0.408932637259103,
+    "ci_high": 0.8813247116877355,
+    "p": 0.0,
+    "n_clusters": 12,
+    "n_valid_resamples": 10000
+   },
+   "shuffled": {
+    "n": 100,
+    "mean": 0.562975215930361,
+    "p_perm": 0.009900990099009901
+   },
+   "minus_shuffled_ci": {
+    "estimate": 0.09116410707439737,
+    "ci_low": -0.0074032899919432345,
+    "ci_high": 0.24321522322115485,
+    "p": 0.0786,
+    "n_clusters": 12,
+    "n_valid_resamples": 10000
+   },
+   "criterion_met": false,
+   "coef_standardised": {
+    "distractor_condition": 0.12185999661460895,
+    "n_steps": 0.1242213285325441,
+    "s0_index": 0.058052114202815905,
+    "s0_relative": -0.12156766863910191,
+    "question_words": 0.05189051561184574,
+    "question_numerals": 0.2100518794395036,
+    "s0_compound": -4.299878135046498
+   }
+  },
+  "typology + s0 error type (partly definitional)": {
+   "features": [
+    "distractor_condition",
+    "n_steps",
+    "s0_index",
+    "s0_relative",
+    "question_words",
+    "question_numerals",
+    "s0_compound",
+    "s0_type=planning",
+    "s0_type=binding",
+    "s0_type=arithmetic",
+    "s0_type=non-computational"
+   ],
+   "lambda": 100.0,
+   "cv_by_lambda": {
+    "0.0001": 0.9679917887279201,
+    "0.001": 0.9683868694391722,
+    "0.01": 0.9675166240887116,
+    "0.1": 0.9662699842768554,
+    "1.0": 0.9645962301825646,
+    "10.0": 0.9651114367857514,
+    "100.0": 0.9689314401492765
+   },
+   "n_train": 1352,
+   "n_eval": 496,
+   "eval_templates": 12,
+   "eval_positive": 117,
+   "auroc": {
+    "estimate": 0.9930541460884469,
+    "ci_low": 0.9743478433923205,
+    "ci_high": 1.0,
+    "p": 0.0,
+    "n_clusters": 12,
+    "n_valid_resamples": 10000
+   },
+   "shuffled": {
+    "n": 100,
+    "mean": 0.9862914101436531,
+    "p_perm": 0.009900990099009901
+   },
+   "minus_shuffled_ci": {
+    "estimate": 0.0067627359447938185,
+    "ci_low": -0.002304132154573376,
+    "ci_high": 0.03162317966271534,
+    "p": 0.1852,
+    "n_clusters": 12,
+    "n_valid_resamples": 10000
+   },
+   "criterion_met": true,
+   "coef_standardised": {
+    "distractor_condition": 0.07453238961921552,
+    "n_steps": 0.04044101218370068,
+    "s0_index": -0.05312282903940904,
+    "s0_relative": -0.12019457137131917,
+    "question_words": 0.10976909219075054,
+    "question_numerals": 0.0782325729182829,
+    "s0_compound": -0.76791696315414,
+    "s0_type=planning": 1.0099742942261805,
+    "s0_type=binding": -0.8242481635197634,
+    "s0_type=arithmetic": -0.2237236638658842,
+    "s0_type=non-computational": 0.0
+   }
+  }
+ },
+ "seconds": 29.0
+}
