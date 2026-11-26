@@ -59,6 +59,9 @@ Nothing in `docs/annotation/` or `docs/review/` was read or changed.
     - Random edits at 0.5× damage 17% of solved items, so the solved traces are fragile.
   - **Stable failures** (34; 0 of 5 samples correct) are almost never repaired: oracle 2.9%,
     self-sourced 0%. All of the repair comes from borderline failures.
+  - E3 rerun with these stability labels (dev): in stable failures the probe never reads the gold
+    value (D_V 0.000, 14 failures, 2 templates). In borderline failures D_V is 0.519 [0.292,
+    0.947] (27 failures, 7 templates). Neither meets the criterion.
   - The outputs are backed up to the private HF dataset under `btp-r1-repair-pilot/` (Hub commit
     `d275b95`).
 

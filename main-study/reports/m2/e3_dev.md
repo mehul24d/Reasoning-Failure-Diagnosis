@@ -5,7 +5,7 @@
 Criterion (prereg/E3.md, DRAFT): D_V >= 0.2 and CI(G_V - G_shuf) > 0 and CI(G_V - G_prior) > 0.
 
 Probes (layer, lambda, train rows): content/binary: L13, 0.0001, 3957; content/4-class: L18, 10.0, 3957; gold-labelled op: L17, 0.01, 3957
-Stability: not available (R1 stability samples absent).
+Stability: data/generated/kaggle_outputs/btp-r1-repair-pilot/btp/r1.
 
 ## Population: distractor, clean also failed (counts {'content/binary': 7, 'content/4-class': 27})
 
@@ -33,3 +33,5 @@ Stability: not available (R1 stability samples absent).
 | content/binary | 33 (5) | 0.303 [0.138, 1.000] | 0.303 [0.138, 1.000] | 0.926 [0.919, 0.951] | 1.000 [1.000, 1.000] | -0.623 [-0.784, 0.077] | -0.697 [-0.863, 0.000] | 0.697 | 0.303 [0.138, 1.000] | no |
 | content/4-class | 8 (4) | 0.500 [0.000, 0.800] | 0.500 [0.000, 0.800] | 0.371 [0.117, 0.620] | 0.500 [0.000, 0.800] | 0.129 [-0.117, 0.280] | 0.000 [0.000, 0.000] | 0.375 | 0.375 [0.000, 0.714] | no |
 | gold-labelled op (4-class failures) | 8 (4) | 0.625 [0.000, 1.000] | 0.625 [0.000, 1.000] | 0.384 [0.138, 0.531] | 0.625 [0.143, 1.000] | 0.241 [-0.138, 0.469] | 0.000 [-0.600, 0.214] | 0.250 | 0.750 [0.143, 1.000] | no |
+| pooled, stable | 14 (2) | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 0.870 [0.080, 0.931] | 0.929 [0.000, 1.000] | -0.870 [-0.931, -0.080] | -0.929 [-1.000, 0.000] | 0.929 | 0.000 [0.000, 0.000] | no |
+| pooled, borderline | 27 (7) | 0.519 [0.292, 0.947] | 0.519 [0.292, 0.947] | 0.791 [0.495, 0.925] | 0.889 [0.579, 1.000] | -0.272 [-0.559, 0.195] | -0.370 [-0.638, 0.000] | 0.481 | 0.481 [0.277, 0.895] | no |
