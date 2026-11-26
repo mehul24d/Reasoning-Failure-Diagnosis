@@ -1,0 +1,191 @@
+{
+  "curve": {
+    "0.25": {
+      "eval": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.12195121951219512,
+          "broken": 0.0,
+          "continuation_changed": 0.1951219512195122,
+          "correct": 0.04878048780487805
+        },
+        "solved": {
+          "n": 41,
+          "answer_changed": 0.17073170731707318,
+          "broken": 0.0,
+          "continuation_changed": 0.3170731707317073,
+          "correct": 0.8292682926829268
+        }
+      },
+      "oracle": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.12195121951219512,
+          "broken": 0.0,
+          "continuation_changed": 0.1951219512195122,
+          "correct": 0.024390243902439025
+        }
+      },
+      "random": {
+        "failure": {
+          "n": 410,
+          "answer_changed": 0.07073170731707316,
+          "broken": 0.0,
+          "continuation_changed": 0.1878048780487805,
+          "correct": 0.03414634146341464
+        },
+        "solved": {
+          "n": 410,
+          "answer_changed": 0.11463414634146342,
+          "broken": 0.0,
+          "continuation_changed": 0.23658536585365852,
+          "correct": 0.8853658536585366
+        }
+      },
+      "self": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.04878048780487805,
+          "broken": 0.0,
+          "continuation_changed": 0.07317073170731707,
+          "correct": 0.024390243902439025
+        },
+        "solved": {
+          "n": 41,
+          "answer_changed": 0.024390243902439025,
+          "broken": 0.0,
+          "continuation_changed": 0.04878048780487805,
+          "correct": 0.975609756097561
+        }
+      }
+    },
+    "0.5": {
+      "eval": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.1951219512195122,
+          "broken": 0.0,
+          "continuation_changed": 0.36585365853658536,
+          "correct": 0.0975609756097561
+        },
+        "solved": {
+          "n": 41,
+          "answer_changed": 0.2926829268292683,
+          "broken": 0.0,
+          "continuation_changed": 0.5609756097560976,
+          "correct": 0.7073170731707317
+        }
+      },
+      "oracle": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.21951219512195122,
+          "broken": 0.0,
+          "continuation_changed": 0.36585365853658536,
+          "correct": 0.0975609756097561
+        }
+      },
+      "random": {
+        "failure": {
+          "n": 410,
+          "answer_changed": 0.11951219512195121,
+          "broken": 0.0,
+          "continuation_changed": 0.3170731707317073,
+          "correct": 0.05853658536585366
+        },
+        "solved": {
+          "n": 410,
+          "answer_changed": 0.1975609756097561,
+          "broken": 0.0,
+          "continuation_changed": 0.4073170731707317,
+          "correct": 0.802439024390244
+        }
+      },
+      "self": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.14634146341463414,
+          "broken": 0.0,
+          "continuation_changed": 0.1951219512195122,
+          "correct": 0.0975609756097561
+        },
+        "solved": {
+          "n": 41,
+          "answer_changed": 0.024390243902439025,
+          "broken": 0.0,
+          "continuation_changed": 0.04878048780487805,
+          "correct": 0.975609756097561
+        }
+      }
+    },
+    "1.0": {
+      "oracle": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.36585365853658536,
+          "broken": 0.0,
+          "continuation_changed": 0.7073170731707317,
+          "correct": 0.1951219512195122
+        }
+      }
+    },
+    "2.0": {
+      "oracle": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.5853658536585366,
+          "broken": 0.024390243902439025,
+          "continuation_changed": 0.9512195121951219,
+          "correct": 0.14634146341463414
+        }
+      }
+    },
+    "4.0": {
+      "oracle": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.7073170731707317,
+          "broken": 0.04878048780487805,
+          "continuation_changed": 1.0,
+          "correct": 0.24390243902439024
+        }
+      }
+    },
+    "8.0": {
+      "oracle": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.7804878048780488,
+          "broken": 0.4634146341463415,
+          "continuation_changed": 1.0,
+          "correct": 0.2682926829268293
+        }
+      }
+    },
+    "16.0": {
+      "oracle": {
+        "failure": {
+          "n": 41,
+          "answer_changed": 0.5853658536585366,
+          "broken": 0.07317073170731707,
+          "continuation_changed": 1.0,
+          "correct": 0.43902439024390244
+        }
+      }
+    }
+  },
+  "m_star": 0.5,
+  "reason": "criterion met",
+  "trail": [
+    {
+      "m": 0.25,
+      "answer_changed": 0.12195121951219512,
+      "broken": 0.0
+    },
+    {
+      "m": 0.5,
+      "answer_changed": 0.21951219512195122,
+      "broken": 0.0
+    }
+  ]
+}

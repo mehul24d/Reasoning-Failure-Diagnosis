@@ -1,0 +1,23 @@
+{
+  "m_star": 0.5,
+  "divergence_rate_at_m_star": {
+    "oracle": 0.36585365853658536,
+    "self": 0.5555555555555556,
+    "eval": 0.4634146341463415,
+    "random": 0.3621951219512195
+  },
+  "edited_runs": {
+    "oracle": 107,
+    "self": 67,
+    "eval": 214,
+    "random": 21400
+  },
+  "expected_regenerations": 7926.514905149052,
+  "sec_per_scan_row": 0.15887287742496378,
+  "sec_per_regen_row": 1.942510903274275,
+  "projected_t4h": 5.238573300431443,
+  "projected_t4h_with_safety": 6.548216625539304,
+  "used_t4h": 0.956,
+  "budget_t4h": 8.0,
+  "within_budget": true
+}

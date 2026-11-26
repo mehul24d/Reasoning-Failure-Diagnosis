@@ -36,8 +36,31 @@ Nothing in `docs/annotation/` or `docs/review/` was read or changed.
     so the criterion is not met.
   - E4 dev code check: 23.6% [8.1, 47.8] of dev failures are content-attributable at s0. The
     typology-only classifier has AUROC 0.654 [0.409, 0.881], so the criterion is not met.
-- **R1 (redesigned repair pilot; GPU):** running on Kaggle, 2 × T4, cap 8 T4-h (see below when
-  done).
+- **R1 (redesigned repair pilot; GPU; D48, D51)** (`main-study/reports/m2/r1/r1.md`,
+  `calibration.png`). One Kaggle session on 2 × T4 used **3.885 T4-hours** (cap 8).
+  - **Calibration (41 dev failures):** m\* = 0.5. At that strength the oracle edit changes 22% of
+    answers and breaks 0%. The stop rule did not fire. At 8× it breaks 46%.
+  - **Pilot at m\*:** 107 failures and 107 matched solved items on 24 templates. Net gain, in
+    points, with template CIs:
+
+    | condition | net gain [CI] | p vs random | pre-registered verdict |
+    |---|---|---|---|
+    | oracle content | +7.5 [+3.1, +14.7] | 0.010 | supported |
+    | self-sourced | +0.9 [−6.8, +10.0] | 0.129 | inconclusive |
+    | evaluation | −4.7 [−13.3, +9.1] | 0.713 | inconclusive |
+    | random (100 directions) | −3.3 on average | | |
+
+  - **Exploratory caveat (not pre-registered).** The oracle edit is never applied to solved
+    items, so its damage is 0 by construction.
+    - On repair alone, oracle repairs 15.0% of failures and random directions 10.7%: +4.3
+      [−0.9, +11.7], p 0.12. That cannot be told apart from random.
+    - The self-sourced edit's advantage is lower damage (8.4% against 17.3% for random), because
+      its gate opens on only 17 of 107 solved items.
+    - Random edits at 0.5× damage 17% of solved items, so the solved traces are fragile.
+  - **Stable failures** (34; 0 of 5 samples correct) are almost never repaired: oracle 2.9%,
+    self-sourced 0%. All of the repair comes from borderline failures.
+  - The outputs are backed up to the private HF dataset under `btp-r1-repair-pilot/` (Hub commit
+    `d275b95`).
 
 ## 2026-11-16: Off-site copy of the Kaggle outputs in a private Hugging Face dataset
 

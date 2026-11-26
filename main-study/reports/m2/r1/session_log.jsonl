@@ -1,0 +1,5 @@
+{"stage": "setup", "time": 1795640669.1831129, "used_t4h": 0.125}
+{"stage": "stability", "time": 1795641145.6362538, "used_t4h": 0.389}
+{"stage": "cal_oracle", "time": 1795641678.970649, "used_t4h": 0.686, "m_star": 0.5, "reason": "criterion met"}
+{"stage": "cal_rest", "time": 1795642166.0803237, "used_t4h": 0.956}
+{"stage": "main", "time": 1795647437.7544787, "used_t4h": 3.885, "main": "complete"}

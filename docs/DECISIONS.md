@@ -1475,3 +1475,34 @@ committed before any E3/E4 number exists.
 - **Dev runs check the code only:** labelled DEVELOPMENT, and they decide no gate.
 - **Reuse.** E3 reuses E1's subsample, layer, λ and shuffles, and the R1 stability samples for
   the stable/borderline split on dev. It generates no new traces.
+
+## D51 (2026-11-26) R1 repair pilot: run, outcome, and one exploratory split
+
+The R1 kernel (`mehuldahiya/btp-r1-repair-pilot` v2, code `7f621b5`, Kaggle 2 × T4) ran the
+whole of `prereg/R1.md` in one session: stability, then calibration, projection and the pilot.
+- **Compute.** The session took 1.94 h, which is **3.885 T4-hours** (cap 8). The projection
+  before the pilot was 6.55 T4-h with the 1.25 safety factor. The session finished at
+  22:57 UTC on 2026-11-25 (04:27 IST on 2026-11-26).
+- **Calibration** reached m\* = 0.5: the oracle edit changed 22% of the 41 dev failures and broke
+  0%. So the stop rule did not fire, and the pilot ran at full size: 214 items, 100 random
+  directions, 5 stability samples at T = 0.7.
+- **No deviation from the protocol.** The population is the pre-registered one: 107 failures on
+  24 of the 49 train/dev templates. Only 24 templates have content-attributable primary failures.
+  The matched solved set used the with-replacement fallback 27 times and the other-template
+  fallback 0 times.
+- **Reuse.** No trace was regenerated. The items come from the S2 greedy traces, and the
+  directions come from the S4 cache. The only new generations are the edited continuations and
+  the 5 stability samples per failure. S3 sampled test failures only, so no stability samples
+  existed for these failures.
+- **Backup.** All 31 output files (15 MB) are in the private HF dataset
+  `MehulD24/btp-minor-kaggle-outputs` under `btp-r1-repair-pilot/` (Hub commit `d275b95`), and
+  their sizes match. The sha256 list is `reports/m2/r1/outputs_sha256.txt`.
+- **Exploratory analysis added after seeing the results** (`analysis/r1_exploratory.py`). It is
+  NOT pre-registered.
+  - The pre-registered comparison is on net gain. But the oracle edit is zero on solved items, so
+    its damage is 0 by construction, while every random direction is applied to solved items.
+    The oracle's "supported" net verdict therefore mixes "repairs more" with "never touches solved
+    items".
+  - The exploratory script compares repair (failures only) and damage (solved items only) with
+    the random null separately.
+  - It is reported next to the pre-registered numbers and never replaces them.
